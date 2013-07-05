@@ -12,10 +12,10 @@ public class ClickablePad extends Clickable{
   }
   
   void drawCommonContent(){
-    textSize(42);
+    textSize(10);
     textAlign(CENTER);
-    fill(50);
-    text(text, x+(w*0.5), y+(h*0.7));   
+    fill(200);
+    text(text, x+(w*0.15), y-(h*0.03));   
   }
 
 }

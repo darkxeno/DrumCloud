@@ -59,6 +59,11 @@ PFont lcdFont;
 FloatList savedCues= new FloatList(), notPlayedCues=new FloatList();
 StringDict soundByCue= new StringDict();
 
+final int LINES=0;
+final int BARS=1;
+final int CURVES=2;
+int spectrumMode=LINES;
+
 
 AudioPlayThread audioPlayThread= new AudioPlayThread(this, 1, "AudioPlayThread");
 
@@ -76,7 +81,7 @@ VerticalSlider[] sliders=new VerticalSlider[6];
 PImage sliderImage;
 
 float maxLedWidth,ledHeight;
-int originPowerSpecX,originPowerSpecY;
+float originPowerSpecX,originPowerSpecY;
 
 PanelMode panelMode=PanelMode.FILTER;
 final int ALL=0;
@@ -339,12 +344,16 @@ void drawTempoBar() {
   rect(barOriginX+offset, barOriginY, markerWidth, barHeight);
 }
 
-void drawPadButtons(color c, ClickablePad[] padArray, float buttonsOriginX, float buttonsOriginY, float buttonSize, float buttonMargin,String buttonText) {
+void drawPadsContainer(){
   strokeWeight(3);
   stroke(100,100,100,255);
   fill(50,50,50,255);
-  rect(buttonsOriginX-buttonSize*0.2,buttonsOriginY-buttonSize*0.2,buttonSize*5.295,buttonSize*1.4);  
-  //stroke(255);
+  rect(buttonsOriginX-buttonSize*0.2,buttonsOriginY-buttonSize*0.2,buttonSize*5.295,buttonSize*5.295);    
+}
+
+void drawPadButtons(color c, ClickablePad[] padArray, float buttonsOriginX, float buttonsOriginY, float buttonSize, float buttonMargin,String buttonText) {
+  strokeWeight(3);
+  stroke(100,100,100,255);
   for (int i=0;i<padArray.length;i++) {
     if (padArray[i]==null)
       padArray[i]=new ClickablePad(buttonsOriginX+(buttonSize+buttonMargin)*i, buttonsOriginY, buttonSize, buttonSize);
@@ -352,6 +361,12 @@ void drawPadButtons(color c, ClickablePad[] padArray, float buttonsOriginX, floa
     padArray[i].fillColor=c;    
     padArray[i].drawState();
   }
+}
+
+PVector getPadButtonOrigin(int soundType){
+  int row=int(soundType/4);
+  int col=soundType%4;
+  return new PVector(buttonsOriginX+(buttonSize+buttonMarginX)*col,buttonsOriginY+(buttonSize+buttonMarginY)*row); 
 }
 
 void drawKickButtons() {
@@ -450,10 +465,34 @@ void drawSpectrumOf(AudioPlayer audioPlayer, color c, int soundType) {
         fill(c);        
         rect(ledX+maxLedWidth-ledWidth,ledY, ledWidth, ledHeight);
       }
-      int finalPix=0;
-      for (int i=0;i<values.length;i++) {
-        finalPix=(int)map(i, 0, 511, 0, width);
-        line(originPowerSpecX+finalPix, originPowerSpecY, originPowerSpecX+finalPix, originPowerSpecY-values[i]*height*0.1);
+      float xOffset=0;
+      PVector origin=getPadButtonOrigin(soundType);
+      originPowerSpecX=origin.x+1;
+      originPowerSpecY=origin.y+buttonSize-(spectrumMode==BARS?2:3);      
+      origin.y=origin.y+buttonSize-3-values[0]*height*0.1;
+      origin.x+=3;      
+      fill(100);
+      for (int i=0;i<values.length;i+=values.length/10.0) {
+        if(values[i]<0)values[i]=0;
+        xOffset=map(i, 0, values.length, 0, buttonSize-4-(spectrumMode==BARS?6:0));
+        switch(spectrumMode){
+          case LINES:
+            stroke(50);
+            strokeWeight(3);
+            if(i>=(int)(values.length/10.0)){
+              PVector destiny=new PVector(originPowerSpecX+xOffset, originPowerSpecY-values[i]*height*0.1);
+              line(origin.x,origin.y,destiny.x,destiny.y);
+              origin=destiny;
+            }
+          break;
+          case BARS:
+            noStroke();
+            PVector destiny=new PVector(originPowerSpecX+xOffset, originPowerSpecY-values[i]*height*0.1);
+            rect(destiny.x,destiny.y,buttonSize/10,originPowerSpecY-destiny.y);
+            origin=destiny;
+          break;          
+        }
+        
       }
     }
     else {
@@ -468,6 +507,7 @@ void draw()
   //image(backTopMachine, 0, 0, width, 629.0*(width/440.0));
   //proccessTempoVars();
   drawTempoBar();
+  drawPadsContainer();
   drawKickButtons();
   drawBassButtons();
   drawSnareButtons();
