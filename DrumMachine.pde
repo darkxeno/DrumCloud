@@ -16,8 +16,8 @@ import ddf.minim.spi.*;
  ddf.minim.AudioPlayer playerHitHat;
  ddf.minim.AudioPlayer[] playersArray=new ddf.minim.AudioPlayer[20];
  */
- 
-boolean isAndroidDevice=false; 
+
+static boolean isAndroidDevice=true; 
 
 Midi midi;
 
@@ -26,6 +26,7 @@ AudioPlayer[] playerKick=new AudioPlayer[4];
 AudioPlayer[] playerBass=new AudioPlayer[4];
 AudioPlayer[] playerSnare=new AudioPlayer[4];
 AudioPlayer[] playerHitHat=new AudioPlayer[4];
+int loadPlayerOfSoundType=-1;
 
 int lastPlayerUsed=0;
 boolean onlyOnePlayerMode=true;
@@ -35,12 +36,18 @@ float beatMS=60000.0/BPM;
 float beatsPerTempo=4.0;
 float gridsByBeat=16.0;
 float tempoMS=beatsPerTempo*beatMS;
+float pausedMS=-1;
 float tempoOffset=0;
 float beatOffset=0;
 float lastPlayTime;
 float firstKick=0;
 boolean snapToGrid=true;
 boolean liveMode=false;
+
+final int normalMode=0;
+final int loadMode=1;
+final int deleteMode=2;
+int mainMode=normalMode;
 
 PImage backTopMachine, backBottomMachine;
 
@@ -53,6 +60,9 @@ color blueColor=#5828A3;
 color blueDarkColor=#380883;
 color blueLightColor=#380883;
 color greenColor=#22A300;
+color darkGreyColor=color(50);
+color mediumGreyColor=color(127);
+color lightGreyColor=color(200);
 
 PFont lcdFont;
 
@@ -73,15 +83,18 @@ color barColor, markerColor, separatorColor;
 float pressBarWidth, pressBarHeight, pressBarHeightMargin;
 ClickablePad[] kick=new ClickablePad[4], bass=new ClickablePad[4], snare=new ClickablePad[4], hithat=new ClickablePad[4];
 Clickable panelModeButton, trackModeButton;
+ExpandableButtons deleteButtons;
+ToggleButton loadButton,playButton,deleteButton;
 
 float valueX=0.0, valueY=0.0;
 float buttonSize, buttonsOriginX, buttonsOriginY, buttonMarginX, buttonMarginY;
 float sliderWidth, sliderHeight, sliderOriginX, sliderMinY, sliderMaxY, sliderMarginX;
 VerticalSlider[] sliders=new VerticalSlider[6];
+HorizontalSlider bpmSlider;
 PImage sliderImage;
 
-float maxLedWidth,ledHeight;
-float originPowerSpecX,originPowerSpecY;
+float maxLedWidth, ledHeight;
+float originPowerSpecX, originPowerSpecY;
 
 PanelMode panelMode=PanelMode.FILTER;
 final int ALL=0;
@@ -95,10 +108,11 @@ void setup()
 {
   setupGeneral();
   setupTempoBar();
+  setupSliders(); 
   setupPadButtons();
-  setupSliders();
   setupMidi();
   setupPowerSpectrum();
+  setupTopControls();
 }
 
 
@@ -112,12 +126,16 @@ void setupPowerSpectrum() {
   maxLedWidth=buttonSize;
   ledHeight=(height*0.01);      
   originPowerSpecX=0;
-  originPowerSpecY=(int)height;  
+  originPowerSpecY=(int)height;
 }
 
 void setupGeneral() {
-  if(!isAndroidDevice)
+  if (!isAndroidDevice)
     size(480, 688);
+  else
+    size(420,700);
+    //size(768,1280);
+  FontAdjuster.width=width;
   audioPlayThread.start();
   background(0);
   maxim = new Maxim(this);
@@ -126,19 +144,19 @@ void setupGeneral() {
     playerKick[i] = maxim.loadFile("kick_"+i+".wav");
     playerKick[i].setLooping(false);
     playerKick[i].volume(volume);
-    playerKick[i].setFilter(filterFrequency,filterResonance);
+    playerKick[i].setFilter(filterFrequency, filterResonance);
     playerBass[i] = maxim.loadFile("bass_"+i+".wav");
     playerBass[i].setLooping(false);
     playerBass[i].volume(volume);
-    playerBass[i].setFilter(filterFrequency,filterResonance);
+    playerBass[i].setFilter(filterFrequency, filterResonance);
     playerSnare[i] = maxim.loadFile("snare_"+i+".wav");
     playerSnare[i].setLooping(false);
     playerSnare[i].volume(volume);
-    playerSnare[i].setFilter(filterFrequency,filterResonance);
+    playerSnare[i].setFilter(filterFrequency, filterResonance);
     playerHitHat[i] = maxim.loadFile("hithat_"+i+".wav");
     playerHitHat[i].setLooping(false);
     playerHitHat[i].volume(volume);
-    playerHitHat[i].setFilter(filterFrequency,filterResonance);
+    playerHitHat[i].setFilter(filterFrequency, filterResonance);
   }
   //player.volume(1.0);
   backTopMachine=loadImage("MPD26_mod.png");
@@ -150,7 +168,7 @@ void setupMidi() {
   midi=new Midi(this);
 }
 
-void changeBPM(float newBPM){
+void changeBPM(float newBPM) {
   BPM=newBPM;
   beatMS=60000.0/BPM;
   beatsPerTempo=4.0;
@@ -212,7 +230,10 @@ void setupTempoBar() {
   separatorColor = candyPink;
   markerWidth=width*0.005;
   barOriginX=width*0.091;
-  barOriginY=height*0.01;
+  if(!isAndroidDevice)
+    barOriginY=height*0.01;
+  else
+    barOriginY=height*0.05;
 }
 
 void setupPadButtons() {
@@ -220,10 +241,11 @@ void setupPadButtons() {
   buttonsOriginX=width*0.131;
   buttonMarginX=buttonSize*0.29;
   buttonMarginY=buttonSize*0.275;
-  
-  if(isAndroidDevice){
-    buttonsOriginY=height*0.429;
-  }else{
+
+  if (isAndroidDevice) {
+    buttonsOriginY=height*0.5;
+  }
+  else {
     buttonsOriginY=height*0.445;
   }
 }
@@ -231,36 +253,47 @@ void setupPadButtons() {
 void setupSliders() {
   sliderWidth=29.0*(width*0.14/44.0);//width*0.12;
   sliderHeight=29.0*(height*0.06/44.0);//width*0.025;
-  sliderOriginX=width*0.11;
-  sliderMarginX=width*0.14;  
+  sliderMarginX=width*0.142;
+  sliderOriginX=width*0.10;
   sliderImage=loadImage("slider.png");
-  
-  if(isAndroidDevice){
-    sliderMinY=height*0.17;
-    sliderMaxY=height*0.3;    
+
+  if (isAndroidDevice) {
+    sliderMinY=height*0.23;
+    sliderMaxY=height*0.36;
   }
-  else{
+  else {
     sliderMinY=height*0.162;
-    sliderMaxY=height*0.33;  
-  }  
+    sliderMaxY=height*0.33;
+  }
+}
+
+void toggleAudioPlayThread(){
+
+  if(liveMode){
+    audioPlayThread= new AudioPlayThread(this, 1, "AudioPlayThread");
+    audioPlayThread.start();
+  }else{
+    pausedMS=millis()%tempoMS;
+    if (audioPlayThread.running)
+      audioPlayThread.quit();  
+  }
+  
+  liveMode=!liveMode;
+
 }
 
 //synchronized 
 void proccessTempoVars() {
 
-  if (liveMode) {
-    if (audioPlayThread.running)
-      audioPlayThread.quit();
-    return;
-  }
-  else {
-    if (!audioPlayThread.running)
-      audioPlayThread.start();
-  }
-
   long ms=millis();
   long tms=audioPlayThread.getMillis();
   //println("Comparing times, main:"+ms+" audio thread:"+tms+" dif:"+(tms-ms));
+  
+  if(pausedMS>=0 && (ms%tempoMS<pausedMS-1 || ms%tempoMS>pausedMS+1)){
+    return;
+  }else{
+    pausedMS=-1;
+  }  
 
   if (ms%tempoMS<tempoOffset) {
     notPlayedCues=savedCues.copy();
@@ -273,9 +306,13 @@ void proccessTempoVars() {
   if (notPlayedCues.size()>0 && tempoOffset>=notPlayedCues.get(0)) {
     if (onlyOnePlayerMode) {
       if (soundByCue.hasKey(notPlayedCues.get(0)+"")) {
-        int[] types = int(split(soundByCue.get(notPlayedCues.get(0)+""), '#'));
-        for (int i=0;i<types.length;i++)
+        String sounds=soundByCue.get(notPlayedCues.get(0)+"");
+        //println("CueString:"+sounds);
+        int[] types = int(split(sounds.substring(0,sounds.length()-1), '#'));
+        for (int i=0;i<types.length;i++){
+          //println("Playing soundType:"+types[i]);
           playSoundType(types[i]);
+        }
       }
     }    
     //println("playing at:"+tempoOffset+" stored as:"+notPlayedCues.get(0)+" failGap:"+(tempoOffset-notPlayedCues.get(0)));
@@ -289,17 +326,49 @@ void proccessTempoVars() {
       audioPlayThread.wait=1;
     }
     else {
-      println("tempoOffset:"+tempoOffset+" nextOn:"+notPlayedCues.get(0)+" wait:"+audioPlayThread.wait);
+      //println("tempoOffset:"+tempoOffset+" nextOn:"+notPlayedCues.get(0)+" wait:"+audioPlayThread.wait);
       audioPlayThread.wait=1;
     }
   }
 }
 
-void drawBPM(){
-  fill(0);
-  //textFont(lcdFont, 20);
-  textSize(20);
-  text("BPM ["+floor(BPM*10.0)/10.0+"] ", barOriginX+barWidth*0.85, barOriginY+barHeight*2.5);
+void setupTopControls() {
+  bpmSlider=new HorizontalSlider(barOriginX, barOriginY+barHeight*2.0, sliderWidth, buttonSize*0.5);
+  bpmSlider.limitX(barOriginX, barOriginX+barWidth*0.25);
+  bpmSlider.valuesX(80, 160, 120);
+  bpmSlider.text="BPM";
+  
+  playButton=new ToggleButton(barOriginX+barWidth*0.368, barOriginY+barHeight*2.0, buttonSize*0.5, buttonSize*0.5);
+  playButton.text="II";
+  playButton.activatedText=">";
+  playButton.fillColor=color(150, 150, 0);
+  //playButton.blinkWhenOn=true;  
+
+  loadButton=new ToggleButton(barOriginX+barWidth*0.62-buttonSize*0.6, barOriginY+barHeight*2.0, buttonSize*1.2, buttonSize*0.5);
+  loadButton.text="LOAD";
+  loadButton.fillColor=color(150, 150, 0);
+  loadButton.blinkWhenOn=true;
+
+  deleteButtons=new ExpandableButtons(barOriginX+barWidth-buttonSize*1.2, barOriginY+barHeight*2.0, buttonSize*1.2, buttonSize*0.5);
+  deleteButtons.text="DELETE";
+  deleteButtons.fillColor=color(100, 100, 0);
+  String[] buttons = { "KICK", "BASS", "SNARE", "HITHAT", "ALL"};
+  deleteButtons.setOtherButtons(buttons);
+  color[] colors = { redColor, orangeColor, blueColor, greenColor, mediumGreyColor};
+  deleteButtons.setOtherButtonColors(colors);
+}
+
+void drawTopControls() {
+  bpmSlider.rollover(mouseX, mouseY);
+  bpmSlider.dragHorizontally(mouseX);  
+  bpmSlider.draw();
+  changeBPM(bpmSlider.value());
+
+  playButton.drawState();
+
+  loadButton.drawState();
+  
+  deleteButtons.drawState();
 }
 
 void drawTempoBar() {
@@ -318,25 +387,27 @@ void drawTempoBar() {
     fill(getColorByMs(savedCues.get(i)));
     if (!snapToGrid) {
       float cOffset=map(savedCues.get(i), 0.0, tempoMS, 0.0, barWidth-markerWidth);
-      rect(barOriginX+cOffset-markerWidth*0.5, barOriginY, markerWidth, barHeight);
+      if (cOffset<barWidth-markerWidth)
+        rect(barOriginX+cOffset-markerWidth*0.5, barOriginY, markerWidth, barHeight);
     }
     else {
       float cOffset=map(savedCues.get(i), 0.0, tempoMS, 0.0, barWidth);
-      rect(barOriginX+cOffset, barOriginY, gridWidth, barHeight);
+      if (cOffset<barWidth-gridWidth)
+        rect(barOriginX+cOffset, barOriginY, gridWidth, barHeight);
     }
   }   
 
 
   for (int i=0;i<beatsPerTempo;i++) {
-    if(i!=0){
+    if (i!=0) {
       fill(separatorColor);
       rect(beatsWidth*i+barOriginX-markerWidth*0.5, barOriginY, markerWidth, barHeight);
     }
     fill(255);
-    if(i!=beatsPerTempo)
-    for (int j=1;j<gridsByBeat;j++) {
-      rect((beatsWidth*i)+gridWidth*j+barOriginX, barOriginY, markerWidth/4.0, barHeight);
-    }
+    if (i!=beatsPerTempo)
+      for (int j=1;j<gridsByBeat;j++) {
+        rect((beatsWidth*i)+gridWidth*j+barOriginX, barOriginY, markerWidth/4.0, barHeight);
+      }
   }
 
   fill(markerColor);
@@ -344,45 +415,54 @@ void drawTempoBar() {
   rect(barOriginX+offset, barOriginY, markerWidth, barHeight);
 }
 
-void drawPadsContainer(){
+void drawPadsContainer() {
   strokeWeight(3);
-  stroke(100,100,100,255);
-  fill(50,50,50,255);
-  rect(buttonsOriginX-buttonSize*0.2,buttonsOriginY-buttonSize*0.2,buttonSize*5.295,buttonSize*5.295);    
+  stroke(100, 100, 100, 255);
+  fill(50, 50, 50, 255);
+  rect(barOriginX, buttonsOriginY-buttonSize*0.2, barWidth, buttonSize*5.295);
 }
 
-void drawPadButtons(color c, ClickablePad[] padArray, float buttonsOriginX, float buttonsOriginY, float buttonSize, float buttonMargin,String buttonText) {
+void drawPadButtons(color c, ClickablePad[] padArray, float buttonsOriginX, float buttonsOriginY, float buttonSize, float buttonMargin, String buttonText) {
   strokeWeight(3);
-  stroke(100,100,100,255);
+  stroke(100, 100, 100, 255);
   for (int i=0;i<padArray.length;i++) {
     if (padArray[i]==null)
       padArray[i]=new ClickablePad(buttonsOriginX+(buttonSize+buttonMargin)*i, buttonsOriginY, buttonSize, buttonSize);
     padArray[i].text=buttonText+i;
-    padArray[i].fillColor=c;    
+    padArray[i].fillColor=c;
+    if(mainMode==loadMode){
+      if(loadButton.blinkOn){
+        padArray[i].strokeColor=color(255);    
+      }else{
+        padArray[i].strokeColor=color(100);
+      }
+    }else{
+      padArray[i].strokeColor=color(100);
+    }    
     padArray[i].drawState();
   }
 }
 
-PVector getPadButtonOrigin(int soundType){
+PVector getPadButtonOrigin(int soundType) {
   int row=int(soundType/4);
   int col=soundType%4;
-  return new PVector(buttonsOriginX+(buttonSize+buttonMarginX)*col,buttonsOriginY+(buttonSize+buttonMarginY)*row); 
+  return new PVector(buttonsOriginX+(buttonSize+buttonMarginX)*col, buttonsOriginY+(buttonSize+buttonMarginY)*row);
 }
 
 void drawKickButtons() {
-  drawPadButtons(redColor, kick, buttonsOriginX, buttonsOriginY, buttonSize, buttonMarginX,"K");
+  drawPadButtons(redColor, kick, buttonsOriginX, buttonsOriginY, buttonSize, buttonMarginX, "K");
 }
 
 void drawBassButtons() {
-  drawPadButtons(orangeColor, bass, buttonsOriginX, buttonsOriginY+buttonSize+buttonMarginY, buttonSize, buttonMarginX,"B");
+  drawPadButtons(orangeColor, bass, buttonsOriginX, buttonsOriginY+buttonSize+buttonMarginY, buttonSize, buttonMarginX, "B");
 }
 
 void drawSnareButtons() {
-  drawPadButtons(blueColor, snare, buttonsOriginX, buttonsOriginY+(buttonSize+buttonMarginY)*2, buttonSize, buttonMarginX,"S");
+  drawPadButtons(blueColor, snare, buttonsOriginX, buttonsOriginY+(buttonSize+buttonMarginY)*2, buttonSize, buttonMarginX, "S");
 }
 
 void drawHitHatButtons() {
-  drawPadButtons(greenColor, hithat, buttonsOriginX, buttonsOriginY+(buttonSize+buttonMarginY)*3, buttonSize, buttonMarginX,"H");
+  drawPadButtons(greenColor, hithat, buttonsOriginX, buttonsOriginY+(buttonSize+buttonMarginY)*3, buttonSize, buttonMarginX, "H");
 }
 
 void drawSliders() {
@@ -390,7 +470,7 @@ void drawSliders() {
     if (sliders[i]==null) {
       sliders[i]=new VerticalSlider(sliderOriginX+(sliderMarginX*i), sliderMinY+(sliderMaxY-sliderMinY)*0.5, sliderWidth, sliderHeight);
       sliders[i].limitY(sliderMinY, sliderMaxY);      
-      if(i>2){
+      if (i>2) {
         sliders[i].y=sliderMinY;
       }
     }
@@ -400,6 +480,12 @@ void drawSliders() {
     //sliders[i].debugDisplay();
     sliders[i].draw();
   }
+  sliders[0].text="FILTER\nFREQ";
+  sliders[1].text="FILTER\nRES";
+  sliders[2].text="PITCH\nSPEED";
+  sliders[3].text="KICK\nVOL";
+  sliders[4].text="BASS\nVOL";
+  sliders[5].text="MAIN\nVOL";
 }
 
 void drawFiltersZone() {
@@ -413,7 +499,7 @@ void drawFiltersZone() {
     panelModeButton=new Clickable(width*0.1, height*0.51, width*0.2, height*0.025);
   panelModeButton.fillColor=redColor;   
   panelModeButton.drawState();
-  
+
   fill(0); 
   text("[PANEL MODE] ["+panelMode+"]", width*0.2, height*0.525);
 
@@ -422,7 +508,7 @@ void drawFiltersZone() {
     trackModeButton=new Clickable(width*0.5, height*0.51, width*0.2, height*0.025);
   panelModeButton.fillColor=orangeColor;   
   panelModeButton.drawState();    
-  
+
   fill(0);
   text("[TRACK MODE] ["+trackMode+"]", width*0.6, height*0.525);
 
@@ -451,19 +537,17 @@ void drawSpectrumOf(AudioPlayer audioPlayer, color c, int soundType) {
     float[] values=audioPlayer.getPowerSpectrum();
     if (values!=null && values.length>0) {
       float avg=audioPlayer.getAveragePower();
-      println("total values:"+values.length+" value[0]:"+values[0]+" avg:"+avg);
+      //println("total values:"+values.length+" value[0]:"+values[0]+" avg:"+avg);
       strokeWeight(1);
       //stroke(red(c),green(c),blue(c));
       stroke(c, 128);
 
-      if(avg>=0){
-        float fixY=10;
-        if(isAndroidDevice)fixY=20;
+      if (avg>=0) {
         float ledWidth=maxLedWidth*avg;
         float ledX=buttonsOriginX+(buttonSize+buttonMarginX)*(soundType%4);
-        float ledY=buttonsOriginY-fixY+(buttonSize+buttonMarginY)*(soundType/4);
+        float ledY=buttonsOriginY-(buttonSize*0.15)+(buttonSize+buttonMarginY)*(soundType/4);
         fill(c);        
-        rect(ledX+maxLedWidth-ledWidth,ledY, ledWidth, ledHeight);
+        rect(ledX+maxLedWidth-ledWidth, ledY, ledWidth, ledHeight);
       }
       float xOffset=0;
       PVector origin=getPadButtonOrigin(soundType);
@@ -473,26 +557,25 @@ void drawSpectrumOf(AudioPlayer audioPlayer, color c, int soundType) {
       origin.x+=3;      
       fill(100);
       for (int i=0;i<values.length;i+=values.length/10.0) {
-        if(values[i]<0)values[i]=0;
+        if (values[i]<0)values[i]=0;
         xOffset=map(i, 0, values.length, 0, buttonSize-4-(spectrumMode==BARS?6:0));
-        switch(spectrumMode){
-          case LINES:
-            stroke(50);
-            strokeWeight(3);
-            if(i>=(int)(values.length/10.0)){
-              PVector destiny=new PVector(originPowerSpecX+xOffset, originPowerSpecY-values[i]*height*0.1);
-              line(origin.x,origin.y,destiny.x,destiny.y);
-              origin=destiny;
-            }
-          break;
-          case BARS:
-            noStroke();
+        switch(spectrumMode) {
+        case LINES:
+          stroke(50);
+          strokeWeight(3);
+          if (i>=(int)(values.length/10.0)) {
             PVector destiny=new PVector(originPowerSpecX+xOffset, originPowerSpecY-values[i]*height*0.1);
-            rect(destiny.x,destiny.y,buttonSize/10,originPowerSpecY-destiny.y);
+            line(origin.x, origin.y, destiny.x, destiny.y);
             origin=destiny;
-          break;          
+          }
+          break;
+        case BARS:
+          noStroke();
+          PVector destiny=new PVector(originPowerSpecX+xOffset, originPowerSpecY-values[i]*height*0.1);
+          rect(destiny.x, destiny.y, buttonSize/10, originPowerSpecY-destiny.y);
+          origin=destiny;
+          break;
         }
-        
       }
     }
     else {
@@ -503,7 +586,7 @@ void drawSpectrumOf(AudioPlayer audioPlayer, color c, int soundType) {
 void draw()
 {  
   clear();
-  background(127,127,127);  
+  background(127, 127, 127);  
   //image(backTopMachine, 0, 0, width, 629.0*(width/440.0));
   //proccessTempoVars();
   drawTempoBar();
@@ -512,10 +595,10 @@ void draw()
   drawBassButtons();
   drawSnareButtons();
   drawHitHatButtons();
-  drawBPM();
   //drawFiltersZone();
   drawSliders();
   drawPowerSpectrum();
+  drawTopControls();  
 }
 
 
@@ -625,122 +708,227 @@ void proccessPanel() {
 
 void mouseMoved()
 {
-  for(int i=0;i<kick.length;i++){
-    if(kick[i].isOver(mouseX,mouseY)){
-      
+  for (int i=0;i<kick.length;i++) {
+    if (kick[i].isOver(mouseX, mouseY)) {
     }
-    if(bass[i].isOver(mouseX,mouseY)){
-      
+    if (bass[i].isOver(mouseX, mouseY)) {
     }
-    if(snare[i].isOver(mouseX,mouseY)){
-      
+    if (snare[i].isOver(mouseX, mouseY)) {
     }
-    if(hithat[i].isOver(mouseX,mouseY)){
-      
-    }    
+    if (hithat[i].isOver(mouseX, mouseY)) {
+    }
   }
+  if (deleteButtons.isOver(mouseX, mouseY)) {
+  }
+  if (loadButton.isOver(mouseX, mouseY)) {
+  }
+  if (playButton.isOver(mouseX, mouseY)) {
+  } 
   
 }
 
 void mouseDragged()
 {
+  if (deleteButtons.isSelected(mouseX, mouseY)) {
+  }  
+  
   for (int i=0;i<sliders.length;i++) {
-    if(sliders[i].dragging){
-    float valY=constrain(map(sliders[i].y, sliderMinY, sliderMaxY, 1.0, 0.0), 0.0, 1.0);    
-    switch(i) {
-    case 0:
-      filterFrequency=map(valY, 0.0, 1.0, 0.0, 10000);
-      controlFilter(filterFrequency, filterResonance, 0);
-      break;
-    case 1:
-      filterResonance=valY;
-      controlFilter(filterFrequency, filterResonance, 0);
-      break;
-    case 2:
-      speed=valY*2;
-      controlPitch(speed, 0);
-      break;
-    case 3:
-      volumeKick=valY;
-      controlVolume(volumeKick, 1);      
-      break;
-    case 4:
-      volumeBass=valY;
-      controlVolume(volumeBass, 2);      
-      break;
-    case 5:
-      volume=valY;
-      controlVolume(volume, 0);
-      break;
-    }
-    //println("frequency:"+filterFrequency+" resonance:"+filterResonance+" speed:"+valY*2);
+    if (sliders[i].dragging) {
+      float valY=constrain(map(sliders[i].y, sliderMinY, sliderMaxY, 1.0, 0.0), 0.0, 1.0);    
+      switch(i) {
+      case 0:
+        filterFrequency=map(valY, 0.0, 1.0, 0.0, 10000);
+        controlFilter(filterFrequency, filterResonance, 0);
+        break;
+      case 1:
+        filterResonance=valY;
+        controlFilter(filterFrequency, filterResonance, 0);
+        break;
+      case 2:
+        speed=valY*2;
+        controlPitch(speed, 0);
+        break;
+      case 3:
+        volumeKick=valY;
+        controlVolume(volumeKick, 1);      
+        break;
+      case 4:
+        volumeBass=valY;
+        controlVolume(volumeBass, 2);      
+        break;
+      case 5:
+        volume=valY;
+        controlVolume(volume, 0);
+        break;
+      }
+      //println("frequency:"+filterFrequency+" resonance:"+filterResonance+" speed:"+valY*2);
     }
   }
-  
-  
 }
 
 void mouseReleased() {
   for (int i=0;i<sliders.length;i++) {
     sliders[i].stopDragging();
   }
+  bpmSlider.stopDragging();
   for (int i=0;i<kick.length;i++) {
     kick[i].stopClick();
     bass[i].stopClick();
     snare[i].stopClick();
     hithat[i].stopClick();
-  }  
+  }
+  int index=deleteButtons.buttonSelectedAt(mouseX, mouseY);
+  if (index!=-1) {
+    if(index>=4)
+      deleteAllSounds();
+    else
+      deleteSoundOfGroup(index);
+  }
+  loadButton.stopClick();
+  playButton.stopClick();
+}
+
+void deleteSoundType(int soundType){
+  if (savedCues.size()>0) {
+      println("Deleting soundType:"+soundType);
+      //IntList toBeRemoved=new FloatList();
+      for(int i=0;i<savedCues.size();i++){
+        float cue=savedCues.get(i);
+        if (soundByCue.hasKey(cue+"")) {
+          String value=soundByCue.get(cue+"");
+          println("Old value:"+value);          
+          if(value.indexOf(soundType+"#")!=-1){
+            value=value.replaceAll(soundType+"#","");
+            println("New value:"+value);
+            soundByCue.set(cue+"",value);
+            savedCues.remove(i);
+            //toBeRemoved.append();
+          }
+        }
+      }
+  }
+}
+
+
+void deleteAllSounds(){
+  savedCues.clear();
+  soundByCue.clear();
+}
+
+void deleteSoundOfGroup(int soundGroup) {
+  println("Deleting sound group:"+soundGroup);
+  if (savedCues.size()>0) {
+    for(int i=0;i<16;i+=4){
+      deleteSoundType(i+soundGroup);
+    }
+  }
+}
+
+
+void loadSoundType(int soundType,AudioPlayer player){
+  loadPlayerOfSoundType=soundType;
+  selectInput("Select a .wav file to load:", "fileSelected");
+}
+
+void fileSelected(File selection) {
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    println("User selected " + selection.getAbsolutePath());
+    if(loadPlayerOfSoundType!=-1){
+      println("Loading file " + selection.getAbsolutePath());
+      AudioPlayer ap=getPlayerBySoundType(loadPlayerOfSoundType);
+      ap.stop();
+      maxim.reloadFile(ap,selection.getAbsolutePath()); 
+      if(ap!=null){
+        /*loadPlayer.setAnalysing(true);
+        loadPlayer.setLooping(false);
+        //loadPlayer.volume(1.0);
+        //loadPlayer.cue(0);
+        //playerKick[0].play();
+        playerKick[0] = null;   
+        playerKick[0] = loadPlayer;*/
+      }else{
+        println("loaded Player is null");
+      }
+    }
+  }
 }
 
 void mousePressed()
 {
   for (int i=0;i<kick.length;i++) {
     if (kick[i].isClicked(mouseX, mouseY)) {
-      addSoundTypeToList(kick.length*i);
+      if(mainMode==normalMode)
+        addSoundTypeToList(kick.length*i);
+      else if(mainMode==loadMode)
+        loadSoundType(kick.length*i,playerKick[i]);
+      else if(mainMode==deleteMode)
+        deleteSoundType(kick.length*i);
     }
     else if (bass[i].isClicked(mouseX, mouseY)) {
-      addSoundTypeToList(1+bass.length*i);
+      if(mainMode==normalMode)
+        addSoundTypeToList(1+bass.length*i);
+      else if(mainMode==loadMode)
+        loadSoundType(1+bass.length*i,playerBass[i]);
+      else if(mainMode==deleteMode)
+        deleteSoundType(1+bass.length*i);      
     }
     else if (snare[i].isClicked(mouseX, mouseY)) {
-      addSoundTypeToList(2+snare.length*i);
+      if(mainMode==normalMode)
+        addSoundTypeToList(2+snare.length*i);
+      else if(mainMode==loadMode)
+        loadSoundType(2+snare.length*i,playerSnare[i]);
+      else if(mainMode==deleteMode)
+        deleteSoundType(2+snare.length*i);        
     }
     else if (hithat[i].isClicked(mouseX, mouseY)) {
-      addSoundTypeToList(3+snare.length*i);
+      if(mainMode==normalMode)
+        addSoundTypeToList(3+hithat.length*i);
+      else if(mainMode==loadMode)
+        loadSoundType(3+snare.length*i,playerHitHat[i]);
+      else if(mainMode==deleteMode)
+        deleteSoundType(3+snare.length*i);        
     }
   }
   for (int i=0;i<sliders.length;i++) {
     sliders[i].clicked(mouseX, mouseY);
   }
-  /*if(panelModeButton.isClicked(mouseX, mouseY)) {
-   panelMode=PanelMode.fromInt((panelMode.value()+1)%4);
-   }
-   
-   if(trackModeButton.isClicked(mouseX, mouseY)) {
-   trackMode=(trackMode+1)%5;
-   } */
+  bpmSlider.clicked(mouseX, mouseY);
+
+  if (deleteButtons.isClicked(mouseX, mouseY)) {
+  }
+  if (loadButton.isClicked(mouseX, mouseY)) {
+    if(loadButton.ON){
+      mainMode=loadMode;
+    }else{
+      mainMode=normalMode;
+    }
+  } 
+  if (playButton.isClicked(mouseX, mouseY)) {
+    toggleAudioPlayThread();
+  }   
 }
 
-
-void playSoundType(int sountType) {
-  int soundNumber=sountType/4;
-  switch(sountType%4) {
+AudioPlayer getPlayerBySoundType(int soundType){
+  int soundNumber=soundType/4;
+  switch(soundType%4) {
   case 0:
-    playerKick[soundNumber].cue(0);
-    playerKick[soundNumber].play();        
-    break;
+    return playerKick[soundNumber];        
   case 1:
-    playerBass[soundNumber].cue(0);
-    playerBass[soundNumber].play();        
-    break;
+    return playerBass[soundNumber];        
   case 2:
-    playerSnare[soundNumber].cue(0);
-    playerSnare[soundNumber].play();        
-    break;
+    return playerSnare[soundNumber];        
   case 3:
-    playerHitHat[soundNumber].cue(0);
-    playerHitHat[soundNumber].play();        
-    break;
+    return playerHitHat[soundNumber];        
   }
+  return null;
+}
+
+void playSoundType(int soundType) {
+  AudioPlayer ap=getPlayerBySoundType(soundType);
+  ap.cue(0);
+  ap.play(); 
 }
 
 color getColorByMs(float msOcc) {
@@ -748,8 +936,8 @@ color getColorByMs(float msOcc) {
     int[] types = int(split(soundByCue.get(msOcc+""), '#'));
     if (types.length>0) {
       color finalColor=getColorSoundType(types[0]);
-      for (int i=1;i<types.length;i++)
-        finalColor=lerpColor(finalColor, getColorSoundType(types[i]), 0.5);//1.0/types.length);
+      //for (int i=1;i<types.length;i++)
+      //  finalColor=lerpColor(finalColor, getColorSoundType(types[i]), 0.5);//1.0/types.length);
       return finalColor;
     }
     else return color(0);
@@ -792,9 +980,9 @@ void addSoundTypeToList(int soundType) {
 
     println("saved cues:"+savedCues);
     if (soundByCue.hasKey(clickOffset+""))
-      soundByCue.set(clickOffset+"", soundByCue.hasKey(clickOffset+"")+"#"+soundType);
+      soundByCue.set(clickOffset+"", soundByCue.get(clickOffset+"")+soundType+"#");
     else
-      soundByCue.set(clickOffset+"", soundType+"");
+      soundByCue.set(clickOffset+"", soundType+"#");
   }
 }
 
@@ -802,12 +990,12 @@ void keyPressed() {
   if (key == CODED) {
     //println("Pressed:"+keyCode);
     if (keyCode == UP) {
-      if(BPM<140)
-      changeBPM(BPM+1);
+      if (BPM<140)
+        changeBPM(BPM+1);
     } 
     else if (keyCode == DOWN) {
-      if(BPM>80)
-      changeBPM(BPM-1);
+      if (BPM>80)
+        changeBPM(BPM-1);
     } 
     else if (keyCode == LEFT) {
       if (gridsByBeat>2)gridsByBeat*=0.5;
@@ -823,65 +1011,65 @@ void keyPressed() {
     }
   } 
   else {
-    switch(keyCode){
-      case 32://SPACEBAR
-        liveMode=!liveMode;
+    switch(keyCode) {
+    case 32://SPACEBAR
+      toggleAudioPlayThread();
       break;
-      case BACKSPACE:
-      case 187:
+    case BACKSPACE:
+    case 187:
       if (savedCues.size()>0) {
         savedCues.remove(savedCues.size()-1);
         //println("Deleting last cue");
       }      
       break;
-      case 49:
-        addSoundTypeToList(0);
+    case 49:
+      addSoundTypeToList(0);
       break;      
-      case 50:
-        addSoundTypeToList(4);
+    case 50:
+      addSoundTypeToList(4);
       break;      
-      case 51:
-        addSoundTypeToList(8);
+    case 51:
+      addSoundTypeToList(8);
       break;      
-      case 52:
-        addSoundTypeToList(12);
+    case 52:
+      addSoundTypeToList(12);
       break;
-      case 81:
-        addSoundTypeToList(1);
+    case 81:
+      addSoundTypeToList(1);
       break;      
-      case 87:
-        addSoundTypeToList(5);
+    case 87:
+      addSoundTypeToList(5);
       break;      
-      case 69:
-        addSoundTypeToList(9);
+    case 69:
+      addSoundTypeToList(9);
       break;      
-      case 82:
-        addSoundTypeToList(13);
+    case 82:
+      addSoundTypeToList(13);
       break;
-      case 65:
-        addSoundTypeToList(2);
+    case 65:
+      addSoundTypeToList(2);
       break;      
-      case 83:
-        addSoundTypeToList(6);
+    case 83:
+      addSoundTypeToList(6);
       break;      
-      case 68:
-        addSoundTypeToList(10);
+    case 68:
+      addSoundTypeToList(10);
       break;      
-      case 70:
-        addSoundTypeToList(14);
+    case 70:
+      addSoundTypeToList(14);
       break; 
-       case 90:
-        addSoundTypeToList(3);
+    case 90:
+      addSoundTypeToList(3);
       break;      
-      case 88:
-        addSoundTypeToList(7);
+    case 88:
+      addSoundTypeToList(7);
       break;      
-      case 67:
-        addSoundTypeToList(11);
+    case 67:
+      addSoundTypeToList(11);
       break;      
-      case 86:
-        addSoundTypeToList(15);
-      break;     
+    case 86:
+      addSoundTypeToList(15);
+      break;
     }   
     //println("Pressed code:"+keyCode);
   }

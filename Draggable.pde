@@ -45,7 +45,7 @@ class Draggable {
     
     if(limitedX){
       minXZone=minX-(xExp*0.5);
-      maxXZone=maxX+(xExp*0.5);
+      maxXZone=maxX+(xExp*0.5)+w;
     }else{
       minXZone=x-(xExp*0.5);
       maxXZone=x+w+(xExp*0.5);    
@@ -154,5 +154,17 @@ class Draggable {
       else y = my + offsetY;
     }
   }
+  
+  void dragHorizontally(int mx) {
+    if (dragging) {
+      if(!limitedX)
+        x = mx + offsetX;
+      else if(mx + offsetX<minX)
+        x = minX;
+      else if(mx + offsetX>maxX)
+        x = maxX;
+      else x = mx + offsetX;
+    }
+  }  
 
 }

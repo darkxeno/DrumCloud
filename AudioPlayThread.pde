@@ -42,7 +42,11 @@ class AudioPlayThread extends Thread {
   void run () {
     while (running) {
       millis=millis();
+      try{
       drumMachine.proccessTempoVars();
+      }catch(Exception ex){
+        println("Exception on proccessTempoVars:"+ex.toString());
+      }
       count++;
       // Ok, let's wait for however long we should wait
       if(wait>0){

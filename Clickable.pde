@@ -1,6 +1,8 @@
 public class Clickable {
   boolean clicked = false; // Is the object being clicked?
   boolean overed = false;
+  
+  int strokeWeight=3;
  
   float x,y,w,h;          // Location and size
   float offsetX, offsetY; // Mouseclick offset
@@ -51,14 +53,15 @@ public class Clickable {
   }   
   
   void drawOvered(){
-    stroke(200);
+    stroke(150);
     fill(red(fillColor)*0.7,green(fillColor)*0.7,blue(fillColor)*0.7,alpha(fillColor));
     rect(x,y,w,h);
     drawCommonContent();    
   }
   
   void drawClicked(){
-    //stroke(strokeColor.red()*0.8,strokeColor.green()*0.8,strokeColor.blue()*0.8,strokeColor.alpha()*0.8);
+    //stroke(red(strokeColor)*0.8,green(strokeColor)*0.8,blue(strokeColor)*0.8,alpha(strokeColor)*0.8);
+    stroke(200);
     fill(red(fillColor)*0.5,green(fillColor)*0.5,blue(fillColor)*0.5,alpha(fillColor));
     rect(x,y,w,h);
     drawCommonContent();    
