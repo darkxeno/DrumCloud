@@ -225,7 +225,13 @@ public class SelectDialog extends Dialog {
 	  simpleAdapter.notifyDataSetChanged();	  
   }
   
-  void requestDriveFolderList(String folderId) {	  
+  void requestDriveFolderList(String folderId) {
+	  mProgressDialog = new ProgressDialog(DrumCloud.activity);
+	  mProgressDialog.setMessage("Loading Drive folder:  "+folderId);
+	  mProgressDialog.setIndeterminate(true);
+	  mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);	  
+	  mProgressDialog.show();
+	  
 	  Intent i=new Intent(getContext(),GoogleDriveActivity.class);
 	  i.putExtra("folderId", folderId);
 	  getContext().startActivity(i);	  
@@ -245,6 +251,9 @@ public class SelectDialog extends Dialog {
 	  }
 	  simpleAdapter.notifyDataSetChanged();
 	  selectMode.updateUI();
+	  
+	  mProgressDialog.hide();	  
+	  
   	if(!this.isShowing()){
 		this.show();
 	}	  
@@ -318,8 +327,11 @@ public class SelectDialog extends Dialog {
     		  item.modifiedDate=item.getFile().lastModified();
     	  }
         if(filterExtension!=null){
-          if(f.getName().toLowerCase().endsWith(filterExtension.toLowerCase())){
-            result.add(item);
+        	String[] extensions=filterExtension.split(";");
+          for(int i1=0;i1<extensions.length;i1++){
+        	  if(f.getName().toLowerCase().endsWith(extensions[i1].toLowerCase())){
+        	  result.add(item);
+          	}
           }
         }else{
           result.add(item);
