@@ -98,10 +98,10 @@ public class SelectDialog extends Dialog {
   private String filterExtension = null;
   
   private FileItem lastSelectedFileItem=null;
-  private boolean localMode=false;
-  private boolean showMainOptions=true;
+  public static boolean localMode=false;
+  public static boolean showMainOptions=true;
   private String currentFolderId=GoogleDriveActivity.googleDriveMainFolderId;
-  private String parentFolderId=GoogleDriveActivity.googleDriveMainFolderId;
+  //private String parentFolderId=GoogleDriveActivity.googleDriveMainFolderId;
   private String callbackMethod=null;
   
   public SelectDialog(PApplet context, Intent intent) {
@@ -115,20 +115,19 @@ public class SelectDialog extends Dialog {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(SelectConstants.generateMainActivityViews(getContext()));
+    SelectDialog.showMainOptions=true;
+	GoogleDriveActivity.delegate=this;
     listView = (ListView) findViewById(android.R.id.list);
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView parent, View v, int position, long id) {
         onListItemClick((ListView) parent, v, position, id);
       }      
-      
     });
 
     filterExtension=getIntent().getStringExtra(EX_FILTER_EXTENSION);
     //System.err.println("FILTER:"+filterExtension);
     
-    
-
     setTitle(getIntent().getStringExtra(EX_TITLE));
     currentPath = getIntent().getStringExtra(EX_PATH);
     if (currentPath == null) {
@@ -153,13 +152,14 @@ public class SelectDialog extends Dialog {
 
         view.setBackgroundColor(fItem.getType().getColor());
         TextView tv1 = (TextView) view.findViewById(android.R.id.text1);
-        TextView tv2 = (TextView) view.findViewById(android.R.id.text2);
-        tv2.setText(fItem.getFullPath());
-        
         tv1.setTextColor(Color.BLACK);
-        tv2.setTextColor(Color.BLACK);
         
-
+        if(fItem.getName().equalsIgnoreCase("Up..")){
+        	TextView tv2 = (TextView) view.findViewById(android.R.id.text2);        
+        	tv2.setText(fItem.getFullPath());
+        	tv2.setTextColor(Color.BLACK);
+        }
+        
         return view;
       }
     };
@@ -209,10 +209,7 @@ public class SelectDialog extends Dialog {
 	  simpleAdapter.notifyDataSetChanged();	  
   }
   
-  void requestDriveFolderList(String folderId) {
-	  GoogleDriveActivity.delegate=this;
-	  
-	  //GoogleDriveActivity.filesInFolder(folderId);
+  void requestDriveFolderList(String folderId) {	  
 	  Intent i=new Intent(getContext(),GoogleDriveActivity.class);
 	  i.putExtra("folderId", folderId);
 	  getContext().startActivity(i);	  
@@ -224,7 +221,7 @@ public class SelectDialog extends Dialog {
 	  sortFileItems(newData);
 	  if(!currentFolderId.equalsIgnoreCase(GoogleDriveActivity.googleDriveMainFolderId)){
 		  FileItem upFileItem=new FileItem(SelectConstants.fs_up_item, FileType.Up, lastSelectedFileItem.getFile());
-		  upFileItem.fileId=parentFolderId;
+		  upFileItem.fileId=lastSelectedFileItem.parentFolderId;
 		  simpleAdapter.add(upFileItem);
 	  }
 	  for (FileItem item : newData) {
@@ -325,46 +322,36 @@ public class SelectDialog extends Dialog {
    */
   protected void onFileSelected(File file, Intent intent) {
 	  Log.d("onFileSelected","Path:"+file.getAbsolutePath()+" b:"+file.getAbsolutePath().startsWith("https://drive.google.com"));
-	  if(showMainOptions){
-		  if(file!=null && file.getAbsolutePath().contains("drive.google.com")){
-			  localMode=false;
-		  }else{
-			  localMode=true;
+	  if(localMode){  
+		  if (file != null) {
+			  //String callbackMethod = intent.getStringExtra(SelectDialog.EX_CALLBACK);
+			  selectCallback(file, callbackMethod, parent);
+			  Intent i=new Intent(getContext(),GoogleDriveActivity.class);
+			  i.putExtra("filePath", file.getAbsolutePath());
+			  getContext().startActivity(i);
 		  }
-		  showMainOptions=false;
-		  updateCurrentList(file);
 	  }else{
-		  if(localMode){  
-			  if (file != null) {
-				  //String callbackMethod = intent.getStringExtra(SelectDialog.EX_CALLBACK);
-				  selectCallback(file, callbackMethod, parent);
-				  Intent i=new Intent(getContext(),GoogleDriveActivity.class);
-				  i.putExtra("filePath", file.getAbsolutePath());
-				  getContext().startActivity(i);
+		  if (file != null) {
+
+			  // instantiate it within the onCreate method
+			  mProgressDialog = new ProgressDialog(DrumCloud.activity);
+			  mProgressDialog.setMessage("Downloading:  "+lastSelectedFileItem.getName());
+			  mProgressDialog.setIndeterminate(false);
+			  mProgressDialog.setMax(100);
+			  mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			  
+			  if(lastSelectedFileItem.getType()==FileType.File){  
+				  GoogleDriveActivity.downloadFile(lastSelectedFileItem.downloadUrl);
 			  }
-		  }else{
-			  if (file != null) {
-				
-				  // instantiate it within the onCreate method
-				  mProgressDialog = new ProgressDialog(DrumCloud.activity);
-				  mProgressDialog.setMessage("Downloading:"+lastSelectedFileItem.getName());
-				  mProgressDialog.setIndeterminate(false);
-				  mProgressDialog.setMax(100);
-				  mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-				  
-				  if(lastSelectedFileItem.getType()==FileType.File)
-					  GoogleDriveActivity.downloadFile(lastSelectedFileItem.downloadUrl);
-				  else
-				  {
-					  parentFolderId=currentFolderId;
-					  currentFolderId=lastSelectedFileItem.fileId;
-					  requestDriveFolderList(currentFolderId);
-				  }
-				  //InputStream is=GoogleDriveActivity.downloadFile(file);
-				  /*if(is!=null){
+			  else
+			  {
+				  currentFolderId=lastSelectedFileItem.fileId;
+				  requestDriveFolderList(currentFolderId);
+			  }
+			  //InputStream is=GoogleDriveActivity.downloadFile(file);
+			  /*if(is!=null){
 
 				  }*/
-			  }
 		  }
 	  }
   }

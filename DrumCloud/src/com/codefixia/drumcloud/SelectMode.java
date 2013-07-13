@@ -161,11 +161,21 @@ public abstract class SelectMode implements FileFilter {
 
     @Override
     void onItemClickedImpl(File f) {
-      if (f.isDirectory()) {
-        ui.updateCurrentList(f);
-      } else {
-        selectResult(f);
-      }
+    	if(SelectDialog.showMainOptions){
+    		if(f!=null && (f.getAbsolutePath().contains("drive.google.com")||
+    				f.getAbsolutePath().contains("www.googleapis.com"))){
+    			SelectDialog.localMode=false;
+    		}else{
+    			SelectDialog.localMode=true;
+    		}
+    		SelectDialog.showMainOptions=false;
+    		ui.updateCurrentList(f);
+    	}else    	
+    		if (f.isDirectory()) {
+    			ui.updateCurrentList(f);
+    		} else {
+    			selectResult(f);
+    		}
     }
 
     @Override
@@ -191,7 +201,18 @@ public abstract class SelectMode implements FileFilter {
 
     @Override
     void onItemClickedImpl(File f) {
-      ui.updateCurrentList(f);
+  	  if(SelectDialog.showMainOptions){
+		  /*if(f!=null && (f.getAbsolutePath().contains("drive.google.com")||
+				  f.getAbsolutePath().contains("www.googleapis.com"))){
+			  SelectDialog.localMode=false;
+		  }else{
+			  SelectDialog.localMode=true;
+		  }*/
+		  SelectDialog.showMainOptions=false;
+		  ui.updateCurrentList(f);
+	  }else{    	
+		  ui.updateCurrentList(f);
+	  }
       // result is selected with the help of "Select Current Folder" button
     }
 

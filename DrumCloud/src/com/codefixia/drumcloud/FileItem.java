@@ -2,12 +2,15 @@ package com.codefixia.drumcloud;
 
 import java.io.File;
 
+import com.codefixia.googledrive.GoogleDriveActivity;
+
 public class FileItem {
     private final String name;
     private final FileType type;
     private final File file;
     public String downloadUrl;
     public String fileId;
+    public String parentFolderId=GoogleDriveActivity.googleDriveMainFolderId;
 
     public FileItem(String name, FileType type, File file) {
       this.name = name;

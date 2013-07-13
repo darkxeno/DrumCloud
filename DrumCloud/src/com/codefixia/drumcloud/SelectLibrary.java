@@ -107,7 +107,12 @@ public class SelectLibrary {
                                    File defaultSelection,
                                    final int mode) {
     if (defaultSelection == null) {
-      defaultSelection = Environment.getExternalStorageDirectory();
+      File drumCloudFolder=new File(Environment.getExternalStorageDirectory().getPath()+"/drumcloud/downloads/");
+      if(drumCloudFolder.exists()){
+    	  defaultSelection=drumCloudFolder;
+      }else{
+    	  defaultSelection=Environment.getExternalStorageDirectory();
+      }
     }
 
     final Intent i = new Intent();
