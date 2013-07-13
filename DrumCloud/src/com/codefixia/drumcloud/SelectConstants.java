@@ -68,9 +68,10 @@ public final class SelectConstants {
   public static final int RID_SAVE_BTN = 60;
   public static final int RID_ITEMS_LV = android.R.id.list;
 
-  static final int COLOR_FILE = 0xFF99CC00;
-  static final int COLOR_FOLDER = 0xFFFFBB33;
-  static final int COLOR_UP = 0xFF33B5E5;
+    
+  static final int COLOR_FILE = 0xff22A300; 
+  static final int COLOR_FOLDER = 0xffC18900;
+  static final int COLOR_UP = 0xffB90016;
   
   /**
    * <pre>

@@ -56,6 +56,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -149,16 +150,31 @@ public class SelectDialog extends Dialog {
         View view = super.getView(position, convertView, parent);
         
         FileItem fItem = this.getItem(position);
-
+        //view.setLayoutParams(new LayoutParams(android.widget.AbsListView.LayoutParams.FILL_PARENT, android.widget.AbsListView.LayoutParams.WRAP_CONTENT));
         view.setBackgroundColor(fItem.getType().getColor());
         TextView tv1 = (TextView) view.findViewById(android.R.id.text1);
-        tv1.setTextColor(Color.BLACK);
+        tv1.setTextColor(Color.WHITE);
+        tv1.setTextSize(15);
+        tv1.setShadowLayer((float) 0.01, 1, 1,Color.BLACK); 
+        
+    	TextView tv2 = (TextView) view.findViewById(android.R.id.text2);
+    	tv2.setTextColor(Color.WHITE);
+    	tv2.setTextSize(10);
+    	tv2.setShadowLayer((float) 0.01, 1, 1,Color.BLACK);
         
         if(fItem.getName().equalsIgnoreCase("Up..")){
-        	TextView tv2 = (TextView) view.findViewById(android.R.id.text2);        
-        	tv2.setText(fItem.getFullPath());
-        	tv2.setTextColor(Color.BLACK);
-        }
+        	if(fItem.isOnline)
+        		tv2.setText("Press to go back");
+        	else
+        		tv2.setText("Press to go back to\n"+fItem.getFullPath());
+        }else if(fItem.getType()==FileType.Folder){
+        	if(fItem.isOnline)
+        		tv2.setText(fItem.getFormattedCreationDate()+"\n"+fItem.getFormattedLastViewDate());
+        	else        	
+        		tv2.setText("Path:\n"+fItem.getFullPath());
+        }else if(fItem.getType()==FileType.File){
+        	tv2.setText(fItem.getFormattedLastModifiedDate()+"\n"+fItem.getFormattedSize());
+        }        
         
         return view;
       }
@@ -295,7 +311,12 @@ public class SelectDialog extends Dialog {
         f.getName(),
         f.isDirectory() ? FileType.Folder : FileType.File,
         f);
+      item.isOnline=false;
       if(!f.isDirectory()){
+    	  if(item.getFile().exists()){
+    		  item.size=item.getFile().length();
+    		  item.modifiedDate=item.getFile().lastModified();
+    	  }
         if(filterExtension!=null){
           if(f.getName().toLowerCase().endsWith(filterExtension.toLowerCase())){
             result.add(item);

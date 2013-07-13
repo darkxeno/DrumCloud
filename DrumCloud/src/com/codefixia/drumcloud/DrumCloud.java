@@ -37,24 +37,6 @@ public class DrumCloud extends PApplet {
 public static Activity activity;
 
 
-
-/*
-import ddf.minim.spi.*;
- import ddf.minim.signals.*;
- import ddf.minim.*;
- import ddf.minim.analysis.*;
- import ddf.minim.ugens.*;
- import ddf.minim.effects.*;
- 
- Minim maxim;
- 
- ddf.minim.AudioPlayer player;
- ddf.minim.AudioPlayer playerBass;
- ddf.minim.AudioPlayer playerSnare;
- ddf.minim.AudioPlayer playerHitHat;
- ddf.minim.AudioPlayer[] playersArray=new ddf.minim.AudioPlayer[20];
- */
-
 static boolean isAndroidDevice=true;
 
 SelectLibrary files;
@@ -93,7 +75,7 @@ PImage backTopMachine, backBottomMachine;
 
 float filterFrequency=11025.0f, filterResonance=0.5f, delayTime=0, delayFeedback=0, speed=1.0f, speed1=1.0f, volumeKick=1.0f, volumeBass=1.0f, volume=1.0f;
 
-int candyPink=color(247, 104, 124);
+public int candyPink=color(247, 104, 124);
 int redColor=0xffB90016;
 int orangeColor=0xffC18900;
 int blueColor=0xff5828A3;

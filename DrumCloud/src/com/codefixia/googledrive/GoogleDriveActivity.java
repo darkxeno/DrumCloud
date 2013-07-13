@@ -178,43 +178,26 @@ public class GoogleDriveActivity extends Activity {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				List<FileItem> childs=new ArrayList<FileItem>();
+				List<FileItem> fileItemList=new ArrayList<FileItem>();
 				if(service==null){
 					Log.e("DRIVE SERVICE","ERROR NOT INITIALIZED");
-					returnFiles(childs);
+					returnFiles(fileItemList);
 					return;
 				}		
-				//Children.List request;
 				Files.List request;
 				try {
-					//request = service.children().list(folderId);
 					request = service.files().list().setQ("'"+folderId+"' in parents");
 					do {
 						try {
-							//ChildList children = request.execute();
-							FileList children = request.execute();
+							FileList oneFile = request.execute();
 							
-							for (File child : children.getItems()) {
-								FileType ft=child.getMimeType().contains("folder")?FileType.Folder:FileType.File;
-								String url = null;
-								//if(child.getParents().size()>0)
-									//url=getFolderById(child.getParents().get(0).getId());
-								if(url==null){
-									url=child.getSelfLink();
-									//(ft==FileType.File)?child.getDownloadUrl():child.getSelfLink();
-								}
-								fileId=child.getId();
-								FileItem file=new FileItem(child.getTitle(),ft, new java.io.File(url) );
-								file.downloadUrl=child.getDownloadUrl();
-								file.parentFolderId=folderId;//getFolderById(child.getParents().get(0).getId());
-								file.fileId=fileId;
-	
-								//FileItem file=getFileItem(fileId);
-								if(file!=null)
-									childs.add(file);
+							for (File child : oneFile.getItems()) {
+								FileItem fileItem=getFileItem(child);
+								if(fileItem!=null)
+									fileItemList.add(fileItem);
 								System.out.println("File Id: " + child.toString());
 							}
-							request.setPageToken(children.getNextPageToken());
+							request.setPageToken(oneFile.getNextPageToken());
 						} catch (IOException e) {
 							System.out.println("An error occurred: " + e);
 							request.setPageToken(null);
@@ -225,15 +208,12 @@ public class GoogleDriveActivity extends Activity {
 				} catch (UserRecoverableAuthIOException e) {
 					startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
 				}catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				returnFiles(childs);
-
+				returnFiles(fileItemList);
 			}		
 		});
 		t.start();		
-
 	}
 	
 	private void returnFiles(final List<FileItem> childs) {
@@ -262,6 +242,26 @@ public class GoogleDriveActivity extends Activity {
 			Log.e("FILE INFO ERROR","An error occured: " + e);
 		}
 		return null;
+	}	
+	
+	private FileItem getFileItem(File file) {
+		FileType fileType=file.getMimeType().contains("folder")?FileType.Folder:FileType.File;
+		FileItem fileItem=new FileItem(file.getTitle(),fileType, new java.io.File(file.getSelfLink()) );
+		fileItem.downloadUrl=file.getDownloadUrl();
+		fileItem.parentFolderId=folderId;
+		fileItem.fileId=file.getId();
+		fileItem.extension=file.getFileExtension();
+		fileItem.size=file.getFileSize();
+		fileItem.isOnline=true;
+		
+		if(file.getCreatedDate()!=null)
+			fileItem.creationDate=file.getCreatedDate().getValue();
+		if(file.getModifiedDate()!=null)
+			fileItem.modifiedDate=file.getModifiedDate().getValue();
+		if(file.getLastViewedByMeDate()!=null)
+			fileItem.lastView=file.getLastViewedByMeDate().getValue();		
+
+		return fileItem;
 	}	
 	
 	/**
