@@ -1,1 +1,5 @@
 web-export
+DrumCloud/bin
+DrumCloud/gen
+*.class
+DrumCloud/out

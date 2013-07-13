@@ -1,0 +1,26 @@
+<component name="libraryTable">
+  <library name="dexedLibs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/processing-core-e9bf8a4b68eff425746d2a1551c9ff08.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-play-services-f2f2642667d7bd83b47fe8a00fb6d7d4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/jsr305-1.3.9-389900ac45624bc65aa4c047dadaefed.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/gson-2.1-820eef8e3f6ba9ab00e1a3a34f405fc4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/annotations-b63d887c9172c6f58dd0a5bdd3ca1fcf.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/themidibus-c519361a6eb3d9faac529442814b90bf.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-oauth-client-1.15.0-rc-5ab48bcd4910687408eaa1bb606583cb.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-http-client-android-1.15.0-rc-ded496091afe70552cb32260fd21ce9f.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/protobuf-java-2.4.1-8c50e7c8dd530462931a9db0127a4c6d.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-api-client-android-1.15.0-rc-02c79578aa32094259f5028732b5e59b.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-http-client-1.15.0-rc-282f8987b532ae9e36a6baa487a85b41.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/jackson-core-2.1.3-1b6ded1904de4ba9eede388511596b6d.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-http-client-jackson2-1.15.0-rc-791cdcdaae59f89f2eb8283b33b978bc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/jackson-core-asl-1.9.11-6c1ef148e33ca6d0364307dad2d698d7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-api-services-drive-v2-rev85-1.15.0-rc-cd08ad35e43c325b17de3895e9a0cde1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-api-client-1.15.0-rc-0bd19f87d63f376eb429a79bd85ee1ba.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-http-client-gson-1.15.0-rc-15f6ec568ef4f25ef03314ecd40d6cc0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/google-http-client-jackson-1.15.0-rc-1e93da8bd35355aa9ffbea3329ced4bc.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

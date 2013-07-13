@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="drive">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/google-api-services-drive-v2-rev85-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/google-api-services-drive-v2-rev85-1.15.0-rc-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/google-api-services-drive-v2-rev85-1.15.0-rc-sources.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

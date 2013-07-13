@@ -1,0 +1,21 @@
+<component name="libraryTable">
+  <library name="libs1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-http-client-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/jsr305-1.3.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-oauth-client-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/jackson-core-asl-1.9.11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-http-client-android-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-api-client-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/protobuf-java-2.4.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-http-client-gson-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/jackson-core-2.1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-http-client-jackson2-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-api-client-android-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/google-http-client-jackson-1.15.0-rc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.google_apis/drive-v2r85lv1.15.0-rc/drive/libs/gson-2.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
