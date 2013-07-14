@@ -1,6 +1,11 @@
 package com.codefixia.googledrive;
+import android.R;
+import android.R.integer;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.IntentService;
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,13 +25,21 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.codefixia.drumcloud.DrumCloud;
@@ -49,7 +62,9 @@ import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-public class GoogleDriveActivity extends Activity {
+public class GoogleDriveService extends IntentService {
+
+
 	static final int REQUEST_ACCOUNT_PICKER = 1;
 	static final int REQUEST_AUTHORIZATION = 2;
 	static final int CAPTURE_IMAGE = 3;
@@ -57,10 +72,10 @@ public class GoogleDriveActivity extends Activity {
 
 	private static Uri fileUri;
 	private static Drive service=null;
-	private GoogleAccountCredential credential;
 	private java.io.File selectedFile=null;
 	private String filePath;
 	private String folderId;
+	private String operation;
 	private static Boolean uploadMode=false;
 	private String fileId;
 	final static public String googleDriveMainFolderId="0B7AaL1Q9Q5fTZGY2eG12WDc5aFU";
@@ -69,88 +84,81 @@ public class GoogleDriveActivity extends Activity {
 	final static public String[] folderCategoryIds={"0B7AaL1Q9Q5fTX1pjNnViTFMzVG8","0B7AaL1Q9Q5fTRHZHbldlbWFjREk","0B7AaL1Q9Q5fTMTZGaFFKM1JuVWc","0B7AaL1Q9Q5fTdVU1MTNuNkFJZHM","0B7AaL1Q9Q5fTYmJYUmR6MElvUDQ","0B7AaL1Q9Q5fTdVVOWEdQdFNNSEU","0B7AaL1Q9Q5fTbXBzZHIyaENQOFE","0B7AaL1Q9Q5fTYjlzeEg0LUJvMUE"};
 	final static public String[] folderCategoryNames={"Others","Kick","Bass","Snare","Hats","Percurssion","Synth","FX"};
 	private int categorySelected=-1;
+	private final IBinder myBinder = new MyLocalBinder();
 	
 	public static SelectDialog delegate;
+	//private Activity mainActivity=DrumCloud.activity;
+
+	public GoogleDriveService() {
+		super("GoogleDriveService");
+	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		//Remove title bar
-		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+	public IBinder onBind(Intent arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-		//Remove notification bar
-		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		this.setTheme(android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-		
-		filePath=getIntent().getStringExtra("filePath");
-		folderId=getIntent().getStringExtra("folderId");
-		uploadMode=filePath!=null;
-
-		if(service==null){
-			credential = GoogleAccountCredential.usingOAuth2(this.getApplicationContext(), DriveScopes.DRIVE);
-			Intent accountIntent=credential.newChooseAccountIntent();
-			if(!uploadMode){
-				accountIntent.putExtra("folderId", folderId);
-				startActivityForResult(accountIntent, REQUEST_FOLDER_FILES);				
+	public class MyLocalBinder extends Binder {
+		public GoogleDriveService getService() {
+			return GoogleDriveService.this;
+		}
+	}	
+	
+	@Override
+	protected void onHandleIntent(Intent intent) {
+		String newOperation=intent.getStringExtra("operation");
+		Log.d("DRIVESERVICE","Last operation:\""+operation+"\" new:"+newOperation);
+		if(newOperation!=null && newOperation.length()>0){
+			operation=newOperation;
+			folderId=intent.getStringExtra("folderId");
+			filePath=intent.getStringExtra("filePath");
+			Log.d("DRIVESERVICE","Received operation:\""+operation+"\" folderId:"+folderId+" filePath:"+filePath);
+			if(service!=null){
+				processOperation(operation);
 			}else{
-				accountIntent.putExtra("filePath", filePath);
-				startActivityForResult(accountIntent, REQUEST_ACCOUNT_PICKER);
+				Intent i=new Intent(this,DummyActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				//i.putExtra("operation", operation);
+				startActivity(i);				
 			}
-		}else{
-			if(uploadMode){
-				uploadFile(filePath);
-			}else{
-				filesInFolder(folderId);
+		}else{//response from DummyActivity
+			int resultCode=intent.getIntExtra("resultCode",0);
+			int requestCode=intent.getIntExtra("requestCode",0);
+			if (resultCode == Activity.RESULT_OK && intent != null && intent.getExtras() != null) {
+				String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+				if (accountName != null) {
+					DummyActivity.getCredential().setSelectedAccountName(accountName);
+					service = getDriveService(DummyActivity.getCredential());
+					Log.d("DRIVESERVICE","Account name:"+accountName+" recovering operation:"+operation);
+					if(service!=null)
+						processOperation(operation);
+				}else{
+					showToast("Error autenticating on Google Drive");
+				}
 			}
 		}
+	}
+
+	public void processOperation(final String operation){
+		if(operation==null){
+			showToast("Undefined operation");
+		}else if(operation.equalsIgnoreCase("filesInFolder")){
+			filesInFolder(folderId);
+		}else if(operation.equalsIgnoreCase("startCameraIntent")){
+			startCameraIntent();
+		}else if(operation.equalsIgnoreCase("downloadFile")){
+			downloadFile(filePath);
+		}else if(operation.equalsIgnoreCase("uploadFile")){
+			uploadFile(filePath);
+		}else{
+			showToast("Unimplemented operation:"+operation);
+		}				
 	}
 	
 	private Drive getDriveService(GoogleAccountCredential credential) {
 		return new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), credential)
 		.build();
-	}	
-	
-	@Override
-	protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-		switch (requestCode) {
-		case REQUEST_FOLDER_FILES:
-			if (resultCode == RESULT_OK && data != null && data.getExtras() != null) {
-				String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-				if (accountName != null) {
-					credential.setSelectedAccountName(accountName);
-					service = getDriveService(credential);
-					Log.d("GOT SERVICE","FolderId:"+folderId);
-					if(folderId!=null)
-						filesInFolder(folderId);
-					finish();
-				}else{
-					
-				}
-			}
-			break;		
-		case REQUEST_ACCOUNT_PICKER:
-			if (resultCode == RESULT_OK && data != null && data.getExtras() != null) {
-				String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-				if (accountName != null) {
-					credential.setSelectedAccountName(accountName);
-					service = getDriveService(credential);
-					uploadFile(filePath);
-				}
-			}
-			break;
-		case REQUEST_AUTHORIZATION:
-			if (resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null) {
-				//saveFileToDrive();
-			} else {
-				startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
-			}
-			break;						
-		case CAPTURE_IMAGE:
-			if (resultCode == Activity.RESULT_OK) { 
-				uploadFile(filePath);
-			}
-		}
 	}
 
 	private void startCameraIntent() {
@@ -162,7 +170,7 @@ public class GoogleDriveActivity extends Activity {
 
 		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-		startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+		//startActivityForResult(cameraIntent, CAPTURE_IMAGE);
 	}
 	
 	public String getFolderById(String fileId){
@@ -186,7 +194,7 @@ public class GoogleDriveActivity extends Activity {
 				}		
 				Files.List request;
 				try {
-					request = service.files().list().setQ("'"+folderId+"' in parents");
+					request = service.files().list().setQ("'"+((folderId==null)?googleDriveMainFolderId:folderId)+"' in parents");
 					do {
 						try {
 							FileList oneFile = request.execute();
@@ -206,7 +214,7 @@ public class GoogleDriveActivity extends Activity {
 							request.getPageToken().length() > 0);			
 					
 				} catch (UserRecoverableAuthIOException e) {
-					startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
+					//startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
 				}catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -223,7 +231,7 @@ public class GoogleDriveActivity extends Activity {
 				delegate.callbackDriveFolderList(childs);
 			}
 		});		
-		finish();
+		//fa.finish();
 	}
 
 	private FileItem getFileItem(String fileId) {
@@ -236,8 +244,8 @@ public class GoogleDriveActivity extends Activity {
 			Log.i("FILE INFO","MIME type: " + file.getMimeType());
 			return item;
 		}catch (UserRecoverableAuthIOException e) {
-			if(e.getIntent()!=null)
-				startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);			
+			//if(e.getIntent()!=null)
+				//startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);			
 		}catch (IOException e) {
 			Log.e("FILE INFO ERROR","An error occured: " + e);
 		}
@@ -307,7 +315,7 @@ public class GoogleDriveActivity extends Activity {
 	}
 
 	private void uploadFile(final String localFilePath) {
-		AlertDialog.Builder  d = new AlertDialog.Builder(this).
+		AlertDialog.Builder  d = new AlertDialog.Builder(DrumCloud.activity).
 				//setMessage("Select the category of the sample.").
 				setTitle("Do you want to upload and share your sample on Google Drive?");
 		d.setSingleChoiceItems(folderCategoryNames, 0 , new OnClickListener() {
@@ -316,7 +324,7 @@ public class GoogleDriveActivity extends Activity {
 				// TODO Auto-generated method stub
 				          String str = folderCategoryNames[which];
 				          categorySelected=which;
-				          Toast.makeText(GoogleDriveActivity.this,
+				          Toast.makeText(DrumCloud.activity,
 				                    "You have selected the \""+str+"\" sample category.",
 				                     Toast.LENGTH_LONG).show();
 			}
@@ -325,7 +333,7 @@ public class GoogleDriveActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
-				finish();
+				//fa.finish();
 			}
 		});
 		d.setPositiveButton("Save", new OnClickListener() {
@@ -374,7 +382,7 @@ public class GoogleDriveActivity extends Activity {
 						        	  Log.e("UPLOAD ERROR", "Error while uploading:"+selectedFile.getName());
 						          }
 							} catch (UserRecoverableAuthIOException e) {
-								startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
+								//startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
@@ -387,12 +395,20 @@ public class GoogleDriveActivity extends Activity {
 	}
 
 	public void showToast(final String toast) {
-		runOnUiThread(new Runnable() {
+		DrumCloud.activity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_SHORT).show();
-				finish();
+				Toast.makeText(DrumCloud.activity, toast, Toast.LENGTH_SHORT).show();
+				//fa.finish();
 			}
 		});
 	}
+	
+	@Override
+	public void onDestroy() 
+	{   
+		Log.d("ONDESTROY","Detroying GoogleDriveService");
+	   super.onDestroy();  
+	}	
+	
 }

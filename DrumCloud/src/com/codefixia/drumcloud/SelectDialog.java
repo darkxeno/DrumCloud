@@ -37,8 +37,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.codefixia.googledrive.GoogleDriveActivity;
+import com.codefixia.googledrive.GoogleDriveService;
 import com.codefixia.googledrive.DownloadFile;
+import com.codefixia.googledrive.GoogleDriveService.MyLocalBinder;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.model.ChildReference;
@@ -46,10 +47,14 @@ import com.google.api.services.drive.model.ChildReference;
 import processing.core.PApplet;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,23 +106,43 @@ public class SelectDialog extends Dialog {
   private FileItem lastSelectedFileItem=null;
   public static boolean localMode=false;
   public static boolean showMainOptions=true;
-  private String currentFolderId=GoogleDriveActivity.googleDriveMainFolderId;
+  private String currentFolderId=GoogleDriveService.googleDriveMainFolderId;
   //private String parentFolderId=GoogleDriveActivity.googleDriveMainFolderId;
   private String callbackMethod=null;
+  GoogleDriveService driveService;
+  boolean isBound = false;
+
+  private ServiceConnection myConnection = new ServiceConnection() {
+
+	  public void onServiceConnected(ComponentName className,
+			  IBinder service) {
+		  MyLocalBinder binder = (MyLocalBinder) service;
+		  driveService = binder.getService();
+		  isBound = true;
+	  }
+
+	  public void onServiceDisconnected(ComponentName arg0) {
+		  isBound = false;
+	  }
+
+  };
   
   public SelectDialog(PApplet context, Intent intent) {
     super(context);
     this.parent = context;
     this.intent = intent;
     callbackMethod = intent.getStringExtra(SelectDialog.EX_CALLBACK);
+    Intent i=new Intent(getContext(),GoogleDriveService.class);
+	this.getContext().bindService(i, myConnection, Context.BIND_AUTO_CREATE);
   }
   
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(SelectConstants.generateMainActivityViews(getContext()));
+    
     SelectDialog.showMainOptions=true;
-	GoogleDriveActivity.delegate=this;
+	GoogleDriveService.delegate=this;
     listView = (ListView) findViewById(android.R.id.list);
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
@@ -227,21 +252,22 @@ public class SelectDialog extends Dialog {
   
   void requestDriveFolderList(String folderId) {
 	  mProgressDialog = new ProgressDialog(DrumCloud.activity);
-	  mProgressDialog.setMessage("Loading Drive folder:  "+folderId);
+	  mProgressDialog.setMessage("Loading Drive folder:  "+(folderId==null?"MAIN":folderId));
 	  mProgressDialog.setIndeterminate(true);
 	  mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);	  
 	  mProgressDialog.show();
 	  
-	  Intent i=new Intent(getContext(),GoogleDriveActivity.class);
+	  Intent i=new Intent(getContext(),GoogleDriveService.class);
+	  i.putExtra("operation", "filesInFolder");
 	  i.putExtra("folderId", folderId);
-	  getContext().startActivity(i);	  
+	  getContext().startService(i);	  
   }
   
   public void callbackDriveFolderList(List<FileItem> newData) {
 	  simpleAdapter.clear();
 	  Log.d("CALLBACK","Gathered "+newData.size()+" files");
 	  sortFileItems(newData);
-	  if(!currentFolderId.equalsIgnoreCase(GoogleDriveActivity.googleDriveMainFolderId)){
+	  if(currentFolderId!=null && !currentFolderId.equalsIgnoreCase(GoogleDriveService.googleDriveMainFolderId)){
 		  FileItem upFileItem=new FileItem(SelectConstants.fs_up_item, FileType.Up, lastSelectedFileItem.getFile());
 		  upFileItem.fileId=lastSelectedFileItem.parentFolderId;
 		  simpleAdapter.add(upFileItem);
@@ -359,9 +385,10 @@ public class SelectDialog extends Dialog {
 		  if (file != null) {
 			  //String callbackMethod = intent.getStringExtra(SelectDialog.EX_CALLBACK);
 			  selectCallback(file, callbackMethod, parent);
-			  Intent i=new Intent(getContext(),GoogleDriveActivity.class);
+			  Intent i=new Intent(getContext(),GoogleDriveService.class);
 			  i.putExtra("filePath", file.getAbsolutePath());
-			  getContext().startActivity(i);
+			  i.putExtra("operation", "uploadFile");
+			  getContext().startService(i);
 		  }
 	  }else{
 		  if (file != null) {
@@ -374,7 +401,7 @@ public class SelectDialog extends Dialog {
 			  mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			  
 			  if(lastSelectedFileItem.getType()==FileType.File){  
-				  GoogleDriveActivity.downloadFile(lastSelectedFileItem.downloadUrl);
+				  GoogleDriveService.downloadFile(lastSelectedFileItem.downloadUrl);
 			  }
 			  else
 			  {
@@ -403,6 +430,7 @@ public class SelectDialog extends Dialog {
 	  File output=new File(outputFilePath);
 	  if(output.exists()){
 		  selectCallback(output, callbackMethod, parent);
+		  Toast.makeText(DrumCloud.activity, "Sound downloaded: " + output.getName(), Toast.LENGTH_SHORT).show();
 	  }else{
 		  Toast.makeText(DrumCloud.activity, "Error downlading file:"+outputFilePath, Toast.LENGTH_SHORT).show();
 	  }
@@ -458,4 +486,19 @@ public class SelectDialog extends Dialog {
   public Intent getIntent() {
     return intent;
   }
+  
+	@Override
+	public void onAttachedToWindow() 
+	{   
+		Log.d("ONATTACHED","onAttachedToWindow SelectDialog");
+	   super.onAttachedToWindow();  
+	}  
+  
+	@Override
+	public void onDetachedFromWindow() 
+	{   
+		Log.d("ONDETACHED","onDetachedFromWindow SelectDialog");
+	   super.onDetachedFromWindow();  
+	}	
+	  
 }

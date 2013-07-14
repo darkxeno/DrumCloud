@@ -6,7 +6,7 @@ import java.util.Date;
 
 import android.text.format.DateFormat;
 
-import com.codefixia.googledrive.GoogleDriveActivity;
+import com.codefixia.googledrive.GoogleDriveService;
 import com.google.api.client.util.DateTime;
 
 public class FileItem {
@@ -21,7 +21,7 @@ public class FileItem {
     public Long size;
     public boolean isOnline=false;
     public String extension;
-    public String parentFolderId=GoogleDriveActivity.googleDriveMainFolderId;
+    public String parentFolderId=GoogleDriveService.googleDriveMainFolderId;
 
     public FileItem(String name, FileType type, File file) {
       this.name = name;

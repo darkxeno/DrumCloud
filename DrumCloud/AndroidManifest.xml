@@ -21,9 +21,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.codefixia.googledrive.GoogleDriveActivity"
-            android:screenOrientation="portrait" >
+            android:name="com.codefixia.googledrive.DummyActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>        
+        <service android:name="com.codefixia.googledrive.GoogleDriveService">
+            
+        </service>        
     </application>
 
 </manifest>
