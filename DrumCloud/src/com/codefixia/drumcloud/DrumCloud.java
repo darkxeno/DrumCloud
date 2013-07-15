@@ -5,6 +5,10 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
+import org.json.*; 
+
+import com.codefixia.googledrive.DownloadFile;
+
 import themidibus.*; 
 import java.io.FileFilter; 
 import java.util.regex.Pattern; 
@@ -34,12 +38,25 @@ import java.io.IOException;
 
 public class DrumCloud extends PApplet {
 
-public static Activity activity;
+	public static Activity activity;
 
 
-static boolean isAndroidDevice=true;
-
-SelectLibrary files;
+/*
+import ddf.minim.spi.*;
+ import ddf.minim.signals.*;
+ import ddf.minim.*;
+ import ddf.minim.analysis.*;
+ import ddf.minim.ugens.*;
+ import ddf.minim.effects.*;
+ 
+ Minim maxim;
+ 
+ ddf.minim.AudioPlayer player;
+ ddf.minim.AudioPlayer playerBass;
+ ddf.minim.AudioPlayer playerSnare;
+ ddf.minim.AudioPlayer playerHitHat;
+ ddf.minim.AudioPlayer[] playersArray=new ddf.minim.AudioPlayer[20];
+ */
 
 Midi midi;
 
@@ -75,7 +92,7 @@ PImage backTopMachine, backBottomMachine;
 
 float filterFrequency=11025.0f, filterResonance=0.5f, delayTime=0, delayFeedback=0, speed=1.0f, speed1=1.0f, volumeKick=1.0f, volumeBass=1.0f, volume=1.0f;
 
-public int candyPink=color(247, 104, 124);
+int candyPink=color(247, 104, 124);
 int redColor=0xffB90016;
 int orangeColor=0xffC18900;
 int blueColor=0xff5828A3;
@@ -126,6 +143,17 @@ final int SNARE=3;
 final int HITHAT=4;
 int trackMode=ALL;
 
+final static boolean isAndroidDevice=true;
+
+SelectLibrary files;
+
+public void setupAndroid() {
+  files = new SelectLibrary(this);
+  files.filterExtension=".wav;.aif;.aiff";
+  activity = (Activity)this;
+}
+
+
 public void setup()
 {
   setupGeneral();
@@ -139,21 +167,14 @@ public void setup()
     setupAndroid();
 }
 
-
-public void setupAndroid() {
-  files = new SelectLibrary(this);
-  files.filterExtension=".wav";
-  activity = (Activity)this;
-}
-
 public void setupPowerSpectrum() {
   //if (AndroidUtil.numCores()>1) {
-    for (int i=0;i<playerKick.length;i++) {
-      playerKick[i].setAnalysing(true);
-      playerBass[i].setAnalysing(true);
-      playerSnare[i].setAnalysing(true);
-      playerHitHat[i].setAnalysing(true);
-    }
+  for (int i=0;i<playerKick.length;i++) {
+    playerKick[i].setAnalysing(true);
+    playerBass[i].setAnalysing(true);
+    playerSnare[i].setAnalysing(true);
+    playerHitHat[i].setAnalysing(true);
+  }
   //}
   maxLedWidth=buttonSize;
   ledHeight=(height*0.01f);      
@@ -163,11 +184,11 @@ public void setupPowerSpectrum() {
 
 public void setupGeneral() {
   /*if (!isAndroidDevice)
-   size(480, 688);
-   else
-   size(420,700);
-   //size(768,1280);
-   */
+    size(480, 688);
+  else
+    size(420, 700);*/
+  //size(768,1280);
+
   FontAdjuster.width=width;
   if (AndroidUtil.numCores()>1) {
     audioPlayThread=new AudioPlayThread(this, 1, "AudioPlayThread");
@@ -670,7 +691,7 @@ public void draw()
    proccessTempoVars();
    }*/
   //if (AndroidUtil.numCores()>1) { 
-    drawPowerSpectrum();
+  drawPowerSpectrum();
   //}
   /*if(AndroidUtil.numCores()==1){
    proccessTempoVars();
@@ -877,13 +898,14 @@ public void deleteSoundType(int soundType) {
         String value=soundByCue.get(cue+"");
         println("Old value:"+value);          
         if (value.indexOf(soundType+"#")!=-1) {
-          try{
-          value=value.replaceAll(soundType+"#", "");
-          println("New value:"+value);
-          soundByCue.set(cue+"", value);
-          savedCues.remove(i);
-          //toBeRemoved.append();
-          }catch(Exception ex){
+          try {
+            value=value.replaceAll(soundType+"#", "");
+            println("New value:"+value);
+            soundByCue.set(cue+"", value);
+            savedCues.remove(i);
+            //toBeRemoved.append();
+          }
+          catch(Exception ex) {
             println("Exception on deleteSoundType():");
             ex.printStackTrace();
           }
@@ -897,7 +919,7 @@ public void deleteSoundType(int soundType) {
 public void deleteAllSounds() {
   savedCues.clear();
   soundByCue.clear();
-  for(int i=0;i<16;i++){
+  for (int i=0;i<16;i++) {
     getPlayerBySoundType(i).stop();
   }
 }
@@ -915,9 +937,25 @@ public void deleteSoundOfGroup(int soundGroup) {
 public void loadSoundType(int soundType, AudioPlayer player) {
   loadPlayerOfSoundType=soundType;
   if (isAndroidDevice)
-    files.selectInput("Select a .wav file to load:", "fileSelected");
-  //else
-  //selectInput("Select a .wav file to load:", "fileSelected");
+    files.selectInput("Select a .wav,.aif file to load:", "fileSelected");
+
+  //selectInput("Select a .wav,.aif file to load:", "fileSelected");
+}
+
+public org.json.JSONArray loadJsonSoundPack(File file) {
+  org.json.JSONArray sounds=null;
+  if (file.exists() && file.isFile()) {
+    if(isAndroidDevice){
+      String text = join( loadStrings( file.getAbsolutePath() ), "");
+      JSON json = JSON.parse(text);
+      println( json );
+      //sounds=loadJSONArray(file.getAbsolutePath());
+      return new org.json.JSONArray();
+    }else{
+      //sounds=loadJSONArray(file.getAbsolutePath());
+    }
+  }    
+  return sounds;
 }
 
 public void fileSelected(File selection) {
@@ -926,30 +964,52 @@ public void fileSelected(File selection) {
   } 
   else {
     println("User selected " + selection.getAbsolutePath());
-    if (loadPlayerOfSoundType!=-1) {
-      println("Loading file " + selection.getAbsolutePath());
-      AudioPlayer ap=getPlayerBySoundType(loadPlayerOfSoundType);
-      ap.stop();
-      maxim.reloadFile(ap, selection.getAbsolutePath()); 
-      if (ap!=null) {
-        //if (AndroidUtil.numCores()>1) {
-          ap.setAnalysing(true);
-        //}
-        ap.setLooping(false);
-        /*
-         //loadPlayer.volume(1.0);
-         //loadPlayer.cue(0);
-         //playerKick[0].play();
-         playerKick[0] = null;   
-         playerKick[0] = loadPlayer;*/
+    if (selection.getName().endsWith(".json")) {
+      org.json.JSONArray sounds=loadJsonSoundPack(selection);
+      for (int i=0;i<sounds.length();i++) {
+        try{
+          org.json.JSONObject sound = sounds.getJSONObject(i);
+          File localFile=new File(DownloadFile.getDownloadPath()+""+sound.getString("filePath"));
+          //else
+            //localFile=new File(this.dataPath("")+sound.getString("filePath"));
+          println("Loading sound:"+sound.getString("filePath")+" on pad:"+sound.getInt("soundType"));
+          loadSoundOnPlayer(sound.getInt("soundType"),localFile);          
+        }catch(org.json.JSONException e){
+          e.printStackTrace();
+        }
+
       }
-      else {
-        println("loaded Player is null");
+    }
+    else {
+      if (loadPlayerOfSoundType!=-1) {
+        loadSoundOnPlayer(loadPlayerOfSoundType,selection);
       }
     }
   }
   mainMode=normalMode;
   loadButton.ON=false;
+}
+
+public void loadSoundOnPlayer(int soundType,File selection) {
+  println("Loading file " + selection.getAbsolutePath());
+  AudioPlayer ap=getPlayerBySoundType(soundType);
+  ap.stop();
+  maxim.reloadFile(ap, selection.getAbsolutePath()); 
+  if (ap!=null) {
+    //if (AndroidUtil.numCores()>1) {
+    ap.setAnalysing(true);
+    //}
+    ap.setLooping(false);
+    /*
+         //loadPlayer.volume(1.0);
+     //loadPlayer.cue(0);
+     //playerKick[0].play();
+     playerKick[0] = null;   
+     playerKick[0] = loadPlayer;*/
+  }
+  else {
+    println("loaded Player is null");
+  }    
 }
 
 public void mousePressed()
@@ -2073,6 +2133,9 @@ class VerticalSlider extends Draggable{
 
 
 
+
+
+
 public class Maxim {
 
   private float sampleRate = 44100;
@@ -2300,126 +2363,223 @@ public class AudioPlayer implements Synth, AudioGenerator {
       audioClipArray[i] = justLoadAudioFile(filenames[i]);
     }
   }
-  public short[] justLoadAudioFile (String filename) {
 
-    short [] myAudioData = null;
-    int fileSampleRate = 0;
-    try {
-      // how long is the file in bytes?
-      long byteCount = 0;
-      BufferedInputStream bis=null;
+  public short[] loadWavFile(File f) {
 
-      try {
-        byteCount = getAssets().openFd(filename).getLength();
-        // check the format of the audio file first!
-        // only accept mono 16 bit wavs
-        InputStream is = getAssets().open(filename); 
-        bis = new BufferedInputStream(is);
-      }
-      catch(FileNotFoundException e) {
-        println("getAssets not working");
-        e.printStackTrace();
-        
-      File myFile = new File(filename);
-      FileInputStream fIn = new FileInputStream(myFile);
-        if (fIn!=null) {
-          byteCount=fIn.available();
-          bis = new BufferedInputStream(fIn);        
-        }
-        else {
-          println("FileInputStream not working");
-        }
-      }
-      println("Opening file:"+filename);
+	    short [] myAudioData = null;
+	    int fileSampleRate = 0;
+	    String filename="";
+	    try {
+	    	filename=f.getName();
+	      // how long is the file in bytes?
+	      long byteCount = 0;
+	      BufferedInputStream bis=null;
 
+	      try {
+	        byteCount = getAssets().openFd(filename).getLength();
+	        // check the format of the audio file first!
+	        // only accept mono 16 bit wavs
+	        InputStream is = getAssets().open(filename); 
+	        bis = new BufferedInputStream(is);
+	      }
+	      catch(FileNotFoundException e) {
+	        println("getAssets not working");
+	        e.printStackTrace();
+	        
+	      FileInputStream fIn = new FileInputStream(f);
+	        if (fIn!=null) {
+	          byteCount=fIn.available();
+	          bis = new BufferedInputStream(fIn);        
+	        }
+	        else {
+	          println("FileInputStream not working");
+	        }
+	      }
+	      println("Opening file:"+filename);
+	      
+	      if (bis!=null) {
+	        // chop!!
 
-      if (bis!=null) {
-        // chop!!
+	        int bitDepth;
+	        int channels;
+	        boolean isPCM;
 
-        int bitDepth;
-        int channels;
-        boolean isPCM;
+	        // allows us to read up to 4 bytes at a time 
+	        byte[] byteBuff = new byte[4];
 
-        // allows us to read up to 4 bytes at a time 
-        byte[] byteBuff = new byte[4];
+	        // skip 20 bytes to get file format
+	        // (1 byte)
+	        bis.skip(20);
+	        bis.read(byteBuff, 0, 2); // read 2 so we are at 22 now
+	        isPCM = ((short)byteBuff[0]) == 1 ? true:false; 
+	        //System.out.println("File isPCM "+isPCM);
 
-        // skip 20 bytes to get file format
-        // (1 byte)
-        bis.skip(20);
-        bis.read(byteBuff, 0, 2); // read 2 so we are at 22 now
-        isPCM = ((short)byteBuff[0]) == 1 ? true:false; 
-        //System.out.println("File isPCM "+isPCM);
+	        // skip 22 bytes to get # channels
+	        // (1 byte)
+	        bis.read(byteBuff, 0, 2);// read 2 so we are at 24 now
+	        channels = (short)byteBuff[0];
+	        System.out.println("#channels "+channels+" "+byteBuff[0]);
+	        // skip 24 bytes to get sampleRate
+	        // (32 bit int)
+	        bis.read(byteBuff, 0, 4); // read 4 so now we are at 28
 
-        // skip 22 bytes to get # channels
-        // (1 byte)
-        bis.read(byteBuff, 0, 2);// read 2 so we are at 24 now
-        channels = (short)byteBuff[0];
-        System.out.println("#channels "+channels+" "+byteBuff[0]);
-        // skip 24 bytes to get sampleRate
-        // (32 bit int)
-        bis.read(byteBuff, 0, 4); // read 4 so now we are at 28
+	        fileSampleRate = bytesToInt(byteBuff, 4);
+	         //if((float) fileSampleRate != this.sampleRate){
+	         //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+	         //}  
 
-        fileSampleRate = bytesToInt(byteBuff, 4);
-        /* if((float) fileSampleRate != this.sampleRate){
-         throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
-         }  */
+	        // skip 34 bytes to get bits per sample
+	        // (1 byte)
+	        bis.skip(6); // we were at 28...
+	        bis.read(byteBuff, 0, 2);// read 2 so we are at 36 now
+	        bitDepth = (short)byteBuff[0];
+	        System.out.println("bit depth "+bitDepth);
+	        // convert to word count...
+	        bitDepth /= 8;
+	        // now start processing the raw data
+	        // data starts at byte 36
+	        int sampleCount = (int) ((byteCount - 36) / (bitDepth * channels));
+	        myAudioData = new short[sampleCount];
+	        int skip = (channels -1) * bitDepth;
+	        int sample = 0;
+	        // skip a few sample as it sounds like shit
+	        bis.skip(bitDepth * 4);
+	        while (bis.available () >= (bitDepth+skip)) {
+	          bis.read(byteBuff, 0, bitDepth);// read 2 so we are at 36 now
+	          //int val = bytesToInt(byteBuff, bitDepth);
+	          // resample to 16 bit by casting to a short
+	          myAudioData[sample] = (short) bytesToInt(byteBuff, bitDepth);
+	          bis.skip(skip);
+	          sample ++;
+	        }
 
-        // skip 34 bytes to get bits per sample
-        // (1 byte)
-        bis.skip(6); // we were at 28...
-        bis.read(byteBuff, 0, 2);// read 2 so we are at 36 now
-        bitDepth = (short)byteBuff[0];
-        System.out.println("bit depth "+bitDepth);
-        // convert to word count...
-        bitDepth /= 8;
-        // now start processing the raw data
-        // data starts at byte 36
-        int sampleCount = (int) ((byteCount - 36) / (bitDepth * channels));
-        myAudioData = new short[sampleCount];
-        int skip = (channels -1) * bitDepth;
-        int sample = 0;
-        // skip a few sample as it sounds like shit
-        bis.skip(bitDepth * 4);
-        while (bis.available () >= (bitDepth+skip)) {
-          bis.read(byteBuff, 0, bitDepth);// read 2 so we are at 36 now
-          //int val = bytesToInt(byteBuff, bitDepth);
-          // resample to 16 bit by casting to a short
-          myAudioData[sample] = (short) bytesToInt(byteBuff, bitDepth);
-          bis.skip(skip);
-          sample ++;
-        }
+	        float secs = (float)sample / (float)sampleRate;
+	        //System.out.println("Read "+sample+" samples expected "+sampleCount+" time "+secs+" secs ");      
+	        bis.close();
 
-        float secs = (float)sample / (float)sampleRate;
-        //System.out.println("Read "+sample+" samples expected "+sampleCount+" time "+secs+" secs ");      
-        bis.close();
+	        // unchop
+	        readHead = 0;
+	        startPos = 0;
+	        // default to 1 sample shift per tick
+	        dReadHead = 1;
+	        isPlaying = false;
+	        isLooping = true;
+	        masterVolume = 1;
+	      }
+	    } 
 
-        // unchop
-        readHead = 0;
-        startPos = 0;
-        // default to 1 sample shift per tick
-        dReadHead = 1;
-        isPlaying = false;
-        isLooping = true;
-        masterVolume = 1;
-      }
-    } 
+	    catch (FileNotFoundException e) {
+	      e.printStackTrace();
+	    }
+	    catch (IOException e) {
+	      e.printStackTrace();
+	    }
 
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
+	    if ((float) fileSampleRate != this.sampleRate) {
+	      //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+	      Resampler resampler = new Resampler();
+	      System.out.println("Resampling file" +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz"); 
+	      return resampler.reSample(myAudioData, (int)fileSampleRate, (int) (this.sampleRate));
+	    } 
+	    return myAudioData;
+	  }  
 
-    if ((float) fileSampleRate != this.sampleRate) {
-      //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
-      Resampler resampler = new Resampler();
-      System.out.println("Resampling file" +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz"); 
-      return resampler.reSample(myAudioData, (int)fileSampleRate, (int) (this.sampleRate));
-    } 
-    return myAudioData;
-  }
+	  public short[] convertSampleRate(short[] originalAudio, int targetRate, int originalRate) {
+	    if (targetRate==originalRate) {
+	      //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+	      return originalAudio;
+	    }
+	    else {        
+	      Resampler resampler = new Resampler();
+	      return resampler.reSample(originalAudio, originalRate, targetRate);
+	    }
+	  }
 
+	  public short[] loadAiffFile(File f) {
+
+	    AiffFileReader aiffFileReader=new AiffFileReader();    
+	    short [] myAudioData = null;
+	    int sample = 0;      
+	    String fileName="";
+
+	    try {
+	      fileName=f.getName();
+	      AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+
+	      int bitDepth=audioFileFormat.getFormat().getFrameSize();
+	      byte[] byteBuff=new byte[bitDepth];
+	      println("Aiff File framesize:"+bitDepth);
+	      AudioFormatJava af=audioFileFormat.getFormat();
+	      int fileSampleRate=(int)af.getSampleRate();
+	      int channels=af.getChannels();
+	      boolean isBigEndian=af.isBigEndian();
+	      println("Aiff File frameRate:"+af.getFrameRate()+" sampleRate:"+fileSampleRate);
+	      println("Aiff File is bigEndian?:"+isBigEndian+" sample bitsize:"+af.getSampleSizeInBits()+" channels:"+channels);
+	      int numBytesRead = 0;
+	      int skip = 0;//(channels -1) * bitDepth;
+
+	      AudioInputStream ais=aiffFileReader.getAudioInputStream(f);
+	      myAudioData=new short[(int)ais.getFrameLength()];
+	      while ( (numBytesRead = ais.read (byteBuff)) != -1) {
+	        //println("Readed:"+numBytesRead+" saved:"+byteBuff.length);
+	        //println("orig. value:"+bytesToIntBigEndian(byteBuff, numBytesRead)+" final value:"+(short)bytesToIntBigEndian(byteBuff, numBytesRead));
+	        
+	        if(!isBigEndian)
+	          myAudioData[sample] = (short) bytesToInt(byteBuff, numBytesRead);
+	        else
+	          myAudioData[sample] = (short) bytesToIntBigEndian(byteBuff, numBytesRead);
+	          
+	        if (skip>0 && ais.available()>=bitDepth)
+	          ais.skip(skip);
+	        sample ++;
+	      }
+
+	      if (fileSampleRate != this.sampleRate) {
+	        System.out.println("Resampling file" +fileName+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
+	        return convertSampleRate(myAudioData, (int) (this.sampleRate), fileSampleRate);
+	      }
+	    }
+	    catch(UnsupportedAudioFileException e) {
+	      e.printStackTrace();
+	      println("UnsupportedAudioFileException reading:"+fileName+"\n"+e);
+	    }
+	    catch(IOException e) {
+	      e.printStackTrace();
+	      println("IOException reading:"+fileName+"\n"+e);
+	    }    
+
+	    return myAudioData;
+	  }
+
+	  public short[] justLoadAudioFile (String filename) {
+
+	    File f = new File(filename);
+	    
+	    boolean isAiff=false;
+	    AiffFileReader aiffFileReader=new AiffFileReader();
+
+	    try {
+	      AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+
+	      if (audioFileFormat.getType()==AudioFileFormat.Type.AIFC || audioFileFormat.getType()==AudioFileFormat.Type.AIFF) {
+	        println("Aiff File detected type:"+audioFileFormat.getType());
+	        isAiff=true;
+	      }
+	    }
+	    catch(UnsupportedAudioFileException e) {
+	      e.printStackTrace();
+	      println("UnsupportedAudioFileException:"+e);
+	    }
+	    catch(IOException e) {
+	      e.printStackTrace();
+	      println("IOException:"+e);
+	    }
+
+	    if (isAiff)
+	      return loadAiffFile(f);
+	    else
+	      return loadWavFile(f);
+	  }
 
   public void setAnalysing(boolean analysing_) {
     this.analysing = analysing_;
@@ -2467,12 +2627,25 @@ public class AudioPlayer implements Synth, AudioGenerator {
    */
   private int bytesToInt(byte[] bytes, int wordSizeBytes) {
     int val = 0;
+    //LIMIT TO 16BITS
+    if(wordSizeBytes>2)wordSizeBytes=2;
     for (int i=wordSizeBytes-1; i>=0; i--) {
       val <<= 8;
       val |= (int)bytes[i] & 0xFF;
     }
     return val;
   }
+  
+  private int bytesToIntBigEndian(byte[] bytes, int wordSizeBytes) {
+    int val = 0;
+    //LIMIT TO 16BITS
+    if(wordSizeBytes>2)wordSizeBytes=2;
+    for (int i=0;i<wordSizeBytes; i++) {
+      val <<= 8;
+      val |= (int)bytes[i] & 0xFF;
+    }
+    return val;
+  }    
 
   /**
    * Test if this audioplayer is playing right now

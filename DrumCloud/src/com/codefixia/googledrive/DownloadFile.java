@@ -75,10 +75,14 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 		delegate.postDownloadCallback(outputFilePath);
 	}
 	
+	public static String getDownloadPath(){		
+		return Environment.getExternalStorageDirectory().getPath()+"/drumcloud/downloads/";
+	}
+	
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        String outputPath=Environment.getExternalStorageDirectory().getPath()+"/drumcloud/downloads/";
+        String outputPath=getDownloadPath();
 		File outputFile=new File(outputPath);
 		if(!outputFile.exists()){
 			Log.i("CREATING FOLDER","Path:"+outputFile.getAbsolutePath());

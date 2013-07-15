@@ -1,5 +1,4 @@
-
-
+import org.json.*;
 import themidibus.*;
 
 /*
@@ -18,10 +17,6 @@ import ddf.minim.spi.*;
  ddf.minim.AudioPlayer playerHitHat;
  ddf.minim.AudioPlayer[] playersArray=new ddf.minim.AudioPlayer[20];
  */
-
-static boolean isAndroidDevice=true;
-
-SelectLibrary files;
 
 Midi midi;
 
@@ -108,6 +103,16 @@ final int SNARE=3;
 final int HITHAT=4;
 int trackMode=ALL;
 
+final static boolean isAndroidDevice=true;
+
+SelectLibrary files;
+
+void setupAndroid() {
+  files = new SelectLibrary(this);
+  files.filterExtension=".wav;.aif;.aiff";
+}
+
+
 void setup()
 {
   setupGeneral();
@@ -121,20 +126,14 @@ void setup()
     setupAndroid();
 }
 
-
-void setupAndroid() {
-  files = new SelectLibrary(this);
-  files.filterExtension=".wav";
-}
-
 void setupPowerSpectrum() {
   //if (AndroidUtil.numCores()>1) {
-    for (int i=0;i<playerKick.length;i++) {
-      playerKick[i].setAnalysing(true);
-      playerBass[i].setAnalysing(true);
-      playerSnare[i].setAnalysing(true);
-      playerHitHat[i].setAnalysing(true);
-    }
+  for (int i=0;i<playerKick.length;i++) {
+    playerKick[i].setAnalysing(true);
+    playerBass[i].setAnalysing(true);
+    playerSnare[i].setAnalysing(true);
+    playerHitHat[i].setAnalysing(true);
+  }
   //}
   maxLedWidth=buttonSize;
   ledHeight=(height*0.01);      
@@ -144,11 +143,11 @@ void setupPowerSpectrum() {
 
 void setupGeneral() {
   /*if (!isAndroidDevice)
-   size(480, 688);
-   else
-   size(420,700);
-   //size(768,1280);
-   */
+    size(480, 688);
+  else
+    size(420, 700);*/
+  //size(768,1280);
+
   FontAdjuster.width=width;
   if (AndroidUtil.numCores()>1) {
     audioPlayThread=new AudioPlayThread(this, 1, "AudioPlayThread");
@@ -651,7 +650,7 @@ void draw()
    proccessTempoVars();
    }*/
   //if (AndroidUtil.numCores()>1) { 
-    drawPowerSpectrum();
+  drawPowerSpectrum();
   //}
   /*if(AndroidUtil.numCores()==1){
    proccessTempoVars();
@@ -858,13 +857,14 @@ void deleteSoundType(int soundType) {
         String value=soundByCue.get(cue+"");
         println("Old value:"+value);          
         if (value.indexOf(soundType+"#")!=-1) {
-          try{
-          value=value.replaceAll(soundType+"#", "");
-          println("New value:"+value);
-          soundByCue.set(cue+"", value);
-          savedCues.remove(i);
-          //toBeRemoved.append();
-          }catch(Exception ex){
+          try {
+            value=value.replaceAll(soundType+"#", "");
+            println("New value:"+value);
+            soundByCue.set(cue+"", value);
+            savedCues.remove(i);
+            //toBeRemoved.append();
+          }
+          catch(Exception ex) {
             println("Exception on deleteSoundType():");
             ex.printStackTrace();
           }
@@ -878,7 +878,7 @@ void deleteSoundType(int soundType) {
 void deleteAllSounds() {
   savedCues.clear();
   soundByCue.clear();
-  for(int i=0;i<16;i++){
+  for (int i=0;i<16;i++) {
     getPlayerBySoundType(i).stop();
   }
 }
@@ -896,9 +896,25 @@ void deleteSoundOfGroup(int soundGroup) {
 void loadSoundType(int soundType, AudioPlayer player) {
   loadPlayerOfSoundType=soundType;
   if (isAndroidDevice)
-    files.selectInput("Select a .wav file to load:", "fileSelected");
-  //else
-  //selectInput("Select a .wav file to load:", "fileSelected");
+    files.selectInput("Select a .wav,.aif file to load:", "fileSelected");
+
+  //selectInput("Select a .wav,.aif file to load:", "fileSelected");
+}
+
+org.json.JSONArray loadJsonSoundPack(File file) {
+  org.json.JSONArray sounds=null;
+  if (file.exists() && file.isFile()) {
+    if(isAndroidDevice){
+      String text = join( loadStrings( file.getAbsolutePath() ), "");
+      JSON json = JSON.parse(text);
+      println( json );
+      //sounds=loadJSONArray(file.getAbsolutePath());
+      return new org.json.JSONArray();
+    }else{
+      //sounds=loadJSONArray(file.getAbsolutePath());
+    }
+  }    
+  return sounds;
 }
 
 void fileSelected(File selection) {
@@ -907,30 +923,52 @@ void fileSelected(File selection) {
   } 
   else {
     println("User selected " + selection.getAbsolutePath());
-    if (loadPlayerOfSoundType!=-1) {
-      println("Loading file " + selection.getAbsolutePath());
-      AudioPlayer ap=getPlayerBySoundType(loadPlayerOfSoundType);
-      ap.stop();
-      maxim.reloadFile(ap, selection.getAbsolutePath()); 
-      if (ap!=null) {
-        //if (AndroidUtil.numCores()>1) {
-          ap.setAnalysing(true);
-        //}
-        ap.setLooping(false);
-        /*
-         //loadPlayer.volume(1.0);
-         //loadPlayer.cue(0);
-         //playerKick[0].play();
-         playerKick[0] = null;   
-         playerKick[0] = loadPlayer;*/
+    if (selection.getName().endsWith(".json")) {
+      org.json.JSONArray sounds=loadJsonSoundPack(selection);
+      for (int i=0;i<sounds.length();i++) {
+        try{
+          org.json.JSONObject sound = sounds.getJSONObject(i);
+          File localFile=new File(DownloadFile.getDownloadPath()+""+sound.getString("filePath"));
+          //else
+            //localFile=new File(this.dataPath("")+sound.getString("filePath"));
+          println("Loading sound:"+sound.getString("filePath")+" on pad:"+sound.getInt("soundType"));
+          loadSoundOnPlayer(sound.getInt("soundType"),localFile);          
+        }catch(org.json.JSONException e){
+          e.printStackTrace();
+        }
+
       }
-      else {
-        println("loaded Player is null");
+    }
+    else {
+      if (loadPlayerOfSoundType!=-1) {
+        loadSoundOnPlayer(loadPlayerOfSoundType,selection);
       }
     }
   }
   mainMode=normalMode;
   loadButton.ON=false;
+}
+
+void loadSoundOnPlayer(int soundType,File selection) {
+  println("Loading file " + selection.getAbsolutePath());
+  AudioPlayer ap=getPlayerBySoundType(soundType);
+  ap.stop();
+  maxim.reloadFile(ap, selection.getAbsolutePath()); 
+  if (ap!=null) {
+    //if (AndroidUtil.numCores()>1) {
+    ap.setAnalysing(true);
+    //}
+    ap.setLooping(false);
+    /*
+         //loadPlayer.volume(1.0);
+     //loadPlayer.cue(0);
+     //playerKick[0].play();
+     playerKick[0] = null;   
+     playerKick[0] = loadPlayer;*/
+  }
+  else {
+    println("loaded Player is null");
+  }    
 }
 
 void mousePressed()

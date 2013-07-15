@@ -23,6 +23,9 @@ import android.media.*;
 import android.media.audiofx.Visualizer;
 import android.content.res.AssetFileDescriptor;
 import android.hardware.*;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.AudioInputStream;
 
 
 public class Maxim {
@@ -252,11 +255,13 @@ public class AudioPlayer implements Synth, AudioGenerator {
       audioClipArray[i] = justLoadAudioFile(filenames[i]);
     }
   }
-  public short[] justLoadAudioFile (String filename) {
+
+  public short[] loadWavFile(File f) {
 
     short [] myAudioData = null;
     int fileSampleRate = 0;
     try {
+      
       // how long is the file in bytes?
       long byteCount = 0;
       BufferedInputStream bis=null;
@@ -272,8 +277,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
         println("getAssets not working");
         e.printStackTrace();
         
-      File myFile = new File(filename);
-      FileInputStream fIn = new FileInputStream(myFile);
+      FileInputStream fIn = new FileInputStream(f);
         if (fIn!=null) {
           byteCount=fIn.available();
           bis = new BufferedInputStream(fIn);        
@@ -283,8 +287,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
         }
       }
       println("Opening file:"+filename);
-
-
+      
       if (bis!=null) {
         // chop!!
 
@@ -312,9 +315,9 @@ public class AudioPlayer implements Synth, AudioGenerator {
         bis.read(byteBuff, 0, 4); // read 4 so now we are at 28
 
         fileSampleRate = bytesToInt(byteBuff, 4);
-        /* if((float) fileSampleRate != this.sampleRate){
-         throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
-         }  */
+         //if((float) fileSampleRate != this.sampleRate){
+         //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+         //}  
 
         // skip 34 bytes to get bits per sample
         // (1 byte)
@@ -370,6 +373,103 @@ public class AudioPlayer implements Synth, AudioGenerator {
       return resampler.reSample(myAudioData, (int)fileSampleRate, (int) (this.sampleRate));
     } 
     return myAudioData;
+  }  
+
+  public short[] convertSampleRate(short[] originalAudio, int targetRate, int originalRate) {
+    if (targetRate==originalRate) {
+      //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+      return originalAudio;
+    }
+    else {        
+      Resampler resampler = new Resampler();
+      return resampler.reSample(originalAudio, originalRate, targetRate);
+    }
+  }
+
+  public short[] loadAiffFile(File f) {
+
+    AiffFileReader aiffFileReader=new AiffFileReader();    
+    short [] myAudioData = null;
+    int sample = 0;      
+    String fileName="";
+
+    try {
+      fileName=f.getName();
+      javax.sound.sampled.AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+
+      int bitDepth=audioFileFormat.getFormat().getFrameSize();
+      byte[] byteBuff=new byte[bitDepth];
+      println("Aiff File framesize:"+bitDepth);
+      javax.sound.sampled.AudioFormat af=audioFileFormat.getFormat();
+      int fileSampleRate=(int)af.getSampleRate();
+      int channels=af.getChannels();
+      boolean isBigEndian=af.isBigEndian();
+      println("Aiff File frameRate:"+af.getFrameRate()+" sampleRate:"+fileSampleRate);
+      println("Aiff File is bigEndian?:"+isBigEndian+" sample bitsize:"+af.getSampleSizeInBits()+" channels:"+channels);
+      int numBytesRead = 0;
+      int skip = 0;//(channels -1) * bitDepth;
+
+      AudioInputStream ais=aiffFileReader.getAudioInputStream(f);
+      myAudioData=new short[(int)ais.getFrameLength()];
+      while ( (numBytesRead = ais.read (byteBuff)) != -1) {
+        //println("Readed:"+numBytesRead+" saved:"+byteBuff.length);
+        //println("orig. value:"+bytesToIntBigEndian(byteBuff, numBytesRead)+" final value:"+(short)bytesToIntBigEndian(byteBuff, numBytesRead));
+        
+        if(!isBigEndian)
+          myAudioData[sample] = (short) bytesToInt(byteBuff, numBytesRead);
+        else
+          myAudioData[sample] = (short) bytesToIntBigEndian(byteBuff, numBytesRead);
+          
+        if (skip>0 && ais.available()>=bitDepth)
+          ais.skip(skip);
+        sample ++;
+      }
+
+      if (fileSampleRate != this.sampleRate) {
+        System.out.println("Resampling file" +fileName+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
+        return convertSampleRate(myAudioData, (int) (this.sampleRate), fileSampleRate);
+      }
+    }
+    catch(UnsupportedAudioFileException e) {
+      e.printStackTrace();
+      println("UnsupportedAudioFileException reading:"+fileName+"\n"+e);
+    }
+    catch(IOException e) {
+      e.printStackTrace();
+      println("IOException reading:"+fileName+"\n"+e);
+    }    
+
+    return myAudioData;
+  }
+
+  public short[] justLoadAudioFile (String filename) {
+
+    File f = new File(filename);
+    
+    boolean isAiff=false;
+    AiffFileReader aiffFileReader=new AiffFileReader();
+
+    try {
+      javax.sound.sampled.AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+
+      if (audioFileFormat.getType()==AudioFileFormat.Type.AIFC || audioFileFormat.getType()==AudioFileFormat.Type.AIFF) {
+        println("Aiff File detected type:"+audioFileFormat.getType());
+        isAiff=true;
+      }
+    }
+    catch(UnsupportedAudioFileException e) {
+      e.printStackTrace();
+      println("UnsupportedAudioFileException:"+e);
+    }
+    catch(IOException e) {
+      e.printStackTrace();
+      println("IOException:"+e);
+    }
+
+    if (isAiff)
+      return loadAiffFile(f);
+    else
+      return loadWavFile(f);
   }
 
 
@@ -419,12 +519,25 @@ public class AudioPlayer implements Synth, AudioGenerator {
    */
   private int bytesToInt(byte[] bytes, int wordSizeBytes) {
     int val = 0;
+    //LIMIT TO 16BITS
+    if(wordSizeBytes>2)wordSizeBytes=2;
     for (int i=wordSizeBytes-1; i>=0; i--) {
       val <<= 8;
       val |= (int)bytes[i] & 0xFF;
     }
     return val;
   }
+  
+  private int bytesToIntBigEndian(byte[] bytes, int wordSizeBytes) {
+    int val = 0;
+    //LIMIT TO 16BITS
+    if(wordSizeBytes>2)wordSizeBytes=2;
+    for (int i=0;i<wordSizeBytes; i++) {
+      val <<= 8;
+      val |= (int)bytes[i] & 0xFF;
+    }
+    return val;
+  }    
 
   /**
    * Test if this audioplayer is playing right now

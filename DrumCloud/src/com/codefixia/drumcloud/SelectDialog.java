@@ -1,4 +1,6 @@
-package com.codefixia.drumcloud;/**
+package com.codefixia.drumcloud;
+
+/**
  * SelectFile
  * Android library which provides Dialogs for selectInput(), selectFolder() and selectOutput() methods.
  * https://github.com/pif/android-select-file/tree/dlg

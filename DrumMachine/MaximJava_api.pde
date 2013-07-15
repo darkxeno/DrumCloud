@@ -256,7 +256,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
     } 
 
     if ((float) fileSampleRate != this.sampleRate) {
-      System.out.println("Resampling file" +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
+      System.out.println("Resampling file: " +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
       return convertSampleRate(myAudioData, (int) (this.sampleRate), (int)fileSampleRate);
     }
 
@@ -280,7 +280,6 @@ public class AudioPlayer implements Synth, AudioGenerator {
     short [] myAudioData = null;
     int sample = 0;      
     String fileName="";
-
 
     try {
       fileName=f.getName();

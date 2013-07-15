@@ -34,7 +34,7 @@ public class FileItem {
     }
 	
 	public String dateTimeToString(Long timeStamp,String title){
-		if(timeStamp==null)
+		if(timeStamp==null || DrumCloud.activity==null)
 			return "";
 		else{		
 			Date jDate=new Date(timeStamp);

@@ -5,6 +5,7 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
+import org.json.*; 
 import themidibus.*; 
 import java.io.FileFilter; 
 import java.util.regex.Pattern; 
@@ -22,6 +23,9 @@ import android.media.*;
 import android.media.audiofx.Visualizer; 
 import android.content.res.AssetFileDescriptor; 
 import android.hardware.*; 
+import javax.sound.sampled.AudioFileFormat; 
+import javax.sound.sampled.UnsupportedAudioFileException; 
+import javax.sound.sampled.AudioInputStream; 
 
 import java.util.HashMap; 
 import java.util.ArrayList; 
@@ -33,7 +37,6 @@ import java.io.OutputStream;
 import java.io.IOException; 
 
 public class DrumMachineAndroid extends PApplet {
-
 
 
 
@@ -54,10 +57,6 @@ import ddf.minim.spi.*;
  ddf.minim.AudioPlayer playerHitHat;
  ddf.minim.AudioPlayer[] playersArray=new ddf.minim.AudioPlayer[20];
  */
-
-static boolean isAndroidDevice=true;
-
-SelectLibrary files;
 
 Midi midi;
 
@@ -144,6 +143,16 @@ final int SNARE=3;
 final int HITHAT=4;
 int trackMode=ALL;
 
+final static boolean isAndroidDevice=true;
+
+SelectLibrary files;
+
+public void setupAndroid() {
+  files = new SelectLibrary(this);
+  files.filterExtension=".wav;.aif;.aiff";
+}
+
+
 public void setup()
 {
   setupGeneral();
@@ -157,20 +166,14 @@ public void setup()
     setupAndroid();
 }
 
-
-public void setupAndroid() {
-  files = new SelectLibrary(this);
-  files.filterExtension=".wav";
-}
-
 public void setupPowerSpectrum() {
   //if (AndroidUtil.numCores()>1) {
-    for (int i=0;i<playerKick.length;i++) {
-      playerKick[i].setAnalysing(true);
-      playerBass[i].setAnalysing(true);
-      playerSnare[i].setAnalysing(true);
-      playerHitHat[i].setAnalysing(true);
-    }
+  for (int i=0;i<playerKick.length;i++) {
+    playerKick[i].setAnalysing(true);
+    playerBass[i].setAnalysing(true);
+    playerSnare[i].setAnalysing(true);
+    playerHitHat[i].setAnalysing(true);
+  }
   //}
   maxLedWidth=buttonSize;
   ledHeight=(height*0.01f);      
@@ -180,11 +183,11 @@ public void setupPowerSpectrum() {
 
 public void setupGeneral() {
   /*if (!isAndroidDevice)
-   size(480, 688);
-   else
-   size(420,700);
-   //size(768,1280);
-   */
+    size(480, 688);
+  else
+    size(420, 700);*/
+  //size(768,1280);
+
   FontAdjuster.width=width;
   if (AndroidUtil.numCores()>1) {
     audioPlayThread=new AudioPlayThread(this, 1, "AudioPlayThread");
@@ -687,7 +690,7 @@ public void draw()
    proccessTempoVars();
    }*/
   //if (AndroidUtil.numCores()>1) { 
-    drawPowerSpectrum();
+  drawPowerSpectrum();
   //}
   /*if(AndroidUtil.numCores()==1){
    proccessTempoVars();
@@ -894,13 +897,14 @@ public void deleteSoundType(int soundType) {
         String value=soundByCue.get(cue+"");
         println("Old value:"+value);          
         if (value.indexOf(soundType+"#")!=-1) {
-          try{
-          value=value.replaceAll(soundType+"#", "");
-          println("New value:"+value);
-          soundByCue.set(cue+"", value);
-          savedCues.remove(i);
-          //toBeRemoved.append();
-          }catch(Exception ex){
+          try {
+            value=value.replaceAll(soundType+"#", "");
+            println("New value:"+value);
+            soundByCue.set(cue+"", value);
+            savedCues.remove(i);
+            //toBeRemoved.append();
+          }
+          catch(Exception ex) {
             println("Exception on deleteSoundType():");
             ex.printStackTrace();
           }
@@ -914,7 +918,7 @@ public void deleteSoundType(int soundType) {
 public void deleteAllSounds() {
   savedCues.clear();
   soundByCue.clear();
-  for(int i=0;i<16;i++){
+  for (int i=0;i<16;i++) {
     getPlayerBySoundType(i).stop();
   }
 }
@@ -932,9 +936,25 @@ public void deleteSoundOfGroup(int soundGroup) {
 public void loadSoundType(int soundType, AudioPlayer player) {
   loadPlayerOfSoundType=soundType;
   if (isAndroidDevice)
-    files.selectInput("Select a .wav file to load:", "fileSelected");
-  //else
-  //selectInput("Select a .wav file to load:", "fileSelected");
+    files.selectInput("Select a .wav,.aif file to load:", "fileSelected");
+
+  //selectInput("Select a .wav,.aif file to load:", "fileSelected");
+}
+
+public org.json.JSONArray loadJsonSoundPack(File file) {
+  org.json.JSONArray sounds=null;
+  if (file.exists() && file.isFile()) {
+    if(isAndroidDevice){
+      String text = join( loadStrings( file.getAbsolutePath() ), "");
+      JSON json = JSON.parse(text);
+      println( json );
+      //sounds=loadJSONArray(file.getAbsolutePath());
+      return new org.json.JSONArray();
+    }else{
+      //sounds=loadJSONArray(file.getAbsolutePath());
+    }
+  }    
+  return sounds;
 }
 
 public void fileSelected(File selection) {
@@ -943,30 +963,52 @@ public void fileSelected(File selection) {
   } 
   else {
     println("User selected " + selection.getAbsolutePath());
-    if (loadPlayerOfSoundType!=-1) {
-      println("Loading file " + selection.getAbsolutePath());
-      AudioPlayer ap=getPlayerBySoundType(loadPlayerOfSoundType);
-      ap.stop();
-      maxim.reloadFile(ap, selection.getAbsolutePath()); 
-      if (ap!=null) {
-        //if (AndroidUtil.numCores()>1) {
-          ap.setAnalysing(true);
-        //}
-        ap.setLooping(false);
-        /*
-         //loadPlayer.volume(1.0);
-         //loadPlayer.cue(0);
-         //playerKick[0].play();
-         playerKick[0] = null;   
-         playerKick[0] = loadPlayer;*/
+    if (selection.getName().endsWith(".json")) {
+      org.json.JSONArray sounds=loadJsonSoundPack(selection);
+      for (int i=0;i<sounds.length();i++) {
+        try{
+          org.json.JSONObject sound = sounds.getJSONObject(i);
+          File localFile=new File(DownloadFile.getDownloadPath()+""+sound.getString("filePath"));
+          //else
+            //localFile=new File(this.dataPath("")+sound.getString("filePath"));
+          println("Loading sound:"+sound.getString("filePath")+" on pad:"+sound.getInt("soundType"));
+          loadSoundOnPlayer(sound.getInt("soundType"),localFile);          
+        }catch(org.json.JSONException e){
+          e.printStackTrace();
+        }
+
       }
-      else {
-        println("loaded Player is null");
+    }
+    else {
+      if (loadPlayerOfSoundType!=-1) {
+        loadSoundOnPlayer(loadPlayerOfSoundType,selection);
       }
     }
   }
   mainMode=normalMode;
   loadButton.ON=false;
+}
+
+public void loadSoundOnPlayer(int soundType,File selection) {
+  println("Loading file " + selection.getAbsolutePath());
+  AudioPlayer ap=getPlayerBySoundType(soundType);
+  ap.stop();
+  maxim.reloadFile(ap, selection.getAbsolutePath()); 
+  if (ap!=null) {
+    //if (AndroidUtil.numCores()>1) {
+    ap.setAnalysing(true);
+    //}
+    ap.setLooping(false);
+    /*
+         //loadPlayer.volume(1.0);
+     //loadPlayer.cue(0);
+     //playerKick[0].play();
+     playerKick[0] = null;   
+     playerKick[0] = loadPlayer;*/
+  }
+  else {
+    println("loaded Player is null");
+  }    
 }
 
 public void mousePressed()
@@ -2090,6 +2132,9 @@ class VerticalSlider extends Draggable{
 
 
 
+
+
+
 public class Maxim {
 
   private float sampleRate = 44100;
@@ -2317,11 +2362,13 @@ public class AudioPlayer implements Synth, AudioGenerator {
       audioClipArray[i] = justLoadAudioFile(filenames[i]);
     }
   }
-  public short[] justLoadAudioFile (String filename) {
+
+  public short[] loadWavFile(File f) {
 
     short [] myAudioData = null;
     int fileSampleRate = 0;
     try {
+      
       // how long is the file in bytes?
       long byteCount = 0;
       BufferedInputStream bis=null;
@@ -2337,8 +2384,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
         println("getAssets not working");
         e.printStackTrace();
         
-      File myFile = new File(filename);
-      FileInputStream fIn = new FileInputStream(myFile);
+      FileInputStream fIn = new FileInputStream(f);
         if (fIn!=null) {
           byteCount=fIn.available();
           bis = new BufferedInputStream(fIn);        
@@ -2348,8 +2394,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
         }
       }
       println("Opening file:"+filename);
-
-
+      
       if (bis!=null) {
         // chop!!
 
@@ -2377,9 +2422,9 @@ public class AudioPlayer implements Synth, AudioGenerator {
         bis.read(byteBuff, 0, 4); // read 4 so now we are at 28
 
         fileSampleRate = bytesToInt(byteBuff, 4);
-        /* if((float) fileSampleRate != this.sampleRate){
-         throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
-         }  */
+         //if((float) fileSampleRate != this.sampleRate){
+         //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+         //}  
 
         // skip 34 bytes to get bits per sample
         // (1 byte)
@@ -2435,6 +2480,103 @@ public class AudioPlayer implements Synth, AudioGenerator {
       return resampler.reSample(myAudioData, (int)fileSampleRate, (int) (this.sampleRate));
     } 
     return myAudioData;
+  }  
+
+  public short[] convertSampleRate(short[] originalAudio, int targetRate, int originalRate) {
+    if (targetRate==originalRate) {
+      //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+      return originalAudio;
+    }
+    else {        
+      Resampler resampler = new Resampler();
+      return resampler.reSample(originalAudio, originalRate, targetRate);
+    }
+  }
+
+  public short[] loadAiffFile(File f) {
+
+    AiffFileReader aiffFileReader=new AiffFileReader();    
+    short [] myAudioData = null;
+    int sample = 0;      
+    String fileName="";
+
+    try {
+      fileName=f.getName();
+      javax.sound.sampled.AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+
+      int bitDepth=audioFileFormat.getFormat().getFrameSize();
+      byte[] byteBuff=new byte[bitDepth];
+      println("Aiff File framesize:"+bitDepth);
+      javax.sound.sampled.AudioFormat af=audioFileFormat.getFormat();
+      int fileSampleRate=(int)af.getSampleRate();
+      int channels=af.getChannels();
+      boolean isBigEndian=af.isBigEndian();
+      println("Aiff File frameRate:"+af.getFrameRate()+" sampleRate:"+fileSampleRate);
+      println("Aiff File is bigEndian?:"+isBigEndian+" sample bitsize:"+af.getSampleSizeInBits()+" channels:"+channels);
+      int numBytesRead = 0;
+      int skip = 0;//(channels -1) * bitDepth;
+
+      AudioInputStream ais=aiffFileReader.getAudioInputStream(f);
+      myAudioData=new short[(int)ais.getFrameLength()];
+      while ( (numBytesRead = ais.read (byteBuff)) != -1) {
+        //println("Readed:"+numBytesRead+" saved:"+byteBuff.length);
+        //println("orig. value:"+bytesToIntBigEndian(byteBuff, numBytesRead)+" final value:"+(short)bytesToIntBigEndian(byteBuff, numBytesRead));
+        
+        if(!isBigEndian)
+          myAudioData[sample] = (short) bytesToInt(byteBuff, numBytesRead);
+        else
+          myAudioData[sample] = (short) bytesToIntBigEndian(byteBuff, numBytesRead);
+          
+        if (skip>0 && ais.available()>=bitDepth)
+          ais.skip(skip);
+        sample ++;
+      }
+
+      if (fileSampleRate != this.sampleRate) {
+        System.out.println("Resampling file" +fileName+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
+        return convertSampleRate(myAudioData, (int) (this.sampleRate), fileSampleRate);
+      }
+    }
+    catch(UnsupportedAudioFileException e) {
+      e.printStackTrace();
+      println("UnsupportedAudioFileException reading:"+fileName+"\n"+e);
+    }
+    catch(IOException e) {
+      e.printStackTrace();
+      println("IOException reading:"+fileName+"\n"+e);
+    }    
+
+    return myAudioData;
+  }
+
+  public short[] justLoadAudioFile (String filename) {
+
+    File f = new File(filename);
+    
+    boolean isAiff=false;
+    AiffFileReader aiffFileReader=new AiffFileReader();
+
+    try {
+      javax.sound.sampled.AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+
+      if (audioFileFormat.getType()==AudioFileFormat.Type.AIFC || audioFileFormat.getType()==AudioFileFormat.Type.AIFF) {
+        println("Aiff File detected type:"+audioFileFormat.getType());
+        isAiff=true;
+      }
+    }
+    catch(UnsupportedAudioFileException e) {
+      e.printStackTrace();
+      println("UnsupportedAudioFileException:"+e);
+    }
+    catch(IOException e) {
+      e.printStackTrace();
+      println("IOException:"+e);
+    }
+
+    if (isAiff)
+      return loadAiffFile(f);
+    else
+      return loadWavFile(f);
   }
 
 
@@ -2484,12 +2626,25 @@ public class AudioPlayer implements Synth, AudioGenerator {
    */
   private int bytesToInt(byte[] bytes, int wordSizeBytes) {
     int val = 0;
+    //LIMIT TO 16BITS
+    if(wordSizeBytes>2)wordSizeBytes=2;
     for (int i=wordSizeBytes-1; i>=0; i--) {
       val <<= 8;
       val |= (int)bytes[i] & 0xFF;
     }
     return val;
   }
+  
+  private int bytesToIntBigEndian(byte[] bytes, int wordSizeBytes) {
+    int val = 0;
+    //LIMIT TO 16BITS
+    if(wordSizeBytes>2)wordSizeBytes=2;
+    for (int i=0;i<wordSizeBytes; i++) {
+      val <<= 8;
+      val |= (int)bytes[i] & 0xFF;
+    }
+    return val;
+  }    
 
   /**
    * Test if this audioplayer is playing right now
