@@ -1,12 +1,19 @@
 package com.codefixia.googledrive;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.codefixia.drumcloud.SelectDialog;
 
@@ -18,10 +25,15 @@ import android.util.Log;
 //that way, you can easily modify the UI thread from here
 public class DownloadFile extends AsyncTask<String, Integer, String> {
 
-	public SelectDialog delegate;
+	public SelectDialog delegate=null;
+	public static SelectDialog lastDelegate=null;
+	public static String jsonOutputFilePath=null;
 	public String filename="testfile.wav";
 	public String outputFilePath;
+	public String localPath=null;
 	public InputStream input=null;
+	public static int filesDownloaded=0;
+	public static boolean packMode=false;
 
 	@Override
 	protected String doInBackground(String... sUrl) {
@@ -38,12 +50,12 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 				// this will be useful so that you can show a typical 0-100% progress bar
 				fileLength = connection.getContentLength();				
 				input = new BufferedInputStream(url.openStream());
+				System.out.println("Reading "+fileLength+" bytes");
 			}else{
 				fileLength=input.available();
 			}
 			
-			System.err.println("Reading "+fileLength+" bytes");
-			
+			Log.i("WRITE FILE","Writing file:"+outputFilePath);
 			OutputStream output = new FileOutputStream(outputFilePath);
 
 			byte data[] = new byte[1024];
@@ -62,17 +74,87 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 			output.flush();
 			output.close();
 			input.close();
+			
+			if(filename.endsWith("json")){
+				loadSoundPack(new File(outputFilePath));
+			}
+			
 		} catch (Exception e) {
 			System.err.println("Error saving file:"+e);
 		}
 		return null;
 	}
+	
+	public void loadSoundPack(File jsonFile){
+		JSONArray sounds=DownloadFile.loadJsonSoundPack(jsonFile);
+		if(sounds!=null)
+		for(int i=0;i<sounds.length();i++){
+			String id=null,localPath=null;
+			try {
+				JSONObject jo=sounds.getJSONObject(i);
+				id = jo.optString("googleDriveId");
+				localPath = jo.optString("filePath");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			if(id!=null){
+				GoogleDriveService.downloadFileByID(id,localPath);
+			}
+		} 		
+	}
+	
+	public static JSONArray loadJsonSoundPack(File file) {
+		JSONArray sounds=null;
+		if (file.exists() && file.isFile()) {
+			try {
+				//Read text from file
+				StringBuilder text = new StringBuilder();
+				BufferedReader br = new BufferedReader(new FileReader(file));
+				String line;
+
+				while ((line = br.readLine()) != null) {
+					text.append(line);
+					text.append('\n');
+				}
+
+				sounds = new JSONArray(text.toString());
+				System.out.println("Parsed:"+sounds.length()+" sounds"+sounds);
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}				
+			catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}    
+		return sounds;
+	}	
 
 	@Override
 	protected void onPostExecute(String result) {
-		delegate.mProgressDialog.setProgress(100);
-		delegate.mProgressDialog.hide();
-		delegate.postDownloadCallback(outputFilePath);
+		if(filename.endsWith("json")){
+			if(delegate!=null)
+				delegate.mProgressDialog.setIndeterminate(false);
+		}else{
+			synchronized (this) {
+				filesDownloaded++;
+				if(lastDelegate!=null)
+					lastDelegate.mProgressDialog.setProgress(filesDownloaded);
+			}
+			if(filesDownloaded==16){
+				packMode=false;
+				if(lastDelegate!=null){
+					delegate=lastDelegate;
+					outputFilePath=jsonOutputFilePath;
+					lastDelegate=null;
+				}
+			}			
+			if(delegate!=null){
+				delegate.mProgressDialog.setProgress(1);
+				delegate.mProgressDialog.hide();
+				delegate.postDownloadCallback(outputFilePath);
+			}
+		}
 	}
 	
 	public static String getDownloadPath(){		
@@ -82,23 +164,37 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+          
         String outputPath=getDownloadPath();
+        if(localPath!=null){
+        	outputPath+=localPath;
+        }
 		File outputFile=new File(outputPath);
 		if(!outputFile.exists()){
 			Log.i("CREATING FOLDER","Path:"+outputFile.getAbsolutePath());
 			outputFile.mkdirs();
 		}
 		outputFilePath=outputPath+filename;
-        delegate.mProgressDialog.show();
+		if(filename.endsWith("json")){
+			jsonOutputFilePath=outputFilePath;
+			filesDownloaded=0;
+			packMode=true;
+		}		
+		if(delegate!=null){
+			lastDelegate=delegate;
+			delegate.mProgressDialog.show();
+		}
     }
 
     @Override
     protected void onProgressUpdate(Integer... progress) {
         super.onProgressUpdate(progress);
-        if(progress[0]==0){
-        	delegate.mProgressDialog.setIndeterminate(true);
-        }else{
-        	delegate.mProgressDialog.setProgress(progress[0]);
+        if(delegate!=null){
+        	if(progress[0]==0){
+        		delegate.mProgressDialog.setIndeterminate(true);
+        	}else{
+        		delegate.mProgressDialog.setProgress(progress[0]);
+        	}
         }
     }	
 

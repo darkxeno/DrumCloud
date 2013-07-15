@@ -39,6 +39,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import com.codefixia.googledrive.GoogleDriveService;
 import com.codefixia.googledrive.DownloadFile;
 import com.codefixia.googledrive.GoogleDriveService.MyLocalBinder;
@@ -387,10 +390,12 @@ public class SelectDialog extends Dialog {
 		  if (file != null) {
 			  //String callbackMethod = intent.getStringExtra(SelectDialog.EX_CALLBACK);
 			  selectCallback(file, callbackMethod, parent);
-			  Intent i=new Intent(getContext(),GoogleDriveService.class);
-			  i.putExtra("filePath", file.getAbsolutePath());
-			  i.putExtra("operation", "uploadFile");
-			  getContext().startService(i);
+			  if(!file.getAbsolutePath().endsWith("json")){
+				Intent i=new Intent(getContext(),GoogleDriveService.class);
+			  	i.putExtra("filePath", file.getAbsolutePath());
+			  	i.putExtra("operation", "uploadFile");
+			  	getContext().startService(i);
+			  }
 		  }
 	  }else{
 		  if (file != null) {
@@ -399,10 +404,14 @@ public class SelectDialog extends Dialog {
 			  mProgressDialog = new ProgressDialog(DrumCloud.activity);
 			  mProgressDialog.setMessage("Downloading:  "+lastSelectedFileItem.getName());
 			  mProgressDialog.setIndeterminate(false);
-			  mProgressDialog.setMax(100);
 			  mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			  
-			  if(lastSelectedFileItem.getType()==FileType.File){  
+			  if(lastSelectedFileItem.getType()==FileType.File){
+				  if(!lastSelectedFileItem.getName().endsWith("json")){
+					  mProgressDialog.setMax(1);
+				  }else{
+					  mProgressDialog.setMax(16);
+				  }
 				  GoogleDriveService.downloadFile(lastSelectedFileItem.downloadUrl);
 			  }
 			  else
@@ -431,8 +440,13 @@ public class SelectDialog extends Dialog {
 	  Log.i("LOADING LOCAL FILE",outputFilePath);
 	  File output=new File(outputFilePath);
 	  if(output.exists()){
-		  selectCallback(output, callbackMethod, parent);
-		  Toast.makeText(DrumCloud.activity, "Sound downloaded: " + output.getName(), Toast.LENGTH_SHORT).show();
+		  if(!output.getName().endsWith("json")){
+			selectCallback(output, callbackMethod, parent);
+		  	Toast.makeText(DrumCloud.activity, "Sound downloaded: " + output.getName(), Toast.LENGTH_SHORT).show();
+		  }else{ 
+			selectCallback(output, callbackMethod, parent);  
+			Toast.makeText(DrumCloud.activity, "Downloading SoundPack: " + output.getName(), Toast.LENGTH_SHORT).show();  
+		  }
 	  }else{
 		  Toast.makeText(DrumCloud.activity, "Error downlading file:"+outputFilePath, Toast.LENGTH_SHORT).show();
 	  }

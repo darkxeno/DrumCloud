@@ -893,7 +893,7 @@ void deleteSoundOfGroup(int soundGroup) {
 }
 
 
-void loadSoundType(int soundType, AudioPlayer player) {
+public void loadSoundType(int soundType, AudioPlayer player) {
   loadPlayerOfSoundType=soundType;
   if (isAndroidDevice)
     files.selectInput("Select a .wav,.aif file to load:", "fileSelected");
@@ -901,15 +901,20 @@ void loadSoundType(int soundType, AudioPlayer player) {
   //selectInput("Select a .wav,.aif file to load:", "fileSelected");
 }
 
-org.json.JSONArray loadJsonSoundPack(File file) {
-  org.json.JSONArray sounds=null;
+public JSONArray loadJsonSoundPack(File file) {
+  JSONArray sounds=null;
   if (file.exists() && file.isFile()) {
     if(isAndroidDevice){
       String text = join( loadStrings( file.getAbsolutePath() ), "");
-      JSON json = JSON.parse(text);
-      println( json );
-      //sounds=loadJSONArray(file.getAbsolutePath());
-      return new org.json.JSONArray();
+      println("Loaded JSON:"+text);
+    try {
+      sounds = new JSONArray(text);
+      println("Parsed:"+sounds.length()+" sounds"+sounds);      
+    } catch (JSONException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+      return sounds;
     }else{
       //sounds=loadJSONArray(file.getAbsolutePath());
     }
@@ -917,26 +922,28 @@ org.json.JSONArray loadJsonSoundPack(File file) {
   return sounds;
 }
 
-void fileSelected(File selection) {
+public void fileSelected(File selection) {
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
   } 
   else {
-    println("User selected " + selection.getAbsolutePath());
-    if (selection.getName().endsWith(".json")) {
-      org.json.JSONArray sounds=loadJsonSoundPack(selection);
+    println("User selected " + selection.getAbsolutePath()+" name:"+selection.getName());
+    if (selection.getName().endsWith("json")) {
+      JSONArray sounds=loadJsonSoundPack(selection);
       for (int i=0;i<sounds.length();i++) {
         try{
-          org.json.JSONObject sound = sounds.getJSONObject(i);
-          File localFile=new File(DownloadFile.getDownloadPath()+""+sound.getString("filePath"));
-          //else
-            //localFile=new File(this.dataPath("")+sound.getString("filePath"));
-          println("Loading sound:"+sound.getString("filePath")+" on pad:"+sound.getInt("soundType"));
-          loadSoundOnPlayer(sound.getInt("soundType"),localFile);          
-        }catch(org.json.JSONException e){
+          JSONObject sound = sounds.getJSONObject(i);            
+          if(sound!=null){            
+            String finalPath=DownloadFile.getDownloadPath()+""+sound.getString("filePath");
+            println("Loading sound:"+finalPath+" on pad:"+sound.getInt("soundType"));
+            File localFile=new File(finalPath);
+            //else
+            //localFile=new File(this.dataPath("")+sound.getString("filePath"));        
+            loadSoundOnPlayer(sound.getInt("soundType"),localFile);
+          }
+        }catch(JSONException e){
           e.printStackTrace();
         }
-
       }
     }
     else {
@@ -949,26 +956,28 @@ void fileSelected(File selection) {
   loadButton.ON=false;
 }
 
-void loadSoundOnPlayer(int soundType,File selection) {
-  println("Loading file " + selection.getAbsolutePath());
-  AudioPlayer ap=getPlayerBySoundType(soundType);
-  ap.stop();
-  maxim.reloadFile(ap, selection.getAbsolutePath()); 
-  if (ap!=null) {
-    //if (AndroidUtil.numCores()>1) {
-    ap.setAnalysing(true);
-    //}
-    ap.setLooping(false);
-    /*
+public void loadSoundOnPlayer(int soundType,File selection) {
+  if(selection.exists() && selection.isFile()){
+    println("Loading file " + selection.getAbsolutePath());
+    AudioPlayer ap=getPlayerBySoundType(soundType);
+    ap.stop();
+    maxim.reloadFile(ap, selection.getAbsolutePath()); 
+    if (ap!=null) {
+      //if (AndroidUtil.numCores()>1) {
+      ap.setAnalysing(true);
+      //}
+      ap.setLooping(false);
+      /*
          //loadPlayer.volume(1.0);
      //loadPlayer.cue(0);
      //playerKick[0].play();
      playerKick[0] = null;   
      playerKick[0] = loadPlayer;*/
+    }
+    else {
+      println("loaded Player is null");
+    }    
   }
-  else {
-    println("loaded Player is null");
-  }    
 }
 
 void mousePressed()

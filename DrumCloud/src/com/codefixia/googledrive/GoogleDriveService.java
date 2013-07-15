@@ -234,13 +234,15 @@ public class GoogleDriveService extends IntentService {
 		//fa.finish();
 	}
 
-	private FileItem getFileItem(String fileId) {
+	private static FileItem getFileItem(String fileId) {
 		try {
 			Log.i("FILE INFO","File: " + fileId);
 			File file = service.files().get(fileId).execute();
 			FileItem item=new FileItem(file.getTitle(),(file.getFileSize()>0)?FileType.File:FileType.Folder,new java.io.File(file.getSelfLink()));
+			item.downloadUrl=file.getDownloadUrl();
+			item.fileId=fileId;
+			Log.i("FILE INFO","Download url: " + file.getDownloadUrl());
 			Log.i("FILE INFO","Title: " + file.getTitle());
-			Log.i("FILE INFO","Description: " + file.getDescription());
 			Log.i("FILE INFO","MIME type: " + file.getMimeType());
 			return item;
 		}catch (UserRecoverableAuthIOException e) {
@@ -304,6 +306,38 @@ public class GoogleDriveService extends IntentService {
 		});
 		t.start();
 	}
+	
+	public static void downloadFileByID(final String fileId,final String localPath) {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {		
+				if (fileId != null && fileId.length() > 0) {
+					try {
+						FileItem fileItem=getFileItem(fileId);
+						String fileUrl=fileItem.downloadUrl;
+						if(fileUrl!=null && fileUrl.length()>0){
+							HttpResponse resp =
+								service.getRequestFactory().buildGetRequest(new GenericUrl(fileUrl))
+								.execute();
+							  DownloadFile downloadFile = new DownloadFile();
+							  downloadFile.input=resp.getContent();
+							  downloadFile.filename=fileItem.getName();
+							  downloadFile.localPath=localPath.replace(downloadFile.filename, "");
+							  downloadFile.execute(fileUrl);							
+						}else{
+							Log.e("DRIVE","Error obtaining downloadUrl of:"+fileId);
+						}
+					//}catch (UserRecoverableAuthIOException e) {
+			 	      //startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);						
+					}catch (IOException e) {
+						// An error occurred.
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		t.start();
+	}	
 	
 	private static void returnInputStream(final InputStream is) {
 		DrumCloud.activity.runOnUiThread(new Runnable() {

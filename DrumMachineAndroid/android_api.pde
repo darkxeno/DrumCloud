@@ -531,8 +531,9 @@ public class AudioPlayer implements Synth, AudioGenerator {
   private int bytesToIntBigEndian(byte[] bytes, int wordSizeBytes) {
     int val = 0;
     //LIMIT TO 16BITS
-    if(wordSizeBytes>2)wordSizeBytes=2;
-    for (int i=0;i<wordSizeBytes; i++) {
+    int start=0;
+    if(wordSizeBytes>2)start=wordSizeBytes-2;
+    for (int i=start;i<wordSizeBytes; i++) {
       val <<= 8;
       val |= (int)bytes[i] & 0xFF;
     }

@@ -6,6 +6,8 @@ import processing.event.*;
 import processing.opengl.*; 
 
 import org.json.*; 
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.codefixia.googledrive.DownloadFile;
 
@@ -149,7 +151,7 @@ SelectLibrary files;
 
 public void setupAndroid() {
   files = new SelectLibrary(this);
-  files.filterExtension=".wav;.aif;.aiff";
+  files.filterExtension=".wav;.aif;.aiff;.json";
   activity = (Activity)this;
 }
 
@@ -942,15 +944,20 @@ public void loadSoundType(int soundType, AudioPlayer player) {
   //selectInput("Select a .wav,.aif file to load:", "fileSelected");
 }
 
-public org.json.JSONArray loadJsonSoundPack(File file) {
-  org.json.JSONArray sounds=null;
+public JSONArray loadJsonSoundPack(File file) {
+	JSONArray sounds=null;
   if (file.exists() && file.isFile()) {
     if(isAndroidDevice){
       String text = join( loadStrings( file.getAbsolutePath() ), "");
-      JSON json = JSON.parse(text);
-      println( json );
-      //sounds=loadJSONArray(file.getAbsolutePath());
-      return new org.json.JSONArray();
+      println("Loaded JSON:"+text);
+		try {
+			sounds = new JSONArray(text);
+			println("Parsed:"+sounds.length()+" sounds"+sounds);			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+      return sounds;
     }else{
       //sounds=loadJSONArray(file.getAbsolutePath());
     }
@@ -963,22 +970,31 @@ public void fileSelected(File selection) {
     println("Window was closed or the user hit cancel.");
   } 
   else {
-    println("User selected " + selection.getAbsolutePath());
-    if (selection.getName().endsWith(".json")) {
-      org.json.JSONArray sounds=loadJsonSoundPack(selection);
-      for (int i=0;i<sounds.length();i++) {
-        try{
-          org.json.JSONObject sound = sounds.getJSONObject(i);
-          File localFile=new File(DownloadFile.getDownloadPath()+""+sound.getString("filePath"));
-          //else
-            //localFile=new File(this.dataPath("")+sound.getString("filePath"));
-          println("Loading sound:"+sound.getString("filePath")+" on pad:"+sound.getInt("soundType"));
-          loadSoundOnPlayer(sound.getInt("soundType"),localFile);          
-        }catch(org.json.JSONException e){
-          e.printStackTrace();
-        }
-
+    println("User selected " + selection.getAbsolutePath()+" name:"+selection.getName());
+    if (selection.getName().endsWith("json")) {
+    	JSONArray sounds=loadJsonSoundPack(selection);
+    	boolean toggled=false;
+    	if(!liveMode){
+    		toggled=true;
+    		toggleAudioPlayThread();
+    	}
+    	for (int i=0;i<sounds.length();i++) {
+    		try{
+    			JSONObject sound = sounds.getJSONObject(i);        		
+    			if(sound!=null){        		
+    				String finalPath=DownloadFile.getDownloadPath()+""+sound.getString("filePath");
+    				println("Loading sound:"+finalPath+" on pad:"+sound.getInt("soundType"));
+    				File localFile=new File(finalPath);
+    				//else
+    				//localFile=new File(this.dataPath("")+sound.getString("filePath"));        
+    				loadSoundOnPlayer(sound.getInt("soundType"),localFile);
+    			}
+    		}catch(JSONException e){
+    			e.printStackTrace();
+    		}
       }
+      if(toggled)
+    		toggleAudioPlayThread();	
     }
     else {
       if (loadPlayerOfSoundType!=-1) {
@@ -991,25 +1007,27 @@ public void fileSelected(File selection) {
 }
 
 public void loadSoundOnPlayer(int soundType,File selection) {
-  println("Loading file " + selection.getAbsolutePath());
-  AudioPlayer ap=getPlayerBySoundType(soundType);
-  ap.stop();
-  maxim.reloadFile(ap, selection.getAbsolutePath()); 
-  if (ap!=null) {
-    //if (AndroidUtil.numCores()>1) {
-    ap.setAnalysing(true);
-    //}
-    ap.setLooping(false);
-    /*
+	if(selection.exists() && selection.isFile()){
+		println("Loading file " + selection.getAbsolutePath());
+		AudioPlayer ap=getPlayerBySoundType(soundType);
+		ap.stop();
+		maxim.reloadFile(ap, selection.getAbsolutePath()); 
+		if (ap!=null) {
+			//if (AndroidUtil.numCores()>1) {
+			ap.setAnalysing(true);
+			//}
+			ap.setLooping(false);
+			/*
          //loadPlayer.volume(1.0);
      //loadPlayer.cue(0);
      //playerKick[0].play();
      playerKick[0] = null;   
      playerKick[0] = loadPlayer;*/
-  }
-  else {
-    println("loaded Player is null");
-  }    
+		}
+		else {
+			println("loaded Player is null");
+		}    
+	}
 }
 
 public void mousePressed()
@@ -2731,6 +2749,10 @@ public class AudioPlayer implements Synth, AudioGenerator {
     }
     else {
       short sample;
+      if(readHead==0){
+    	  readHead += dReadHead;
+    	  return 0;
+      }
       readHead += dReadHead;
       if (readHead > (audioData.length - 1)) {// got to the end
         //% (float)audioData.length;
@@ -2740,6 +2762,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
         else {
           readHead = 0;
           isPlaying = false;
+          return 0;
         }
       }
 
@@ -2756,6 +2779,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
       y3 =  y1 + ((x3 - x1) * (y2 - y1));
       y3 *= masterVolume;
       sample = fxChain.getSample((short) y3);
+      //println("sample:"+sample);
       if (analysing) {
         // accumulate samples for the fft
         fftFrame[fftInd] = (float)sample / 32768f;
@@ -3007,7 +3031,7 @@ public class FXChain implements Synth {
     }
     if (currentAmp < 0) {
       currentAmp = 0;
-    }  
+    }
     in *= currentAmp;  
     return (short) (in * 32768);
   }
