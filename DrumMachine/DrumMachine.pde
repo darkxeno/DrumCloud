@@ -34,7 +34,7 @@ boolean onlyOnePlayerMode=true;
 float BPM=120.0;
 float beatMS=60000.0/BPM;
 float beatsPerTempo=4.0;
-float gridsByBeat=16.0;
+float gridsByBeat=8.0;
 float tempoMS=beatsPerTempo*beatMS;
 float pausedMS=-1;
 float tempoOffset=0;
@@ -193,7 +193,6 @@ void changeBPM(float newBPM) {
   BPM=newBPM;
   beatMS=60000.0/BPM;
   beatsPerTempo=4.0;
-  gridsByBeat=16.0;
   tempoMS=beatsPerTempo*beatMS;
 }
 

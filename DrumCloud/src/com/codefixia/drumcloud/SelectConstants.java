@@ -72,6 +72,7 @@ public final class SelectConstants {
   static final int COLOR_FILE = 0xff22A300; 
   static final int COLOR_FOLDER = 0xffC18900;
   static final int COLOR_UP = 0xffB90016;
+  static final int COLOR_FILE_PACK = 0xff380883;
   
   /**
    * <pre>

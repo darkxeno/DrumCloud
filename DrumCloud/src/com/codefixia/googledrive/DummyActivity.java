@@ -59,6 +59,13 @@ public class DummyActivity extends Activity {
 			i.putExtra("operation", operation);
 			startService(i);
 			finish();
+		}else{
+			Intent i=new Intent(this,GoogleDriveService.class);
+			i.putExtra("requestCode", requestCode);
+			i.putExtra("resultCode", resultCode);
+			//i.putExtra("operation", "loginCanceled");
+			startService(i);			
+			finish();
 		}
 	}
 	

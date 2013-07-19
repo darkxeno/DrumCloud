@@ -134,8 +134,10 @@ public class GoogleDriveService extends IntentService {
 					if(service!=null)
 						processOperation(operation);
 				}else{
-					showToast("Error autenticating on Google Drive");
+					returnCanceledLogin();
 				}
+			}else{
+				returnCanceledLogin();
 			}
 		}
 	}
@@ -347,6 +349,19 @@ public class GoogleDriveService extends IntentService {
 			}
 		});		
 	}
+	
+	private static void returnCanceledLogin() {
+		DrumCloud.activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if(delegate!=null && delegate.mProgressDialog!=null){
+					delegate.mProgressDialog.dismiss();
+				}
+				Toast.makeText(DrumCloud.activity, "Login on Google Drive canceled", Toast.LENGTH_SHORT).show();
+				delegate.dismiss();
+			}
+		});		
+	}	
 
 	private void uploadFile(final String localFilePath) {
 		AlertDialog.Builder  d = new AlertDialog.Builder(DrumCloud.activity).

@@ -181,8 +181,13 @@ public class SelectDialog extends Dialog {
         
         FileItem fItem = this.getItem(position);
         //view.setLayoutParams(new LayoutParams(android.widget.AbsListView.LayoutParams.FILL_PARENT, android.widget.AbsListView.LayoutParams.WRAP_CONTENT));
-        view.setBackgroundColor(fItem.getType().getColor());
         TextView tv1 = (TextView) view.findViewById(android.R.id.text1);
+        if(fItem.getFile().getName().endsWith("json")){
+        	tv1.setText(fItem.getName().replace(".json", " PACK"));
+        	view.setBackgroundColor(SelectConstants.COLOR_FILE_PACK);
+        }
+        else
+        	view.setBackgroundColor(fItem.getType().getColor());        
         tv1.setTextColor(Color.WHITE);
         tv1.setTextSize(15);
         tv1.setShadowLayer((float) 0.01, 1, 1,Color.BLACK); 
@@ -240,7 +245,7 @@ public class SelectDialog extends Dialog {
 			  getLocalFolderList(f);
 		  }
 		  else{    	    	
-			  requestDriveFolderList(currentFolderId);
+			  requestDriveFolderList(currentFolderId,f.getName());
 		  }
 	  }	  
   }
@@ -255,9 +260,9 @@ public class SelectDialog extends Dialog {
 	  simpleAdapter.notifyDataSetChanged();	  
   }
   
-  void requestDriveFolderList(String folderId) {
+  void requestDriveFolderList(String folderId,String folderName) {
 	  mProgressDialog = new ProgressDialog(DrumCloud.activity);
-	  mProgressDialog.setMessage("Loading Drive folder:  "+(folderId==null?"MAIN":folderId));
+	  mProgressDialog.setMessage("Loading Drive folder:  "+(folderName==null?"MAIN":folderName));
 	  mProgressDialog.setIndeterminate(true);
 	  mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);	  
 	  mProgressDialog.show();
@@ -417,7 +422,7 @@ public class SelectDialog extends Dialog {
 			  else
 			  {
 				  currentFolderId=lastSelectedFileItem.fileId;
-				  requestDriveFolderList(currentFolderId);
+				  requestDriveFolderList(currentFolderId,lastSelectedFileItem.getName());
 			  }
 			  //InputStream is=GoogleDriveActivity.downloadFile(file);
 			  /*if(is!=null){

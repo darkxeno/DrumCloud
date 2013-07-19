@@ -23,7 +23,9 @@ import java.net.MalformedURLException;
 import java.util.*; 
 import java.net.URL; 
 import android.app.Activity; 
+import android.app.ProgressDialog;
 import android.os.Bundle; 
+import android.widget.Toast;
 import android.media.*; 
 import android.media.audiofx.Visualizer; 
 import android.content.res.AssetFileDescriptor; 
@@ -41,6 +43,7 @@ import java.io.IOException;
 public class DrumCloud extends PApplet {
 
 	public static Activity activity;
+	private static int soundsLoaded=0;
 
 
 /*
@@ -973,28 +976,62 @@ public void fileSelected(File selection) {
     println("User selected " + selection.getAbsolutePath()+" name:"+selection.getName());
     if (selection.getName().endsWith("json")) {
     	JSONArray sounds=loadJsonSoundPack(selection);
-    	boolean toggled=false;
+    	final boolean toggled;
     	if(!liveMode){
     		toggled=true;
     		toggleAudioPlayThread();
+    	}else{
+    		toggled=false;
     	}
+    	final ProgressDialog progressDialog= new ProgressDialog(DrumCloud.activity);;
+		if(isAndroidDevice){
+			//progressDialog = new ProgressDialog(DrumCloud.activity);
+			progressDialog.setMessage("Reading sound files");
+			progressDialog.setIndeterminate(false);
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			progressDialog.setMax(16);
+			progressDialog.show();
+		}    	
+		soundsLoaded=0;
     	for (int i=0;i<sounds.length();i++) {
     		try{
     			JSONObject sound = sounds.getJSONObject(i);        		
-    			if(sound!=null){        		
+    			if(sound!=null){       		
     				String finalPath=DownloadFile.getDownloadPath()+""+sound.getString("filePath");
     				println("Loading sound:"+finalPath+" on pad:"+sound.getInt("soundType"));
-    				File localFile=new File(finalPath);
+    				final File localFile=new File(finalPath);
+    				final int soundType=sound.getInt("soundType");
+    				final String fileName=sound.getString("fileName");
     				//else
-    				//localFile=new File(this.dataPath("")+sound.getString("filePath"));        
-    				loadSoundOnPlayer(sound.getInt("soundType"),localFile);
+    				//localFile=new File(this.dataPath("")+sound.getString("filePath"));
+    			    Thread t = new Thread() {
+    			        public void run() {
+    	    				loadSoundOnPlayer(soundType,localFile);
+    	    				synchronized (this) {
+    	    					soundsLoaded++;
+							}
+    	    				DrumCloud.activity.runOnUiThread(new Runnable() {
+    	    					@Override
+    	    					public void run() {
+    	    	    				if(progressDialog!=null){
+    	    	    					progressDialog.setMessage("Reading sound:"+fileName);
+    	    	    					progressDialog.setProgress(soundsLoaded);
+    	    	    					if(soundsLoaded==16){
+    	    	    						progressDialog.dismiss();
+    	    	    					    if(toggled)
+    	    	    					    	toggleAudioPlayThread();    	    	    						
+    	    	    					}
+    	    	    				}
+    	    					}
+    	    				});    	    				
+    			        }
+    			    };
+    			    t.start();
     			}
     		}catch(JSONException e){
     			e.printStackTrace();
     		}
-      }
-      if(toggled)
-    		toggleAudioPlayThread();	
+      }	
     }
     else {
       if (loadPlayerOfSoundType!=-1) {

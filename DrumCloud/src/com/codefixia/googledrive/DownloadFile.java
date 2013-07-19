@@ -151,7 +151,7 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 			}			
 			if(delegate!=null){
 				delegate.mProgressDialog.setProgress(1);
-				delegate.mProgressDialog.hide();
+				delegate.mProgressDialog.dismiss();
 				delegate.postDownloadCallback(outputFilePath);
 			}
 		}
