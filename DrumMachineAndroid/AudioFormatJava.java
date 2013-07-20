@@ -1,3 +1,5 @@
+//package com.codefixia.drumcloud;
+
 /* An audio format
    Copyright (C) 2005 Free Software Foundation, Inc.
 
@@ -35,11 +37,6 @@ this exception to your version of the library, but you are not
 obligated to do so.  If you do not wish to do so, delete this
 exception statement from your version. */
 
-
-package javax.sound.sampled;
-
-import gnu.java.lang.CPStringBuilder;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +46,7 @@ import java.util.Map;
  * the number of channels, its frame rate, etc.
  * @since 1.3
  */
-public class AudioFormat
+public class AudioFormatJava
 {
   /**
    * This describes a given audio format encoding.
@@ -149,7 +146,7 @@ public class AudioFormat
    * @param frameRate the frame rate, in frames per second
    * @param bigEndian true if the data is stored big-endian
    */
-  public AudioFormat(Encoding encoding, float sampleRate, int sampleSizeInBits,
+  public AudioFormatJava(Encoding encoding, float sampleRate, int sampleSizeInBits,
          int channels, int frameSize, float frameRate,
          boolean bigEndian)
   {
@@ -177,7 +174,7 @@ public class AudioFormat
    * @param bigEndian true if the data is stored big-endian
    * @param properties a map describing properties of this format
    */
-  public AudioFormat(Encoding encoding, float sampleRate, int sampleSizeInBits,
+  public AudioFormatJava(Encoding encoding, float sampleRate, int sampleSizeInBits,
          int channels, int frameSize, float frameRate,
          boolean bigEndian, Map<String, Object> properties)
   {
@@ -205,7 +202,7 @@ public class AudioFormat
    * @param signed true if this is a signed encoding
    * @param bigEndian true if the data is stored big-endian
    */
-  public AudioFormat(float sampleRate, int sampleSizeInBits,
+  public AudioFormatJava(float sampleRate, int sampleSizeInBits,
          int channels, boolean signed, boolean bigEndian)
   {
     this.encoding = signed ? Encoding.PCM_SIGNED : Encoding.PCM_UNSIGNED;
@@ -297,7 +294,7 @@ public class AudioFormat
    * @param fmt the format to match against
    * @return true if they match, false otherwise
    */
-  public boolean matches(AudioFormat fmt)
+  public boolean matches(AudioFormatJava fmt)
   {
     if (! encoding.equals(fmt.encoding)
         || channels != fmt.channels
@@ -331,35 +328,35 @@ public class AudioFormat
    */
   public String toString()
   {
-    CPStringBuilder result = new CPStringBuilder();
+    String result = "";
     
     // usually at least encoding should be somewhat specified
-    result.append(encoding);
+    result+="encoding";
     
     if (sampleRate != AudioSystem.NOT_SPECIFIED)
       {
-        result.append(" ");
-        result.append(sampleRate);
-        result.append(" Hz");
+        result+=" ";
+        result+=sampleRate;
+        result+=" Hz";
       }
     
     if (sampleSizeInBits != AudioSystem.NOT_SPECIFIED)
       {
-        result.append(" ");
-        result.append(sampleSizeInBits);
-        result.append(" bits");
+        result+=" ";
+        result+=sampleSizeInBits;
+        result+=" bits";
       }
     
     if (channels != AudioSystem.NOT_SPECIFIED)
       {
-        result.append(" ");
-        result.append(channels);
-        result.append(" channel");
-        if (channels > 1) result.append("s");
+        result+=" ";
+        result+=channels;
+        result+=" channel";
+        if (channels > 1) result+="s";
       }
     
     if (sampleSizeInBits > 8)
-      result.append(bigEndian ? " big endian" : " little endian");
+      result+=bigEndian ? " big endian" : " little endian";
     
     return result.toString();
   }

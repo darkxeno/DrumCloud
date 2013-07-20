@@ -61,7 +61,6 @@ class HorizontalSlider extends Draggable{
     else fill(100,180);
     rect(x,y+outStroke,w,h-2*outStroke);
     fill(200);
-    textMode(CENTER);
     //textSize(20);
     //text(round(normalizedValue()*100)+"%",x+w*.5,maxYZone+h*.7);
     textSize(FontAdjuster.getSize(20));

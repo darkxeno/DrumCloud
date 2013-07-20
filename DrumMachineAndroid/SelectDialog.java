@@ -24,7 +24,7 @@
  * @modified    02/20/2013
  * @version     0.0.1 (1)
  */
-//package selectsrc.files;
+package select.files;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -105,7 +105,6 @@ public class SelectDialog extends Dialog {
     });
       
     filterExtension=getIntent().getStringExtra(EX_FILTER_EXTENSION);
-    //System.err.println("FILTER:"+filterExtension);
 
     setTitle(getIntent().getStringExtra(EX_TITLE));
     currentPath = getIntent().getStringExtra(EX_PATH);
@@ -158,6 +157,7 @@ public class SelectDialog extends Dialog {
     currentPath = f.getAbsolutePath();
     simpleAdapter.clear();
     for (FileItem item : newData) {
+      if(filterExtension!=null && item.getName().endsWith(filterExtension))
           simpleAdapter.add(item);
     }
     simpleAdapter.notifyDataSetChanged();
@@ -208,17 +208,8 @@ public class SelectDialog extends Dialog {
         f.getName(),
         f.isDirectory() ? FileType.Folder : FileType.File,
         f);
-      if(!f.isDirectory()){
-        if(filterExtension!=null){
-          if(f.getName().toLowerCase().endsWith(filterExtension.toLowerCase())){
-            result.add(item);
-          }
-        }else{
-          result.add(item);
-        }
-      }
-      else
-        result.add(item);
+
+      result.add(item);
     }
     return result;
   }

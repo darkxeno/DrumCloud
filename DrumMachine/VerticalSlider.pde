@@ -30,7 +30,8 @@ class VerticalSlider extends Draggable{
     fill(map(normalizedValue(),0,1,50,127),255);
     rect(minXZone,minYZone,maxXZone-minXZone,maxYZone-minYZone);
     strokeWeight(2);
-    stroke(255,255,255,255);
+    //stroke(150);
+    stroke(255,255);
     for(int i=1;i<divisions;i++){
       float yPos=minYZone+i*divHeight;
       if(i%2==0){
@@ -49,7 +50,6 @@ class VerticalSlider extends Draggable{
     else fill(100,180);
     rect(x,y,w,h);
     fill(200);
-    textMode(CENTER);
     //textSize(20);
     //text(round(normalizedValue()*100)+"%",x+w*.5,maxYZone+h*.7);
     textSize(FontAdjuster.getSize(20));

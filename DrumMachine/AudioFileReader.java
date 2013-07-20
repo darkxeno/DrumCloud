@@ -1,4 +1,4 @@
-//package com.codefixia.drumcloud;
+package com.codefixia.drumcloud;
 
 /* Audio file reader API
    Copyright (C) 2005 Free Software Foundation, Inc.

@@ -1,4 +1,4 @@
-/**
+package com.codefixia.drumcloud;/**
  * SelectFile
  * Android library which provides Dialogs for selectInput(), selectFolder() and selectOutput() methods.
  * https://github.com/pif/android-select-file/tree/dlg
@@ -24,7 +24,7 @@
  * @modified    02/20/2013
  * @version     0.0.1 (1)
  */
-package select.files;
+//package selectsrc.files;
 
 import java.io.File;
 
@@ -107,7 +107,12 @@ public class SelectLibrary {
                                    File defaultSelection,
                                    final int mode) {
     if (defaultSelection == null) {
-      defaultSelection = Environment.getExternalStorageDirectory();
+      File drumCloudFolder=new File(Environment.getExternalStorageDirectory().getPath()+"/drumcloud/downloads/");
+      if(drumCloudFolder.exists()){
+    	  defaultSelection=drumCloudFolder;
+      }else{
+    	  defaultSelection=Environment.getExternalStorageDirectory();
+      }
     }
 
     final Intent i = new Intent();
@@ -116,7 +121,8 @@ public class SelectLibrary {
     i.putExtra(SelectDialog.EX_CALLBACK, callbackMethod);
     i.putExtra(SelectDialog.EX_TITLE, prompt);
     if(filterExtension!=null)
-        i.putExtra(SelectDialog.EX_FILTER_EXTENSION, filterExtension);      
+        i.putExtra(SelectDialog.EX_FILTER_EXTENSION, filterExtension);
+    //System.err.println("FILTER:"+filterExtension);      
       
     
     parent.runOnUiThread(new Runnable() {

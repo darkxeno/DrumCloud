@@ -1,3 +1,4 @@
+//package com.codefixia.drumcloud;
 /*
  * Copyright (c) 1999, 2007, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -22,10 +23,6 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
-
 
 /**
  * AIFF file format.
@@ -72,7 +69,7 @@ public class AiffFileFormat extends AudioFileFormat {
         this( aff.getType(), aff.getByteLength(), aff.getFormat(), aff.getFrameLength() );
     }
 
-    AiffFileFormat(Type type, int byteLength, AudioFormat format, int frameLength) {
+    AiffFileFormat(Type type, int byteLength, AudioFormatJava format, int frameLength) {
         super(type, byteLength, format, frameLength);
     }
 

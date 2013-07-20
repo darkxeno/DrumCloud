@@ -1,3 +1,4 @@
+//package com.codefixia.drumcloud;
 /*
  * Copyright 1999-2007 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -30,12 +31,6 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.net.URL;
-
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.sound.sampled.spi.AudioFileReader;
-
 
 
 /**

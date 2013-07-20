@@ -10,7 +10,7 @@
     <application
         android:debuggable="true"
         android:icon="@drawable/icon"
-        android:label="DrumMachineAndroid" >
+        android:label="DrumCloud" >
         <activity
             android:name=".DrumCloud"
             android:screenOrientation="portrait" >

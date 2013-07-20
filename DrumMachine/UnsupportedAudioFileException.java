@@ -1,4 +1,4 @@
-//package com.codefixia.drumcloud;
+package com.codefixia.drumcloud;
 
 /* 
    Copyright (C) 2005 Free Software Foundation, Inc.

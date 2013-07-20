@@ -1,4 +1,4 @@
-public enum PanelMode 
+package com.codefixia.drumcloud;public enum PanelMode 
 {
 FILTER(0),ECHO(1),PITCH(2),SPECTRO(3);
 

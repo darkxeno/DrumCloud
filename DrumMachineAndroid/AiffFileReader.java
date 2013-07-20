@@ -1,4 +1,4 @@
-
+//package com.codefixia.drumcloud;
 /*
     * Copyright (c) 1999, 2007, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -24,30 +24,14 @@
  * questions.
  */
 
-import java.util.Vector;
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.io.EOFException;
-import java.net.URL;
-import java.net.MalformedURLException;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.SequenceInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
  * AIFF file reader and writer.
@@ -67,7 +51,6 @@ public class AiffFileReader extends SunFileReader {
   public static final AudioFileFormat.Type types[] = {
     AudioFileFormat.Type.AIFF
   };
-
 
   /**
    * Constructs a new AiffParser object.
@@ -255,7 +238,7 @@ public class AiffFileReader extends SunFileReader {
     // leaves the input stream at the beginning of the audio data
     int fileRead = 0;
     int dataLength = 0;
-    AudioFormat format = null;
+    AudioFormatJava format = null;
 
     // Read the magic number
     int magic = dis.readInt();
@@ -321,17 +304,17 @@ public class AiffFileReader extends SunFileReader {
 
         // If this is not AIFC then we assume it's
         // a linearly encoded file.
-        AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
+        AudioFormatJava.Encoding encoding = AudioFormatJava.Encoding.PCM_SIGNED;
 
         if (aifc) {
           int enc = dis.readInt(); 
           chunkRead += 4;
           switch (enc) {
           case AiffFileFormat.AIFC_PCM:
-            encoding = AudioFormat.Encoding.PCM_SIGNED;
+            encoding = AudioFormatJava.Encoding.PCM_SIGNED;
             break;
           case AiffFileFormat.AIFC_ULAW:
-            encoding = AudioFormat.Encoding.ULAW;
+            encoding = AudioFormatJava.Encoding.ULAW;
             sampleSizeInBits = 8; // Java Sound convention
             break;
           default:
@@ -343,7 +326,7 @@ public class AiffFileReader extends SunFileReader {
         //if (sampleSizeInBits == 8) {
         //    encoding = AudioFormat.Encoding.PCM_SIGNED;
         //}
-        format =  new AudioFormat(encoding, sampleRate, 
+        format =  new AudioFormatJava(encoding, sampleRate, 
         sampleSizeInBits, channels, 
         frameSize, sampleRate, true);
         break;

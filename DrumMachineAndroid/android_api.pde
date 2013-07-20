@@ -23,9 +23,6 @@ import android.media.*;
 import android.media.audiofx.Visualizer;
 import android.content.res.AssetFileDescriptor;
 import android.hardware.*;
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.sound.sampled.AudioInputStream;
 
 
 public class Maxim {
@@ -260,6 +257,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
 
     short [] myAudioData = null;
     int fileSampleRate = 0;
+    String filename=f.getName();    
     try {
       
       // how long is the file in bytes?
@@ -386,21 +384,21 @@ public class AudioPlayer implements Synth, AudioGenerator {
     }
   }
 
-  public short[] loadAiffFile(File f) {
+public short[] loadAiffFile(File f) {
 
-    AiffFileReader aiffFileReader=new AiffFileReader();    
     short [] myAudioData = null;
+    AiffFileReader aiffFileReader=new AiffFileReader();    
     int sample = 0;      
     String fileName="";
 
     try {
       fileName=f.getName();
-      javax.sound.sampled.AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+      AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
 
       int bitDepth=audioFileFormat.getFormat().getFrameSize();
       byte[] byteBuff=new byte[bitDepth];
       println("Aiff File framesize:"+bitDepth);
-      javax.sound.sampled.AudioFormat af=audioFileFormat.getFormat();
+      AudioFormatJava af=audioFileFormat.getFormat();
       int fileSampleRate=(int)af.getSampleRate();
       int channels=af.getChannels();
       boolean isBigEndian=af.isBigEndian();
@@ -442,7 +440,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
     return myAudioData;
   }
 
-  public short[] justLoadAudioFile (String filename) {
+public short[] justLoadAudioFile (String filename) {
 
     File f = new File(filename);
     
@@ -450,7 +448,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
     AiffFileReader aiffFileReader=new AiffFileReader();
 
     try {
-      javax.sound.sampled.AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
+      AudioFileFormat audioFileFormat=aiffFileReader.getAudioFileFormat(f);
 
       if (audioFileFormat.getType()==AudioFileFormat.Type.AIFC || audioFileFormat.getType()==AudioFileFormat.Type.AIFF) {
         println("Aiff File detected type:"+audioFileFormat.getType());
