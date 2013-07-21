@@ -16,7 +16,7 @@ public class TouchProcessor {
 long  TAP_INTERVAL = 200;
 long  TAP_TIMEOUT  = 200;
 int   DOUBLE_TAP_DIST_THRESHOLD = 30;
-int   FLICK_VELOCITY_THRESHOLD = 20;
+int   FLICK_VELOCITY_THRESHOLD = 50;
 float MAX_MULTI_DRAG_DISTANCE = 100; // from the centroid
 
 // A list of currently active touch points 
@@ -132,7 +132,7 @@ void updateCentroid() {
 }
 
 //-------------------------------------------------------------------------------------
-synchronized void analyse() {
+public synchronized void analyse() {
  handleTaps();
  // simple event priority rule: do not try to rotate or pinch while dragging
  // this gets rid of a lot of jittery events 
@@ -149,7 +149,7 @@ synchronized void analyse() {
 
 //-------------------------------------------------------------------------------------
 // send events to the sketch
-void sendEvents() {
+public void sendEvents() {
  for (int i=0; i < events.size(); i++) {
    TouchEvent e = (TouchEvent)events.get(i);
    if      ( e instanceof TapEvent ) drumCloud.onTap( (TapEvent)e );

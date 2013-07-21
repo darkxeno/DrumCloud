@@ -1,18 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.codefixia.drumcloud"
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="17"/>
-	<uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="13" />
+
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:debuggable="true"
         android:icon="@drawable/icon"
         android:label="DrumCloud" >
         <activity
-            android:name=".DrumCloud"
+            android:name="com.codefixia.drumcloud.DrumCloud"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,10 +29,18 @@
             android:name="com.codefixia.googledrive.DummyActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-        </activity>        
-        <service android:name="com.codefixia.googledrive.GoogleDriveService">
-            
-        </service>        
+        </activity>
+
+        <service android:name="com.codefixia.googledrive.GoogleDriveService" >
+        </service>
+
+        <activity
+            android:name="com.codefixia.donate.DonateActivity"
+            android:label="@string/title_activity_donate" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.codefixia.drumcloud.DrumCloud" />
+        </activity>
     </application>
 
 </manifest>

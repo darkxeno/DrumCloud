@@ -1,4 +1,5 @@
-package com.codefixia.drumcloud;/**
+package com.codefixia.drumcloud;//package com.codefixia.drumcloud;
+/**
  * SelectFile
  * Android library which provides Dialogs for selectInput(), selectFolder() and selectOutput() methods.
  * https://github.com/pif/android-select-file/tree/dlg
@@ -52,10 +53,10 @@ public final class SelectConstants {
   public static final String fs_cant_write_parent_dir = "[%1$s] can\'t be written into selected folder.";
   public static final String fs_do_nothing = "";
   public static final String fs_unacceptable = "[%1$s] can\'t be selected.";
-  public static final String fs_warning = "Oops…";
-  public static final String fs_title_activity_test = "ATestActivity";
+  public static final String fs_warning = "Oops�";
+  public static final String fs_title_activity_test = "DrumCloud";
   public static final String fs_select_current_folder = "Select Current Folder";
-  public static final String fs_enter_file_name = "Enter file name here…";
+  public static final String fs_enter_file_name = "Enter file name here�";
   public static final String fs_save_file = "Create";
   public static final String fs_save_file_overwrite = "Overwrite existing file [%1$s]?";  
   public static final String fs_up_item = "Up..";
@@ -68,9 +69,11 @@ public final class SelectConstants {
   public static final int RID_SAVE_BTN = 60;
   public static final int RID_ITEMS_LV = android.R.id.list;
 
-  static final int COLOR_FILE = 0xFF99CC00;
-  static final int COLOR_FOLDER = 0xFFFFBB33;
-  static final int COLOR_UP = 0xFF33B5E5;
+    
+  static final int COLOR_FILE = 0xff22A300; 
+  static final int COLOR_FOLDER = 0xffC18900;
+  static final int COLOR_UP = 0xffB90016;
+  static final int COLOR_FILE_PACK = 0xff380883;
   
   /**
    * <pre>

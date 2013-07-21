@@ -19,10 +19,14 @@ import java.net.URL;
 import android.app.Activity; 
 import android.os.Bundle; 
 import android.app.ProgressDialog;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.Toast;
 import android.media.*; 
 import android.media.audiofx.Visualizer; 
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor; 
 import android.hardware.*; 
 
@@ -40,6 +44,7 @@ import org.json.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.codefixia.donate.DonateActivity;
 import com.codefixia.googledrive.DownloadFile;
 import com.codefixia.multitouch.DragEvent;
 import com.codefixia.multitouch.FlickEvent;
@@ -73,7 +78,8 @@ float firstKick=0;
 boolean snapToGrid=true;
 boolean liveMode=false;
 boolean sequencerMode=false;
-Sequencer sequencer=new Sequencer();
+boolean pressureEnabled=true;
+Sequencer sequencer=new Sequencer(this);
 final int totalSamples=16;
 final int totalGrids=(int)gridsByBeat*(int)beatsPerTempo;
 AudioPlayer[] playerKick=new AudioPlayer[4];
@@ -393,7 +399,7 @@ public void proccessTempoVars() {
     playedGrids[currentGrid]=true;
     for (int i=0;i<totalSamples;i++) {
       if (samplesPerBeat[i][currentGrid]) {
-        playSoundType(i);
+        playSoundType(i,1);
         float dif=((millis()%tempoMS)-(currentGrid*gridMS));
         if (dif>maxDif)maxDif=dif;
         //println("Estimated play offset:"+(currentGrid*gridMS)+" real play offset:"+(millis()%tempoMS)+" dif:"+dif+" maxDif:"+maxDif);  
@@ -740,6 +746,8 @@ void animateTransition(float animTime, float startValue, float endValue) {
 
 public void draw()
 {  
+	//touch.analyse();
+	//touch.sendEvents();	
   clear();
   background(127, 127, 127);
 
@@ -1120,14 +1128,18 @@ public void loadSoundOnPlayer(int soundType,File selection) {
 	}
 }
 
-
-public void mousePressed()
+/*
+public void mousePressed(){
+	mousePressed(mouseX,mouseY,1.0);
+}
+*/
+public void mousePressed(int mouseX,int mouseY,float pressure)
 {
   if (!sequencerMode) {
     for (int i=0;i<kick.length;i++) {
       if (kick[i].isClicked(mouseX, mouseY)) {
         if (mainMode==normalMode)
-          addSoundTypeToList(kick.length*i);
+          addSoundTypeToList(kick.length*i,pressure);
         else if (mainMode==loadMode)
           loadSoundType(kick.length*i, playerKick[i]);
         else if (mainMode==deleteMode)
@@ -1135,7 +1147,7 @@ public void mousePressed()
       }
       else if (bass[i].isClicked(mouseX, mouseY)) {
         if (mainMode==normalMode)
-          addSoundTypeToList(1+bass.length*i);
+          addSoundTypeToList(1+bass.length*i,pressure);
         else if (mainMode==loadMode)
           loadSoundType(1+bass.length*i, playerBass[i]);
         else if (mainMode==deleteMode)
@@ -1143,7 +1155,7 @@ public void mousePressed()
       }
       else if (snare[i].isClicked(mouseX, mouseY)) {
         if (mainMode==normalMode)
-          addSoundTypeToList(2+snare.length*i);
+          addSoundTypeToList(2+snare.length*i,pressure);
         else if (mainMode==loadMode)
           loadSoundType(2+snare.length*i, playerSnare[i]);
         else if (mainMode==deleteMode)
@@ -1151,7 +1163,7 @@ public void mousePressed()
       }
       else if (hithat[i].isClicked(mouseX, mouseY)) {
         if (mainMode==normalMode)
-          addSoundTypeToList(3+hithat.length*i);
+          addSoundTypeToList(3+hithat.length*i,pressure);
         else if (mainMode==loadMode)
           loadSoundType(3+snare.length*i, playerHitHat[i]);
         else if (mainMode==deleteMode)
@@ -1197,8 +1209,10 @@ public AudioPlayer getPlayerBySoundType(int soundType) {
   return null;
 }
 
-public void playSoundType(int soundType) {
+public void playSoundType(int soundType,float pressure) {
   AudioPlayer ap=getPlayerBySoundType(soundType);
+  println("Using press:"+pressure);
+  ap.volume(pressure);  
   ap.cue(0);
   ap.play();
 }
@@ -1233,8 +1247,12 @@ public int getColorSoundType(int sountType) {
   }
 }
 
-public void addSoundTypeToList(int soundType) {
-  playSoundType(soundType);
+public void addSoundTypeToList(int soundType){
+	addSoundTypeToList(soundType,1);
+}
+
+public void addSoundTypeToList(int soundType,float pressure) {
+  playSoundType(soundType,pressure);
   if (!liveMode) {
     samplesPerBeat[soundType][currentGrid]=!samplesPerBeat[soundType][currentGrid];
     println("changed sound:"+soundType+" at position:"+currentGrid);
@@ -1978,7 +1996,6 @@ class HorizontalSlider extends Draggable{
     else fill(100,180);
     rect(x,y+outStroke,w,h-2*outStroke);
     fill(200);
-    textMode(CENTER);
     //textSize(20);
     //text(round(normalizedValue()*100)+"%",x+w*.5,maxYZone+h*.7);
     textSize(FontAdjuster.getSize(20));
@@ -2058,230 +2075,6 @@ public void controllerChange(int channel, int number, int value) {
 }
 
 }
-public class Sequencer {
-
-  ToggleButton[][] tracks;
-
-  float buttonWidth=0;
-  float buttonHeight=0;
-
-  float barOffset=0;
-
-  float xOffset=0, yOffset=0;
-
-  float totalHeight;
-  float totalWidth;
-  float visibleHeight;
-  float visibleWidth;
-  
-  int lastClickX=5000;
-  int lastClickY=5000;
-  int displacementX=0;
-  int displacementY=0;
-
-  float verticalScrollBarOffset=0;
-  float horizontalScrollBarOffset=0;
-  float scrollBarYSize;
-  float scrollBarXSize;
-  float scrollBarWidth;
-  
-  LinkedList<Integer> mouseMovesX=new LinkedList<Integer>();
-  LinkedList<Integer> mouseMovesY=new LinkedList<Integer>();
-  float maxAccel=40;
-  float velocityX=0;
-  float velocityY=0;
-  float friction=1;
-  boolean released=false;
-
-  public void setup() {
-    buttonWidth=(float)(width/totalSamples*1.5);
-    buttonHeight=buttonWidth;//height/(totalGrids+1)*2;
-    tracks=new ToggleButton[totalSamples][totalGrids+1];
-    totalHeight=(totalGrids+1)*buttonHeight;
-    totalWidth=(totalSamples)*buttonWidth;
-    visibleHeight=height;
-    visibleWidth=width;
-    scrollBarYSize=(visibleHeight/totalHeight)*visibleHeight;
-    scrollBarXSize=(visibleWidth/totalWidth)*visibleWidth;
-    scrollBarWidth=width*0.025f;
-
-    for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=0;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j]=new ToggleButton(width-((i+1)*buttonWidth), j*buttonHeight, buttonWidth, buttonHeight);
-        if (j==0) {
-          tracks[i][j].text=(i%4)+1+"";
-        }
-        if (((j-1)/8)%2==0) {
-          switch((int)i/4) {
-          case 0:
-            tracks[i][j].fillColor=redColor;
-            break;
-          case 1:
-            tracks[i][j].fillColor=orangeColor;
-            break;
-          case 2:
-            tracks[i][j].fillColor=blueColor;
-            break;
-          case 3:
-            tracks[i][j].fillColor=greenColor;
-            break;
-          }
-        }
-        else {
-          switch((int)i/4) {
-          case 0:
-            tracks[i][j].fillColor=color(red(redColor)*0.9f,green(redColor)*0.9f,blue(redColor)*0.9f);
-            break;
-          case 1:
-            tracks[i][j].fillColor=color(red(orangeColor)*0.9f,green(orangeColor)*0.9f,blue(orangeColor)*0.9f);
-            break;
-          case 2:
-            tracks[i][j].fillColor=color(red(blueColor)*0.9f,green(blueColor)*0.9f,blue(blueColor)*0.9f);
-            break;
-          case 3:
-            tracks[i][j].fillColor=color(red(greenColor)*0.9f,green(greenColor)*0.9f,blue(greenColor)*0.9f);
-            break;
-          }          
-        }
-      }
-    }
-  }
-
-  public void drawScrollBars() {
-    fill(127, 127);
-    noStroke();
-    //println("YBar posY:"+yOffset+" restY"+(totalHeight-visibleHeight)+" sizeH:"+(visibleHeight/totalHeight)*visibleHeight);
-    float scrollYPos=map(yOffset, 0, totalHeight-visibleHeight, 0, visibleHeight-scrollBarYSize);
-    rect(width*0.005f, scrollYPos, scrollBarWidth, scrollBarYSize);
-
-    //println("XBar posX:"+xOffset+" restX"+(totalWidth-visibleWidth)+" sizeH:"+(totalWidth/visibleWidth)*visibleWidth);
-    float scrollXPos=map(xOffset, 0, totalWidth-visibleWidth, 0, visibleWidth-scrollBarXSize);  
-    rect(width-scrollBarXSize-scrollXPos, height-(width*0.03f), scrollBarXSize, scrollBarWidth);
-  }
-
-  public void drawPlayBar() {
-    fill(yellowColor);
-    barOffset=map((millis()-totalPaused)%tempoMS, 0.0f, tempoMS, buttonHeight, totalHeight-buttonHeight);
-    //println("barOffset:"+barOffset+" val:"+(millis()-totalPaused)%tempoMS);
-    rect(visibleWidth-totalWidth, barOffset, totalWidth, buttonHeight);
-  }
-  
-  public void proccessDrawAccel(){
-	  if(velocityY!=0 && released){
-		  yOffset+=velocityY;		  
-		  yOffset=constrain(yOffset,0,totalHeight-visibleHeight);
-		  if(velocityY>friction*2)
-			  velocityY-=friction;
-		  else if(velocityY<-friction*2)
-			  velocityY+=friction;
-		  else velocityY=0;
-	  }
-	  if(velocityX!=0 && released){
-		  xOffset-=velocityX;		  
-		  xOffset=constrain(xOffset,0,totalWidth-visibleWidth);
-		  if(velocityX>friction*2)
-			  velocityX-=friction;
-		  else if(velocityX<-friction*2)
-			  velocityX+=friction;
-		  else velocityX=0;
-	  }	  
-  }
-
-  public void draw() {
-	proccessDrawAccel();	  
-    pushMatrix();
-    translate(xOffset, -yOffset);
-    for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=0;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].drawState();
-      }
-    }
-    drawPlayBar();  
-    popMatrix();
-    drawScrollBars();
-  }  
-
-  public void mousePressed() {
-	lastClickX=mouseX;
-	lastClickY=mouseY;
-	released=false;
-    println("Press on sequencer mx:"+mouseX+" my:"+mouseY);
-    /*for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=1;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].isClicked(mouseX-(int)xOffset, mouseY+(int)yOffset);
-      }
-    }*/
-  }
-
-  public void mouseReleased() {
-    println("Release on sequencer mx:"+mouseX+" my:"+mouseY);
-    for (int i=0;i<samplesPerBeat.length;i++) {
-    	for (int j=1;j<samplesPerBeat[i].length+1;j++) {
-    		if(displacementX<buttonWidth*0.5 && displacementY<buttonHeight*0.5){//dist(mouseX,mouseY,lastClickX,lastClickY)<buttonWidth){
-    			if (tracks[i][j].isReleased(mouseX-(int)xOffset, mouseY+(int)yOffset)) {
-    				int soundGroup=(i/4)+((i%4)*4);
-    				//println("From:"+i+" to:"+soundGroup);
-    				samplesPerBeat[soundGroup][j-1]=!samplesPerBeat[soundGroup][j-1];
-
-    			}
-    		}else{
-    			tracks[i][j].cancelClick(mouseX-(int)xOffset, mouseY+(int)yOffset);
-    		}
-    	}
-    }
-    displacementX=0;
-    displacementY=0;
-    released=true;
-  }
-  
-  public void proccessDragAccel(int pmouseX,int pmouseY,int mouseX,int mouseY){
-	  
-	    int distX=pmouseX-mouseX;
-	    int distY=pmouseY-mouseY;    
-	    if(mouseMovesY.size()>=3){
-	    	mouseMovesY.remove();
-	    	mouseMovesX.remove();
-	    }
-		mouseMovesY.add(distY);
-		mouseMovesX.add(distX);
-		int size=mouseMovesY.size();
-		float avgY = 0,avgX = 0;
-		for(int i=0;i<size;i++){
-			avgY+=(float)mouseMovesY.get(i);
-			avgX+=(float)mouseMovesX.get(i);
-		}
-		avgY/=size;
-		avgX/=size;
-	    displacementX+=abs(distX);
-	    displacementY+=abs(distY);dist(1,2,3,4);
-	    //println("DisX:"+displacementX+" DisY:"+displacementY);  
-	    velocityY=map(constrain(avgY,-25,25),-25,25,-maxAccel,maxAccel);
-	    velocityX=map(constrain(avgX,-25,25),-25,25,-maxAccel,maxAccel);
-	    xOffset+=mouseX-pmouseX;
-	    xOffset=constrain(xOffset, 0, totalWidth-visibleWidth);
-	    yOffset+=pmouseY-mouseY;
-	    yOffset=constrain(yOffset, 0, totalHeight-visibleHeight);	  
-	  
-  }
-
-  public void mouseDragged() {
-    //println("Drag on sequencer mx:"+mouseX+" my:"+mouseY);
-
-	  proccessDragAccel(pmouseX,pmouseY,mouseX,mouseY);
-    
-    for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=1;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].isDragging(mouseX-(int)xOffset, mouseY+(int)yOffset);
-      }
-    }
-    released=false;
-  }
-
-  public void mouseMoved() {
-    println("Moved on sequencer px:"+pmouseX+" py:"+pmouseY+" mx:"+mouseX+" my:"+mouseY);
-  }
-}
-
 public class ToggleButton extends Clickable{
   
   String text="";
@@ -2352,6 +2145,7 @@ public class ToggleButton extends Clickable{
       clicked = true;
       offsetX = x-mx;
       offsetY = y-my;
+      ON=!ON;
     }
     else {
       clicked =false;
@@ -2445,7 +2239,6 @@ class VerticalSlider extends Draggable{
     else fill(100,180);
     rect(x,y,w,h);
     fill(200);
-    textMode(CENTER);
     //textSize(20);
     //text(round(normalizedValue()*100)+"%",x+w*.5,maxYZone+h*.7);
     textSize(FontAdjuster.getSize(20));
@@ -4781,7 +4574,7 @@ public class FFT {
 
   //public int sketchWidth() { return 768; }
   //public int sketchHeight() { return 1280; }
-  public String sketchRenderer() { return P3D; }
+  //public String sketchRenderer() { return P3D; }
   
   
   public TouchProcessor touch=new TouchProcessor(this);
@@ -4797,17 +4590,31 @@ public class FFT {
 	  float y = event.getY(index);
 	  int id  = event.getPointerId(index);
 	  float pressure = event.getPressure(index);
-	  println("Pressure:"+pressure);
+	  //println("Pressure:"+pressure);
 
 	  // pass the events to the TouchProcessor
 	  if ( code == MotionEvent.ACTION_DOWN || code == MotionEvent.ACTION_POINTER_DOWN) {
-	    touch.pointDown(x, y, id, pressure);
+		 int numPointers = event.getPointerCount();
+		 println("Detected "+numPointers+" pointers.");
+		 onTouchDown(x, y, pressure);
+		 touch.pointDown(x, y, id, pressure);
+		 /*
+		 for (int i=0; i < numPointers; i++) {
+		      id = event.getPointerId(i);
+		      x = event.getX(i);
+		      y = event.getY(i);
+		      pressure = event.getPressure(i);		      
+		      onTouchDown(x, y, pressure);
+		      if(i==0)
+		  	    touch.pointDown(x, y, id, pressure);
+		 }	*/	  				  
 	  }
 	  else if (code == MotionEvent.ACTION_UP || code == MotionEvent.ACTION_POINTER_UP) {
 	    touch.pointUp(event.getPointerId(index));
 	  }
 	  else if ( code == MotionEvent.ACTION_MOVE) {
 	    int numPointers = event.getPointerCount();
+	    //println("Detected "+numPointers+" pointers.");
 	    for (int i=0; i < numPointers; i++) {
 	      id = event.getPointerId(i);
 	      x = event.getX(i);
@@ -4816,27 +4623,99 @@ public class FFT {
 	    }
 	  } 
 	  
+		//DrumCloud.activity.runOnUiThread(new Runnable() {
+			//@Override
+			//public void run() {
+				touch.analyse();
+				touch.sendEvents();
+			//}
+		//}); 	  	  
+	  
 	  return super.surfaceTouchEvent(event);
-	}  
+	}
+	
+	
+	LinkedList<Float> tapPressures=new LinkedList<Float>();
+	  
+	
+  public void onTouchDown(float x,float y,float pressure){
+	  if(!sequencerMode){
+		  if(pressureEnabled){
+			  if(tapPressures.size()>=10){
+				  int pos=(int)random(0, tapPressures.size());
+				  println("removing:"+pos);
+				  tapPressures.remove(pos);
+			  }
+			  tapPressures.add(pressure);
+			  Collections.sort(tapPressures);
+		  }else{
+			  pressure=1;
+		  }
+		  println("original pressure:"+pressure+" min:"+tapPressures.getFirst()+" max:"+tapPressures.getLast());
+		  pressure=map(pressure,tapPressures.getFirst(),tapPressures.getLast(),0.25f,1);
+		  println("end pressure:"+pressure);
+		  mousePressed((int)x, (int)y, pressure);
+	  }
+	  else{
+		//sequencer.mouseReleased(x,y);
+	  }
+  }	
   
   public void onTap(TapEvent e){
-	  
+	  //println("Detected tap on:("+e.getX()+","+e.getY()+")");
+	  //sequencer.mousePressed(e.getX(),e.getY());
+	  //sequencer.mouseReleased(e.getX(),e.getY());
   }
   
   public void onFlick(FlickEvent e){
-	  
+	  println("Detected flick velocity:("+e.getVelocity().x+","+e.getVelocity().y+")");
   }  
   
   public void onDrag(DragEvent e){
-	  
+	  //println("Detected drag dis:("+e.getDx()+","+e.getDy()+")");
   }
   
   public void onPinch(PinchEvent e){
-	  
+	  //println("Detected pinch amount:"+e.getAmount());
+	  if(sequencerMode)
+		  sequencer.changeZoom((int) e.getCenterX(),(int)e.getCenterY(),e.getAmount());
   }
   
   public void onRotate(RotateEvent e){
-	  
-  }  
+	  //println("Detected rotation angle:"+e.getAngle());
+  }
+  
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+      super.onCreateOptionsMenu(menu);
+      MenuInflater inflater = getMenuInflater();
+      inflater.inflate(R.menu.menu, menu);
+      return true;
+   }
+  
+   @Override public boolean onOptionsItemSelected(MenuItem item) {
+            switch (item.getItemId()) {
+            case R.id.toggleMode:
+            	   if(!sequencerMode){
+            		   item.setTitle("Live Mode");
+            		   sequencer.updateTracksState();
+            	   }else{
+            		   item.setTitle("Sequencer Mode");
+            		   //sequencer.updateSamplePerBeatState();
+            	   }
+                   sequencerMode=!sequencerMode;
+                   break;
+            case R.id.deleteAll:
+                	deleteAllSounds();
+                break;
+            case R.id.donate:
+                Intent donate = new Intent(this, DonateActivity.class);
+                startActivity(donate);
+                break;
+            case R.id.about:
+                
+                break;                
+            }
+            return true;
+   }  
   
 }
