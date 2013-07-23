@@ -1,4 +1,18 @@
+
+import java.util.LinkedList;
+
+import processing.core.PApplet;
+import processing.core.PVector;
+
+//import com.codefixia.drumcloud.DrumCloud.ToggleButton;
+
 public class Sequencer {
+
+  private final DrumMachine drumCloud;
+
+  Sequencer(DrumMachine drumCloud) {
+    this.drumCloud = drumCloud;
+  }
 
   ToggleButton[][] tracks;
 
@@ -10,10 +24,12 @@ public class Sequencer {
   float xOffset=0, yOffset=0;
 
   float totalHeight;
+  float maxTotalHeight;
   float totalWidth;
+  float maxTotalWidth;
   float visibleHeight;
   float visibleWidth;
-  
+
   int lastClickX=5000;
   int lastClickY=5000;
   int displacementX=0;
@@ -24,7 +40,12 @@ public class Sequencer {
   float scrollBarYSize;
   float scrollBarXSize;
   float scrollBarWidth;
-  
+  float playBarWidth;
+
+  int miniMapOriginX;
+  int miniMapOriginY;
+  float miniMapScale=0.1f;
+
   LinkedList<Integer> mouseMovesX=new LinkedList<Integer>();
   LinkedList<Integer> mouseMovesY=new LinkedList<Integer>();
   float maxAccel=40;
@@ -33,139 +54,159 @@ public class Sequencer {
   float friction=1;
   boolean released=false;
 
+  private float zoom=1.0f;
+
   public void setup() {
-    buttonWidth=(float)(width/totalSamples*1.5);
-    buttonHeight=buttonWidth;//height/(totalGrids+1)*2;
-    tracks=new ToggleButton[totalSamples][totalGrids+1];
-    totalHeight=(totalGrids+1)*buttonHeight;
-    totalWidth=(totalSamples)*buttonWidth;
-    visibleHeight=height;
-    visibleWidth=width;
+    buttonWidth=(float)(drumCloud.width/drumCloud.totalSamples);
+    buttonHeight=buttonWidth;
+    tracks=new ToggleButton[drumCloud.totalSamples][drumCloud.totalGrids+1];
+    totalHeight=(drumCloud.totalGrids+1)*buttonHeight;
+    maxTotalHeight=totalHeight;
+    totalWidth=(drumCloud.totalSamples)*buttonWidth;
+    maxTotalWidth=totalWidth;
+    playBarWidth=(drumCloud.totalSamples)*buttonWidth;
+    visibleHeight=drumCloud.height;
+    visibleWidth=drumCloud.width;
     scrollBarYSize=(visibleHeight/totalHeight)*visibleHeight;
     scrollBarXSize=(visibleWidth/totalWidth)*visibleWidth;
-    scrollBarWidth=width*0.025f;
+    scrollBarWidth=drumCloud.width*0.02f;
+    miniMapOriginX=(int) (drumCloud.width*0.05f);
+    miniMapOriginY=(int) (drumCloud.height*0.823f);  
 
-    for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=0;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j]=new ToggleButton(width-((i+1)*buttonWidth), j*buttonHeight, buttonWidth, buttonHeight);
+    for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
+      for (int j=0;j<drumCloud.samplesPerBeat[i].length+1;j++) {
+        tracks[i][j]=drumCloud.new ToggleButton(drumCloud.width-((i+1)*buttonWidth), j*buttonHeight, buttonWidth, buttonHeight);
         if (j==0) {
           tracks[i][j].text=(i%4)+1+"";
         }
         if (((j-1)/8)%2==0) {
           switch((int)i/4) {
           case 0:
-            tracks[i][j].fillColor=redColor;
+            tracks[i][j].fillColor=drumCloud.redColor;
             break;
           case 1:
-            tracks[i][j].fillColor=orangeColor;
+            tracks[i][j].fillColor=drumCloud.orangeColor;
             break;
           case 2:
-            tracks[i][j].fillColor=blueColor;
+            tracks[i][j].fillColor=drumCloud.blueColor;
             break;
           case 3:
-            tracks[i][j].fillColor=greenColor;
+            tracks[i][j].fillColor=drumCloud.greenColor;
             break;
           }
         }
         else {
           switch((int)i/4) {
           case 0:
-            tracks[i][j].fillColor=color(red(redColor)*0.9f,green(redColor)*0.9f,blue(redColor)*0.9f);
+            tracks[i][j].fillColor=//drumCloud.
+            color(drumCloud.red(drumCloud.redColor)*0.9f, drumCloud.green(drumCloud.redColor)*0.9f, drumCloud.blue(drumCloud.redColor)*0.9f);
             break;
           case 1:
-            tracks[i][j].fillColor=color(red(orangeColor)*0.9f,green(orangeColor)*0.9f,blue(orangeColor)*0.9f);
+            tracks[i][j].fillColor=//drumCloud.
+            color(drumCloud.red(drumCloud.orangeColor)*0.9f, drumCloud.green(drumCloud.orangeColor)*0.9f, drumCloud.blue(drumCloud.orangeColor)*0.9f);
             break;
           case 2:
-            tracks[i][j].fillColor=color(red(blueColor)*0.9f,green(blueColor)*0.9f,blue(blueColor)*0.9f);
+            tracks[i][j].fillColor=//drumCloud.
+            color(drumCloud.red(drumCloud.blueColor)*0.9f, drumCloud.green(drumCloud.blueColor)*0.9f, drumCloud.blue(drumCloud.blueColor)*0.9f);
             break;
           case 3:
-            tracks[i][j].fillColor=color(red(greenColor)*0.9f,green(greenColor)*0.9f,blue(greenColor)*0.9f);
+            tracks[i][j].fillColor=//drumCloud.
+            color(drumCloud.red(drumCloud.greenColor)*0.9f, drumCloud.green(drumCloud.greenColor)*0.9f, drumCloud.blue(drumCloud.greenColor)*0.9f);
             break;
-          }          
+          }
         }
       }
     }
   }
 
   public void drawScrollBars() {
-    fill(127, 127);
-    noStroke();
+    drumCloud.fill(127, 127);
+    drumCloud.noStroke();
     //println("YBar posY:"+yOffset+" restY"+(totalHeight-visibleHeight)+" sizeH:"+(visibleHeight/totalHeight)*visibleHeight);
-    float scrollYPos=map(yOffset, 0, totalHeight-visibleHeight, 0, visibleHeight-scrollBarYSize);
-    rect(width*0.005f, scrollYPos, scrollBarWidth, scrollBarYSize);
+    float scrollYPos=PApplet.map(yOffset, 0, (totalHeight-visibleHeight)/this.zoom, 0, visibleHeight-scrollBarYSize);
+    drumCloud.rect(drumCloud.width*0.005f, scrollYPos, scrollBarWidth, scrollBarYSize);
 
     //println("XBar posX:"+xOffset+" restX"+(totalWidth-visibleWidth)+" sizeH:"+(totalWidth/visibleWidth)*visibleWidth);
-    float scrollXPos=map(xOffset, 0, totalWidth-visibleWidth, 0, visibleWidth-scrollBarXSize);  
-    rect(width-scrollBarXSize-scrollXPos, height-(width*0.03f), scrollBarXSize, scrollBarWidth);
+    float scrollXPos=PApplet.map(xOffset, 0, (totalWidth-visibleWidth)/this.zoom, 0, visibleWidth-scrollBarXSize);  
+    drumCloud.rect(scrollXPos, drumCloud.height-(drumCloud.width*0.025f), scrollBarXSize, scrollBarWidth);
   }
 
   public void drawPlayBar() {
-    fill(yellowColor);
-    barOffset=map((millis()-totalPaused)%tempoMS, 0.0f, tempoMS, buttonHeight, totalHeight-buttonHeight);
+    drumCloud.fill(drumCloud.yellowColor);
+    barOffset=PApplet.map((drumCloud.millis()-drumCloud.totalPaused)%drumCloud.tempoMS, 0.0f, drumCloud.tempoMS, buttonHeight, maxTotalHeight);
     //println("barOffset:"+barOffset+" val:"+(millis()-totalPaused)%tempoMS);
-    rect(visibleWidth-totalWidth, barOffset, totalWidth, buttonHeight);
-  }
-  
-  public void proccessDrawAccel(){
-    if(velocityY!=0 && released){
-      yOffset+=velocityY;      
-      yOffset=constrain(yOffset,0,totalHeight-visibleHeight);
-      if(velocityY>friction*2)
-        velocityY-=friction;
-      else if(velocityY<-friction*2)
-        velocityY+=friction;
-      else velocityY=0;
-    }
-    if(velocityX!=0 && released){
-      xOffset-=velocityX;      
-      xOffset=constrain(xOffset,0,totalWidth-visibleWidth);
-      if(velocityX>friction*2)
-        velocityX-=friction;
-      else if(velocityX<-friction*2)
-        velocityX+=friction;
-      else velocityX=0;
-    }    
+    drumCloud.rect(visibleWidth-maxTotalWidth, barOffset, maxTotalWidth, buttonHeight);
   }
 
-  public void draw() {
-  proccessDrawAccel();    
-    pushMatrix();
-    translate(xOffset, -yOffset);
-    for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=0;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].drawState();
+  public void updateTracksState() {
+    for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
+      for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
+        tracks[i][j].ON=drumCloud.samplesPerBeat[i][j-1];
       }
     }
+  }  
+
+  public void draw() {
+    processDrawAccel();	  
+    drumCloud.pushMatrix();
+    drumCloud.scale(this.zoom, this.zoom);    
+    drumCloud.translate(-xOffset, -yOffset);
+    //drumCloud.translate(xScaleFix, 0);
+    for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
+      for (int j=0;j<drumCloud.samplesPerBeat[i].length+1;j++) {
+        tracks[i][j].drawState();
+      }
+    }    
     drawPlayBar();  
-    popMatrix();
+    drumCloud.popMatrix();
     drawScrollBars();
+    drawMiniMap();
+    //debug();
+  }
+
+  public void mousePressed(float x, float y) {
+    mousePressed((int)x, (int)y);
   }  
 
   public void mousePressed() {
-  lastClickX=mouseX;
-  lastClickY=mouseY;
-  released=false;
-    println("Press on sequencer mx:"+mouseX+" my:"+mouseY);
-    /*for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=1;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].isClicked(mouseX-(int)xOffset, mouseY+(int)yOffset);
-      }
-    }*/
+    mousePressed(drumCloud.mouseX, drumCloud.mouseY);
   }
 
-  public void mouseReleased() {
-    println("Release on sequencer mx:"+mouseX+" my:"+mouseY);
-    for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=1;j<samplesPerBeat[i].length+1;j++) {
-        if(displacementX<buttonWidth*0.5 && displacementY<buttonHeight*0.5){//dist(mouseX,mouseY,lastClickX,lastClickY)<buttonWidth){
-          if (tracks[i][j].isReleased(mouseX-(int)xOffset, mouseY+(int)yOffset)) {
+  public void mousePressed(int mouseX, int mouseY) {
+    lastClickX=mouseX;
+    lastClickY=mouseY;
+    released=false;
+    PApplet.println("Press on sequencer mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
+  }
+
+  public void mouseReleased(float x, float y) {
+    displacementX=0;
+    displacementY=0;
+    mouseReleased((int)x, (int)y);
+  }  
+
+  public void mouseReleased() {	  
+    mouseReleased(drumCloud.mouseX, drumCloud.mouseY);
+  }
+
+  public PVector mouseToScreen(int x, int y) {
+    return new PVector((x/this.zoom)+xOffset, (y/this.zoom)+yOffset);
+  }
+
+  public void mouseReleased(int mouseX, int mouseY) {
+    PApplet.println("Release on sequencer mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
+    PVector screenCoords=mouseToScreen(mouseX, mouseY);
+    for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
+      for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
+        if (displacementX<buttonWidth*0.5 && displacementY<buttonHeight*0.5) {//dist(mouseX,mouseY,lastClickX,lastClickY)<buttonWidth){
+          if (tracks[i][j].isReleased((int)screenCoords.x, (int)screenCoords.y)) {
             int soundGroup=(i/4)+((i%4)*4);
             //println("From:"+i+" to:"+soundGroup);
-            samplesPerBeat[soundGroup][j-1]=!samplesPerBeat[soundGroup][j-1];
-
+            drumCloud.samplesPerBeat[soundGroup][j-1]=!drumCloud.samplesPerBeat[soundGroup][j-1];
           }
-        }else{
-          tracks[i][j].cancelClick(mouseX-(int)xOffset, mouseY+(int)yOffset);
+        }
+        else {
+          tracks[i][j].cancelClick((int)screenCoords.x, (int)screenCoords.y);
         }
       }
     }
@@ -173,51 +214,122 @@ public class Sequencer {
     displacementY=0;
     released=true;
   }
-  
-  public void proccessDragAccel(int pmouseX,int pmouseY,int mouseX,int mouseY){
-    
-      int distX=pmouseX-mouseX;
-      int distY=pmouseY-mouseY;    
-      if(mouseMovesY.size()>=3){
-        mouseMovesY.remove();
-        mouseMovesX.remove();
+
+
+  public void debug() {
+    drumCloud.text("OFFSET("+xOffset+","+yOffset+")", drumCloud.width*0.2f, drumCloud.height*0.1f);
+    drumCloud.text("TOTAL("+totalWidth+","+totalHeight+")", drumCloud.width*0.25f, drumCloud.height*0.2f);
+    drumCloud.text("VISIBLE("+visibleWidth+","+visibleHeight+")", drumCloud.width*0.25f, drumCloud.height*0.3f);
+  }
+
+  public void drawMiniMap() {
+    drumCloud.rect(miniMapOriginX+xOffset*0.1f, miniMapOriginY+yOffset*0.1f, visibleWidth/this.zoom*0.1f, visibleHeight/this.zoom*0.1f);
+    drumCloud.rect(miniMapOriginX, miniMapOriginY, maxTotalWidth*0.1f, maxTotalHeight*0.1f);  
+    for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
+      for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
+        drumCloud.noFill();
+        drumCloud.stroke(150);
+        if (tracks[i][j].ON)
+          drumCloud.rect(miniMapOriginX+tracks[i][j].x*miniMapScale, 
+          miniMapOriginY+tracks[i][j].y*miniMapScale, 
+          tracks[i][j].w*miniMapScale, tracks[i][j].h*miniMapScale);
       }
+    }
+  }  
+
+
+  public void processDrawAccel() {
+    if (velocityY!=0 && released) {
+      yOffset+=velocityY;		  
+      limitOffsetY();
+      if (velocityY>friction*2)
+        velocityY-=friction;
+      else if (velocityY<-friction*2)
+        velocityY+=friction;
+      else velocityY=0;
+    }
+    if (velocityX!=0 && released) {
+      xOffset+=velocityX;
+      limitOffsetX();		  		  
+      if (velocityX>friction*2)
+        velocityX-=friction;
+      else if (velocityX<-friction*2)
+        velocityX+=friction;
+      else velocityX=0;
+    }
+  }  
+  
+  public void limitOffsetX(){
+      xOffset=PApplet.constrain(xOffset, 0, (totalWidth-visibleWidth)/this.zoom);  
+  }
+  
+  public void limitOffsetY(){
+      yOffset=PApplet.constrain(yOffset, 0, (totalHeight-visibleHeight)/this.zoom);  
+  }  
+
+  public void processDragAccel(int pmouseX, int pmouseY, int mouseX, int mouseY) {
+
+    int distX=pmouseX-mouseX;
+    int distY=pmouseY-mouseY;
+
+    xOffset+=distX;
+    limitOffsetX();
+    yOffset+=distY;
+    limitOffsetY();	
+
+    displacementX+=PApplet.abs(distX);
+    displacementY+=PApplet.abs(distY);
+    //println("DisX:"+displacementX+" DisY:"+displacementY);  
+
+
+    if (mouseMovesY.size()>=3) {
+      mouseMovesY.remove();
+      mouseMovesX.remove();
+    }
     mouseMovesY.add(distY);
     mouseMovesX.add(distX);
     int size=mouseMovesY.size();
-    float avgY = 0,avgX = 0;
-    for(int i=0;i<size;i++){
+    float avgY = 0, avgX = 0;
+    for (int i=0;i<size;i++) {
       avgY+=(float)mouseMovesY.get(i);
       avgX+=(float)mouseMovesX.get(i);
     }
     avgY/=size;
     avgX/=size;
-      displacementX+=abs(distX);
-      displacementY+=abs(distY);
-      //println("DisX:"+displacementX+" DisY:"+displacementY);  
-      velocityY=map(constrain(avgY,-25,25),-25,25,-maxAccel,maxAccel);
-      velocityX=map(constrain(avgX,-25,25),-25,25,-maxAccel,maxAccel);
-      xOffset+=mouseX-pmouseX;
-      xOffset=constrain(xOffset, 0, totalWidth-visibleWidth);
-      yOffset+=pmouseY-mouseY;
-      yOffset=constrain(yOffset, 0, totalHeight-visibleHeight);    
-    
+    velocityY=PApplet.map(PApplet.constrain(avgY, -25, 25), -25, 25, -maxAccel, maxAccel);
+    velocityX=PApplet.map(PApplet.constrain(avgX, -25, 25), -25, 25, -maxAccel, maxAccel);
   }
 
   public void mouseDragged() {
     //println("Drag on sequencer mx:"+mouseX+" my:"+mouseY);
 
-    proccessDragAccel(pmouseX,pmouseY,mouseX,mouseY);
-    
-    for (int i=0;i<samplesPerBeat.length;i++) {
-      for (int j=1;j<samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].isDragging(mouseX-(int)xOffset, mouseY+(int)yOffset);
+    processDragAccel(drumCloud.pmouseX, drumCloud.pmouseY, drumCloud.mouseX, drumCloud.mouseY);
+
+    for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
+      for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
+        tracks[i][j].isDragging(drumCloud.mouseX+(int)xOffset, drumCloud.mouseY+(int)yOffset);
       }
     }
     released=false;
   }
 
   public void mouseMoved() {
-    //println("Moved on sequencer px:"+pmouseX+" py:"+pmouseY+" mx:"+mouseX+" my:"+mouseY);
+    PApplet.println("Moved on sequencer px:"+drumCloud.pmouseX+" py:"+drumCloud.pmouseY+" mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
+  }
+
+
+  public void changeZoom(int centerX, int centerY, float pinchAmount) {
+    if ( (pinchAmount>0 && this.zoom<2.0)||(pinchAmount<0 && this.zoom>1.0f) ) {
+      this.zoom=PApplet.constrain(this.zoom+pinchAmount * 0.003f, 1, 2.0f);
+      float newButtonWidth=(float)(drumCloud.width/drumCloud.totalSamples*this.zoom);
+      totalHeight=(drumCloud.totalGrids+1)*newButtonWidth;
+      playBarWidth=totalHeight;
+      totalWidth=(drumCloud.totalSamples)*newButtonWidth;
+      scrollBarYSize=(visibleHeight/totalHeight)*visibleHeight;
+      scrollBarXSize=(visibleWidth/totalWidth)*visibleWidth;      
+      limitOffsetX();
+      limitOffsetY();
+    }
   }
 }
+

@@ -40,11 +40,11 @@ import java.io.InputStream;
 import java.io.OutputStream; 
 import java.io.IOException; 
 
+import org.donations.DonationsActivity;
 import org.json.*; 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.codefixia.donate.DonateActivity;
 import com.codefixia.googledrive.DownloadFile;
 import com.codefixia.multitouch.DragEvent;
 import com.codefixia.multitouch.FlickEvent;
@@ -746,8 +746,8 @@ void animateTransition(float animTime, float startValue, float endValue) {
 
 public void draw()
 {  
-	//touch.analyse();
-	//touch.sendEvents();	
+  touch.analyse();
+  touch.sendEvents();	
   clear();
   background(127, 127, 127);
 
@@ -980,6 +980,7 @@ public void deleteSoundType(int soundType) {
   for (int i=0;i<32;i++) {
     samplesPerBeat[soundType][i]=false;
   }
+  //sequencer.updateTracksState();
 }
 
 
@@ -990,6 +991,7 @@ public void deleteAllSounds() {
       samplesPerBeat[i][j]=false;
     }
   }
+  sequencer.updateTracksState();
 }
 
 public void deleteSoundOfGroup(int soundGroup) {
@@ -997,6 +999,7 @@ public void deleteSoundOfGroup(int soundGroup) {
   for (int i=0;i<totalSamples;i+=4) {
     deleteSoundType(i+soundGroup);
   }
+  sequencer.updateTracksState();
 }
 
 
@@ -4626,8 +4629,8 @@ public class FFT {
 		//DrumCloud.activity.runOnUiThread(new Runnable() {
 			//@Override
 			//public void run() {
-				touch.analyse();
-				touch.sendEvents();
+				//touch.analyse();
+				//touch.sendEvents();
 			//}
 		//}); 	  	  
 	  
@@ -4708,8 +4711,7 @@ public class FFT {
                 	deleteAllSounds();
                 break;
             case R.id.donate:
-                Intent donate = new Intent(this, DonateActivity.class);
-                startActivity(donate);
+                startActivity(new Intent(this, DonationsActivity.class));
                 break;
             case R.id.about:
                 

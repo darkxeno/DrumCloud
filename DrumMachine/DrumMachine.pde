@@ -36,7 +36,7 @@ float firstKick=0;
 boolean snapToGrid=true;
 boolean liveMode=false;
 boolean sequencerMode=false;
-Sequencer sequencer=new Sequencer();
+Sequencer sequencer=new Sequencer(this);
 final int totalSamples=16;
 final int totalGrids=(int)gridsByBeat*(int)beatsPerTempo;
 AudioPlayer[] playerKick=new AudioPlayer[4];
@@ -1232,4 +1232,14 @@ void keyPressed() {
     //println("Pressed code:"+keyCode);
   }
 }
+  
+  void mouseWheel(MouseEvent event) {
+    float e = event.getAmount();
+    println("Scroll value:"+e);
+    if(sequencerMode)
+      sequencer.changeZoom(mouseX,mouseY,event.getAmount());
+  }
+
+
+
 

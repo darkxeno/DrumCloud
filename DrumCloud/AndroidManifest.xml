@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+	<uses-permission android:name="com.android.vending.BILLING" />
     <application
         android:debuggable="true"
         android:icon="@drawable/icon"
@@ -33,14 +33,24 @@
 
         <service android:name="com.codefixia.googledrive.GoogleDriveService" >
         </service>
+        
+<activity
+    android:name="org.donations.DonationsActivity"
+    android:excludeFromRecents="true"
+    android:label="Donations"
+    android:launchMode="singleTask"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <activity
-            android:name="com.codefixia.donate.DonateActivity"
-            android:label="@string/title_activity_donate" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.codefixia.drumcloud.DrumCloud" />
-        </activity>
+<!-- - Google Play Store donations -->
+<service android:name="org.donations.google.BillingService" />
+
+<receiver android:name="org.donations.google.BillingReceiver" >
+    <intent-filter>
+        <action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
+        <action android:name="com.android.vending.billing.RESPONSE_CODE" />
+        <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
+    </intent-filter>
+</receiver>        
     </application>
 
 </manifest>
