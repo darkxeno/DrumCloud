@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Flattr -->
+    <item name="donations__flattr_enabled" type="bool">true</item>
+    <item name="donations__flattr_project_url" format="string" type="string">http://goo.gl/eyytQ</item>
+    <!-- without http:// ! -->
+    <item name="donations__flattr_url" format="string" type="string">flattr.com/thing/1681794/DrumCloud</item>
+
+    <!-- Google Play Store In-App Billing -->
+    <item name="donations__google_enabled" type="bool">true</item>
+
+    <!-- your public key from the google play publisher account -->
+    <item name="donations__google_pubkey" format="string" type="string">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvwJMMPad9hWxlqpOP+r28CzGGbWj9K67MY+Sd27is6xPOKEZvfbLR9shcRCMh0TNhZ6A692U+krEgoXEjfoENovFANBKidjl5MOSN5bTk9N/UtS1XCjWfhN5XysFdD3SoYeoXxt1JEvQHXoftTPlQ6TY8qeaT+2PY7NM3M/1Vg2hnmG3zpeU7lR05pt9OWuxw3lLUydOfA5s0fFmE3/9I4W/MVA0v+Zhxmk+dMvsWtkSv2m8DCUSMDFIX5t3GLMjs3QJLEltO6qj1EF9HGvKErTvJtsGewufk64Rcpb+7JRWbodOvcTzljZoP89Z5tC5+mhku7tbABswSC4Po7BxOwIDAQAB</item>
+
+    <!--
+    mapping from the possible donations of 1,2,3,5,8 and 13 eur to your in-app items defined in
+    the publisher account of google play
+    -->
+    <string-array name="donations__google_catalog" translatable="false">
+        <item>drumcloud.donation.1</item>
+        <item>drumcloud.donation.2</item>
+        <item>drumcloud.donation.3</item>
+        <item>drumcloud.donation.5</item>
+        <item>drumcloud.donation.8</item>
+        <item>drumcloud.donation.13</item>
+    </string-array>
+
+    <!-- PayPal -->
+    <item name="donations__paypal_enabled" type="bool">true</item>
+    <item name="donations__paypal_user" format="string" type="string">darkxeno@gmail.com</item>
+    <item name="donations__paypal_currency_code" format="string" type="string">EUR</item>
+
+    <!-- This value can also be translated! -->
+    <!-- Add translatable="false" if you don't want or need to translate -->
+    <string name="donations__paypal_item_name" translatable="false">DrumCloud Donation</string>
+
+</resources>
