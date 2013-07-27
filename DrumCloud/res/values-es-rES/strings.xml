@@ -1,21 +1,107 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="toggle_mode">Toggle Mode</string>
-    <string name="delete_all">Delete All</string>
-    <string name="donate">Donate</string>
-    <string name="about">About</string>    
-  <string name="donations__button_close">Cerrar</string>
-  <string name="donations__flattr">Flattr</string>
-  <string name="donations__description">¿Encuentra útil esta aplicación?\n¡Ayude en su desarrollo con Flattr o envíe donaciones al desarrollador!</string>
-  <string name="donations__flattr_description">¡Flattr toma un 10% como cuota mensual!</string>
-  <string name="donations__google_android_market">Google Play Store</string>
-  <string name="donations__google_android_market_not_supported_title" tools:ignore="ExtraTranslation">No se admiten Donaciones In-App</string>
-  <string name="donations__google_android_market_not_supported">No se admiten Donaciones In-App. ¿Está Google Play Store instalado correctamente?</string>
-  <string name="donations__google_android_market_description">¡Google se queda el 30% de todas las donaciones!</string>
-  <string name="donations__google_android_market_donate_button">¡Donar!</string>
-  <string name="donations__google_android_market_text">¿Cuánto?</string>
-  <string name="donations__paypal">PayPal</string>
-  <string name="donations__paypal_description">¡Puedes elegir cuánto quieres donar después de pulsar el botón!</string>
-  <string name="donations__thanks_dialog_title">¡Gracias!</string>
-  <string name="donations__thanks_dialog">¡Gracias por donar!\n¡Te lo agradezco mucho!</string>
+    <string name="LOAD" tools:ignore="MissingTranslation">CARGAR</string>
+    <string name="DELETE" tools:ignore="MissingTranslation">BORRAR</string>
+    <string name="ALL" tools:ignore="MissingTranslation">TODO</string>    
+    <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar Modo</string>
+    <string name="delete_all" tools:ignore="MissingTranslation">Borrar Todo</string>
+    <string name="donate" tools:ignore="MissingTranslation">Donar</string>
+    <string name="about" tools:ignore="MissingTranslation">Acerca de...</string>
+    <string name="donations__button_close">Cerrar</string>
+    <string name="donations__flattr">Flattr</string>
+    <string name="donations__description">¿Encuentra útil esta aplicación?\n¡Ayude en su desarrollo con Flattr o envíe donaciones al desarrollador!</string><string name="donations__flattr_description">¡Flattr toma un 10% como cuota mensual!</string>
+    <string name="donations__google_android_market">Google Play Store</string>
+    <string name="donations__google_android_market_not_supported_title" tools:ignore="ExtraTranslation">No se admiten Donaciones In-App</string>
+    <string name="donations__google_android_market_not_supported">No se admiten Donaciones In-App. ¿Está Google Play Store instalado correctamente?</string>
+    <string name="donations__google_android_market_description">¡Google se queda el 30% de todas las donaciones!</string>
+    <string name="donations__google_android_market_donate_button">¡Donar!</string>
+    <string name="donations__google_android_market_text">¿Cuánto?</string>
+    <string name="donations__paypal">PayPal</string>
+    <string name="donations__paypal_description">¡Puedes elegir cuánto quieres donar después de pulsar el botón!</string>
+    <string name="donations__thanks_dialog_title">¡Gracias!</string>
+    <string name="donations__thanks_dialog">¡Gracias por donar!\n¡Te lo agradezco mucho!</string>
+    <string name="live_mode">Modo Live</string>
+    <string name="sequencer_mode">Secuenciador</string>
+    <string name="pause">Pausar</string>
+    <string name="play">Reproducir</string>
+    <string name="close">Cerrar</string>
+    <string name="cancel" tools:ignore="MissingTranslation">Cancelar</string>
+    <string name="load_samples" tools:ignore="MissingTranslation">Cargar Samples</string>
+    <string name="help" tools:ignore="MissingTranslation">Ayuda</string>    
+    <string name="aboutDialogText">
+<u>DISEÑO Y DESARROLLO</u>\n
+Constantino Fernández Traba\n
+\n        
+<u>CODEFIXIA</u>\n
+Constantino Fernández Traba\n
+Emilio José Jiménez Jiménez\n
+Ignacio José Ortega Ruiz\n
+Roberto Díez Mirantes\n
+Rubén González González\n
+\n
+<u>ICONO</u>\n
+Diana Hidalgo Marín\n
+\n
+<u>CONTACTO</u>\n
+www.codefixia.com\n
+tino@codefixia.com\n
+\n
+<u>AGRADECIMIENTOS</u>\n
+Coursera \"Creative Programming for Digital Media and Mobile Apps\" Staff\n
+\n
+<u>DRUMCLOUD</u>\n
+<font size="8">
+Copyright © @2013 Codefixia\n
+Todos los derechos reservados\n
+</font>
+</string> 
+<string name="helpDialogTitle1" tools:ignore="MissingTranslation">
+Modo Live Tutorial 1/7
+</string>
+<string name="helpDialogText1" tools:ignore="MissingTranslation">
+La barra de tiempos muestra las 4 divisiones correspondientes a cada uno de los beats divididos a su vez en 8 ticks diferentes.
+Presionando los 16 botones \"TAP\" de colores de la zona inferior de la pantalla añadirá ticks de diferentes colores que representan el momento exacto en el que se reproduce el sample asociado.
+</string>
+<string name="helpDialogTitle2" tools:ignore="MissingTranslation">
+Modo Live Tutorial 2/7
+</string>
+<string name="helpDialogText2" tools:ignore="MissingTranslation">
+El slider horizontal de BPM permite configurar la duración actual de cada beat. Llendo de izquierda a derecha podemos seleccionar desde el mínimo de 80 BPMs al máximo de 160 BPMs. 
+ </string>
+<string name="helpDialogTitle3" tools:ignore="MissingTranslation">
+Modo Live Tutorial 3/7
+</string> 
+<string name="helpDialogText3" tools:ignore="MissingTranslation">
+El botón \"CARGAR\" le permite cargar archivos almacenados en su teléfono (tarjeta SD o memoria interna) y también desde Google Drive.
+Cuando hacemos click en el mismo todos los botones \"TAP\" comienzan a brillar indicando q e debe presionar uno. Una vez seleccionado se mostrará un diálogo que nos permitirá cargar un sample en dicho botón \"TAP\".
+Si elegimos la opción \"Local Files\" podremos navegar por el listado de archivos y directorios de nuestro dispositivo.
+</string>
+<string name="helpDialogTitle4" tools:ignore="MissingTranslation">
+Modo Live Tutorial 4/7
+</string>
+<string name="helpDialogText4" tools:ignore="MissingTranslation">
+Cuando seleccionado un archivo .wav o .aiff se asociará al botón \"TAP\" previamente seleccionado y se nos mostrará un nuevo dialogo que permite compartir dicho sample con la comunidad vía Google Drive. 
+Seleccione la categoría de su archivo de sonido si desea compartirlo. Por el contrarío si en el menú principal seleccionamos la opción \"Google Drive\" podremos 
+descargar paquetes o samples individuales desde la nube o que hayan sido compartidos por otros usuarios.
+</string>
+<string name="helpDialogTitle5" tools:ignore="MissingTranslation">
+Modo Live Tutorial 5/7
+</string>
+<string name="helpDialogText5" tools:ignore="MissingTranslation">
+El botón \"BORRAR\" nos permite eliminar samples de la barra de tiempos. Cuando lo presionamos y nos deslizamos hacia abajo seleccionaremos el tipo de samples a eliminar. 
+Para borrar todos los samples selecionamos \"TODOS\".
+</string>
+<string name="helpDialogTitle6" tools:ignore="MissingTranslation">
+Modo Live Tutorial 6/7
+</string>
+<string name="helpDialogText6" tools:ignore="MissingTranslation">
+Usando los diferentes sliders podemos controlar algunos de los parámetros de audio globales que afectarán a todos los samples. 
+Se puede observar el nombre del parámetro debajo de cada slider:\n- Frecuencia/resonancia filtro\n- Pitch/velocidad\n- Volumen Kick/Bass/Global</string>
+<string name="helpDialogTitle7" tools:ignore="MissingTranslation">
+Modo Live Tutorial 7/7
+</string>
+<string name="helpDialogText7" tools:ignore="MissingTranslation">
+Finalmente pero no menos importante, los botones \"PAD\" que nos permitirán lanzar los samples categorizados por colores.\n
+Usandolos mientras tenemos pausada la reproducción podemos distrutar de las alteraciones asociadas a los diferentes niveles de presión de los mismos.
+</string>   
 </resources>

@@ -16,17 +16,30 @@ import java.io.BufferedInputStream;
 import java.net.MalformedURLException; 
 import java.util.*; 
 import java.net.URL; 
+
 import android.app.Activity; 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.net.Uri;
 import android.os.Bundle; 
+import android.preference.PreferenceManager;
 import android.app.ProgressDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.media.*; 
 import android.media.audiofx.Visualizer; 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor; 
 import android.hardware.*; 
 
@@ -53,9 +66,11 @@ import com.codefixia.multitouch.PinchEvent;
 import com.codefixia.multitouch.RotateEvent;
 import com.codefixia.multitouch.TapEvent;
 import com.codefixia.multitouch.TouchProcessor;
+import com.github.espiandev.showcaseview.ShowcaseView;
+import com.github.espiandev.showcaseview.ShowcaseView.OnShowcaseEventListener;
 
 
-public class DrumCloud extends PApplet {
+public class DrumCloud extends PApplet implements OnShowcaseEventListener {
 
 	public static Activity activity;
 	private static int soundsLoaded=0;
@@ -167,7 +182,20 @@ SelectLibrary files;
 public void setupAndroid() {
   files = new SelectLibrary(this);
   files.filterExtension=".wav;.json;.aiff;.aif";
-  activity = (Activity)this;
+  activity = (Activity)this; 
+	DrumCloud.activity.runOnUiThread(new Runnable() {
+		@Override
+		public void run() {
+			  SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+			  if(!prefs.getBoolean("firstTime", false)) {
+			      // run your one time code
+			      SharedPreferences.Editor editor = prefs.edit();
+			      editor.putBoolean("firstTime", true);
+			      editor.commit();
+			      startHelpShowCase();
+			  }
+		}
+	});      
 }
 
 
@@ -399,7 +427,12 @@ public void proccessTempoVars() {
     playedGrids[currentGrid]=true;
     for (int i=0;i<totalSamples;i++) {
       if (samplesPerBeat[i][currentGrid]) {
-        playSoundType(i,1);
+    	if(i%4==0)
+    		playSoundType(i,volume*volumeKick);
+    	else if(i%4==1)
+    		playSoundType(i,volume*volumeBass);
+    	else
+    		playSoundType(i,volume);
         float dif=((millis()%tempoMS)-(currentGrid*gridMS));
         if (dif>maxDif)maxDif=dif;
         //println("Estimated play offset:"+(currentGrid*gridMS)+" real play offset:"+(millis()%tempoMS)+" dif:"+dif+" maxDif:"+maxDif);  
@@ -426,15 +459,15 @@ public void setupTopControls() {
   //playButton.blinkWhenOn=true;  
 
   loadButton=new ToggleButton(barOriginX+barWidth*0.62f-buttonSize*0.6f, barOriginY+barHeight*2.0f, buttonSize*1.2f, buttonSize*0.5f);
-  loadButton.text="LOAD";
+  loadButton.text=getString(R.string.LOAD);
   loadButton.fillColor=color(150, 150, 0);
   loadButton.blinkWhenOn=true;
 
   deleteButtons=new ExpandableButtons(barOriginX+barWidth-buttonSize*1.2f, barOriginY+barHeight*2.0f, buttonSize*1.2f, buttonSize*0.5f);
-  deleteButtons.text="DELETE";
+  deleteButtons.text=getString(R.string.DELETE);
   deleteButtons.fillColor=yellowColor;
   String[] buttons = { 
-    "KICK", "BASS", "SNARE", "HITHAT", "ALL"
+    "KICK", "BASS", "SNARE", "HITHAT", getString(R.string.ALL)
   };
   deleteButtons.setOtherButtons(buttons);
   int[] colors = { 
@@ -925,11 +958,11 @@ public void mouseDragged()
           break;
         case 3:
           volumeKick=valY;
-          controlVolume(volumeKick, 1);      
+          controlVolume(volumeKick*volume, 1);      
           break;
         case 4:
           volumeBass=valY;
-          controlVolume(volumeBass, 2);      
+          controlVolume(volumeBass*volume, 2);      
           break;
         case 5:
           volume=valY;
@@ -964,9 +997,7 @@ public void mouseReleased() {
       if (index>=4)
         deleteAllSounds();
       else
-        animating=true;
-        //sequencerMode=!sequencerMode;
-      //deleteSoundOfGroup(index);
+    	deleteSoundOfGroup(index);
     }
     loadButton.stopClick();
     playButton.stopClick();
@@ -4691,18 +4722,49 @@ public class FFT {
   @Override public boolean onCreateOptionsMenu(Menu menu) {
       super.onCreateOptionsMenu(menu);
       MenuInflater inflater = getMenuInflater();
-      inflater.inflate(R.menu.menu, menu);
+      inflater.inflate(R.menu.menu, menu);    
       return true;
    }
   
+  public void onClick(View view) {
+
+
+  }  
+  
+  ShowcaseView sv1,sv2,sv3,sv4,sv5,sv6,sv7,sv8;
+  ShowcaseView.ConfigOptions co;
+  
+  public void startHelpShowCase(){
+	  
+      co = new ShowcaseView.ConfigOptions();
+      //co.hideOnClickOutside = true;
+      sv1 = ShowcaseView.insertShowcaseView(barOriginX+barWidth*0.5f,barOriginY+barHeight*0.5f,
+    		  this, R.string.helpDialogTitle1, R.string.helpDialogText1, co);
+      sv1.setShowcaseIndicatorScale(0.3f);
+      sv1.setOnShowcaseEventListener(this);	  
+	  
+  }
+  
    @Override public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
+            case R.id.loadSamples:
+            	if(mainMode!=loadMode)
+            		mainMode=loadMode;
+            	else
+            		mainMode=normalMode;
+            break;
+            case R.id.help:
+            	startHelpShowCase();
+            break;            
+            case R.id.playPause:
+            	toggleAudioPlayThread();
+            break;            
             case R.id.toggleMode:
             	   if(!sequencerMode){
-            		   item.setTitle("Live Mode");
+            		   item.setTitle(R.string.live_mode);
             		   sequencer.updateTracksState();
             	   }else{
-            		   item.setTitle("Sequencer Mode");
+            		   item.setTitle(R.string.sequencer_mode);
             		   //sequencer.updateSamplePerBeatState();
             	   }
                    sequencerMode=!sequencerMode;
@@ -4714,10 +4776,97 @@ public class FFT {
                 startActivity(new Intent(this, DonationsActivity.class));
                 break;
             case R.id.about:
-                
+            	 final Dialog dialog = new Dialog(this);
+                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                 dialog.setContentView(R.layout.about_dialog);
+                 //dialog.setTitle(R.string.about);
+                 dialog.setCancelable(true);
+                 //there are a lot of settings, for dialog, check them all out!
+  
+                 //set up text
+                 TextView text = (TextView) dialog.findViewById(R.id.TextView01);
+                 text.setText(R.string.aboutDialogText);
+  
+                 //set up image view
+                 ImageView img = (ImageView) dialog.findViewById(R.id.ImageView01);
+                 img.setImageResource(R.drawable.codefixia_logo);
+                 img.setOnClickListener(new OnClickListener() {
+                	    public void onClick(View v) {
+                	    	String url = "http://www.codefixia.com";
+                	    	Intent i = new Intent(Intent.ACTION_VIEW);
+                	    	i.setData(Uri.parse(url));
+                	    	startActivity(i);
+                	    }
+                	});
+  
+                 //set up button
+                 Button button = (Button) dialog.findViewById(R.id.Button01);
+                 button.setOnClickListener(new OnClickListener() {
+                 @Override
+                     public void onClick(View v) {
+                	 	dialog.dismiss();
+                     }
+                 });
+                 //now that the dialog is set up, it's time to show it    
+                 dialog.show();            	
                 break;                
             }
             return true;
-   }  
+   }
+
+
+@Override
+public void onShowcaseViewHide(ShowcaseView showcaseView) {
+	// TODO Auto-generated method stub
+	if(showcaseView==sv1){
+		sv2 = ShowcaseView.insertShowcaseView(bpmSlider.x+bpmSlider.w*0.5f,bpmSlider.y+bpmSlider.h*0.5f, this,
+				R.string.helpDialogTitle2, R.string.helpDialogText2, co);
+		sv2.setShowcaseIndicatorScale(0.3f);
+    	sv2.animateGesture(-bpmSlider.w, 0, bpmSlider.w, 0);
+    	sv2.setOnShowcaseEventListener(this);
+	}else if(showcaseView==sv2){
+		sv3 = ShowcaseView.insertShowcaseView(loadButton.x+loadButton.w*0.5f,loadButton.y+loadButton.h*0.5f, this, 
+				R.string.helpDialogTitle3, R.string.helpDialogText3, co); 
+		sv3.setShowcaseIndicatorScale(0.3f);
+	    sv3.animateGesture(0, width*0.05f, 0, 0);
+	    sv3.setOnShowcaseEventListener(this);				
+	}else if(showcaseView==sv3){
+		sv4 = ShowcaseView.insertShowcaseView(loadButton.x+loadButton.w*0.5f,loadButton.y+loadButton.h*0.5f, this,
+				R.string.helpDialogTitle4, R.string.helpDialogText4, co);  
+		sv4.setShowcaseIndicatorScale(0.3f);
+	    sv4.setOnShowcaseEventListener(this);				
+	}else if(showcaseView==sv4){
+		sv5 = ShowcaseView.insertShowcaseView(deleteButtons.x+deleteButtons.w*0.5f,deleteButtons.y+deleteButtons.h*0.5f, this, 
+				R.string.helpDialogTitle5, R.string.helpDialogText5, co);  
+		sv5.setShowcaseIndicatorScale(0.3f);
+		sv5.animateGesture(0, width*0.05f, 0, 0);
+	    sv5.setOnShowcaseEventListener(this);				
+	}else if(showcaseView==sv5){
+		sv6 = ShowcaseView.insertShowcaseView(width*0.5f,height*0.27f, this,
+				R.string.helpDialogTitle6, R.string.helpDialogText6, co);  
+		sv6.setShowcaseIndicatorScale(1.0f);
+		sv6.animateGesture(width*0.05f, -height*0.05f, width*0.05f, height*0.09f);
+	    sv6.setOnShowcaseEventListener(this);				
+	}else if(showcaseView==sv6){
+		sv7 = ShowcaseView.insertShowcaseView(width*0.5f,height*0.71f, this,
+				R.string.helpDialogTitle7, R.string.helpDialogText7, co);  
+		sv7.setShowcaseIndicatorScale(1.7f);
+		sv7.animateGesture(width*0.05f, height*0.05f, width*0.05f, height*0.15f);
+	    sv7.setOnShowcaseEventListener(this);				
+	}
+}
+
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    println("ON CREATE DRUMCLOUD");
+  	
+}
+
+@Override
+public void onShowcaseViewShow(ShowcaseView showcaseView) {
+	// TODO Auto-generated method stub
+	
+}  
   
 }

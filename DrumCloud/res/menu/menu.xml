@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/toggleMode" android:title="@string/toggle_mode"></item>
-    <item android:id="@+id/deleteAll" android:title="@string/delete_all"></item>
-    <item android:id="@+id/donate" android:title="@string/donate"></item>
-    <item android:id="@+id/about" android:title="@string/about"></item>
+    <item android:icon="@android:drawable/ic_media_pause"
+         android:id="@+id/playPause" android:title="@string/pause"></item>
+    <item android:icon="@android:drawable/ic_menu_info_details"
+         android:id="@+id/toggleMode" android:title="@string/sequencer_mode"></item>
+    <item android:icon="@android:drawable/ic_menu_delete"
+         android:id="@+id/deleteAll" android:title="@string/delete_all"></item>
+    <item android:icon="@drawable/google_drive_icon"
+         android:id="@+id/loadSamples" android:title="@string/load_samples"></item>    
+    <item android:icon="@android:drawable/ic_menu_help"
+         android:id="@+id/donate" android:title="@string/donate"></item>
+    <item android:icon="@android:drawable/ic_menu_help"
+         android:id="@+id/help" android:title="@string/help"></item>    
+    <item android:icon="@android:drawable/ic_menu_info_details" 
+        android:id="@+id/about" android:title="@string/about"></item>
     
 </menu>

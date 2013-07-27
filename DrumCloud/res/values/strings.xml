@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar Modo</string>
-    <string name="delete_all" tools:ignore="MissingTranslation">Borrar Todo</string>
-    <string name="donate" tools:ignore="MissingTranslation">Donar</string>
-    <string name="about" tools:ignore="MissingTranslation">Acerca de...</string>
+    <string name="LOAD" tools:ignore="MissingTranslation">LOAD</string>
+    <string name="DELETE" tools:ignore="MissingTranslation">DELETE</string>
+    <string name="ALL" tools:ignore="MissingTranslation">ALL</string>
+    <string name="toggle_mode" tools:ignore="MissingTranslation">Toggle Mode</string>
+    <string name="delete_all" tools:ignore="MissingTranslation">Delete All</string>
+    <string name="donate" tools:ignore="MissingTranslation">Donate</string>
+    <string name="about" tools:ignore="MissingTranslation">About</string> 
     <string name="donations__button_close" tools:ignore="MissingTranslation">Close</string>
     <string name="donations__flattr" tools:ignore="MissingTranslation">Flattr</string>
     <string name="donations__description" tools:ignore="MissingTranslation">Do you find this application useful?\nSupport it\'s development by sending a donation to the developer!</string>
@@ -21,5 +23,90 @@
     <string name="donations__thanks_dialog">Thanks for donating!\nI really appreciate this!</string>
     <string name="donations__alert_dialog_title" tools:ignore="MissingTranslation">Error occurred</string>
     <string name="donations__alert_dialog_no_browser" tools:ignore="MissingTranslation">No browser was found to open a website!</string>
-    
+    <string name="live_mode" tools:ignore="MissingTranslation">Live Mode</string>
+    <string name="sequencer_mode" tools:ignore="MissingTranslation">Sequencer Mode</string>
+    <string name="pause" tools:ignore="MissingTranslation">Pause</string>
+    <string name="play" tools:ignore="MissingTranslation">Play</string>
+    <string name="close" tools:ignore="MissingTranslation">Close</string>
+    <string name="aboutDialogText" tools:ignore="MissingTranslation">
+<u>DEVELOPMENT AND DESIGN</u>\n
+Constantino Fernández Traba\n
+\n        
+<u>CODEFIXIA</u>\n
+Constantino Fernández Traba\n
+Emilio José Jiménez Jiménez\n
+Ignacio José Ortega Ruiz\n
+Roberto Díez Mirantes\n
+Rubén González González\n
+\n
+<u>ICON</u>\n
+Diana Hidalgo Marín\n
+\n
+<u>CONTACT</u>\n
+www.codefixia.com\n
+tino@codefixia.com\n
+\n
+<u>Thanks</u>\n
+Coursera \"Creative Programming for Digital Media and Mobile Apps\" Staff\n
+\n
+<u>DRUMCLOUD</u>\n
+<font size="8">
+Copyright © @2013 Codefixia\n
+All rights reserved\n
+</font>
+</string>
+<string name="cancel" tools:ignore="MissingTranslation">Cancel</string>
+<string name="load_samples" tools:ignore="MissingTranslation">Load Samples</string>
+<string name="help" tools:ignore="MissingTranslation">Help</string>
+<string name="next">Next</string>
+<string name="helpDialogTitle1" tools:ignore="MissingTranslation">
+Live Mode Tutorial 1/7
+</string>
+<string name="helpDialogText1" tools:ignore="MissingTranslation">
+The timebar shows the 4 tempo/beats divisions splitted on 8 diferents grid ticks.
+Pressing the tap buttons below will add different tick colors on the timebar that represents the launch time of the tap button associated sample.
+</string>
+<string name="helpDialogTitle2" tools:ignore="MissingTranslation">
+Live Mode Tutorial 2/7
+</string>
+<string name="helpDialogText2" tools:ignore="MissingTranslation">
+The BPM horizontal slider setup the current beat duration. Sliding to the left or right you can go from the minimun 80 BPM 
+ to the maximum 160 BPM.
+ </string>
+<string name="helpDialogTitle3" tools:ignore="MissingTranslation">
+Live Mode Tutorial 3/7
+</string> 
+<string name="helpDialogText3" tools:ignore="MissingTranslation">
+The Load Button allow you to load files stored on your phone (SD card or internal storage) and from Google Drive.
+When you press on it all the tap buttons starts to blink. Select the one you want to configure and a dialog will be showed up.
+If you press the top \"Local Files\" option you can navigate from your local files/directories list.
+</string>
+<string name="helpDialogTitle4" tools:ignore="MissingTranslation">
+Live Mode Tutorial 4/7
+</string>
+<string name="helpDialogText4" tools:ignore="MissingTranslation">
+When you select one .wav/.aiff file that file it\'s asocciated with the previous selected tap button and a new dialog allows you to upload that sample to Google Drive by 
+previously selecting the sample category more related with your sound file. If you select the \"Google Drive\" option you can download 
+packs or individual samples availables on the cloud or shared by other users.
+</string>
+<string name="helpDialogTitle5" tools:ignore="MissingTranslation">
+Live Mode Tutorial 5/7
+</string>
+<string name="helpDialogText5" tools:ignore="MissingTranslation">
+The delete button allows you to remove some samples from the timebar. You need to press it and slide down to select the type of the samples you want to remove. 
+To delete all the samples select the \"All\" button.
+</string>
+<string name="helpDialogTitle6" tools:ignore="MissingTranslation">
+Live Mode Tutorial 6/7
+</string>
+<string name="helpDialogText6" tools:ignore="MissingTranslation">
+Using the different sliders you can control some of the global audio parameters that affects all the samples. 
+You can see the altered parameter at the bottom of each slider:\n- Filter frequency/resonance\n- Pitch/speed\n- Kick/Bass/Global volume</string>
+<string name="helpDialogTitle7" tools:ignore="MissingTranslation">
+Live Mode Tutorial 7/7
+</string>
+<string name="helpDialogText7" tools:ignore="MissingTranslation">
+Finally but not less important, the pad buttons that allows you to trigger all the samples categorized by colors.\n
+Using the pads on paused mode let\'s you enjoy the different pressure levels of the pads.
+</string>
 </resources>

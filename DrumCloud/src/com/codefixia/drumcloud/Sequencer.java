@@ -73,7 +73,7 @@ public class Sequencer {
     scrollBarXSize=(visibleWidth/totalWidth)*visibleWidth;
     scrollBarWidth=drumCloud.width*0.02f;
     miniMapOriginX=(int) (drumCloud.width*0.05f);
-    miniMapOriginY=(int) (drumCloud.height*0.825f);  
+    miniMapOriginY=(int) (drumCloud.height*0.828f);  
 
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=0;j<drumCloud.samplesPerBeat[i].length+1;j++) {
