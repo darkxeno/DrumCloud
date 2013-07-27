@@ -286,9 +286,11 @@ public void setupMidi() {
 
 public void changeBPM(float newBPM) {
   BPM=newBPM;
+  gridMS=60000.0f/BPM/gridsByBeat;
   beatMS=60000.0f/BPM;
   beatsPerTempo=4.0f;
   tempoMS=beatsPerTempo*beatMS;
+    
 }
 
 public void noteOn(int channel, int pitch, int velocity) {
@@ -421,6 +423,8 @@ public void proccessTempoVars() {
   if ((currentGrid-lastGrid)%32>1)println("ERROR skipped grids:"+(currentGrid-lastGrid-1));
   lastGrid=currentGrid;
   currentGrid=(int)(tempoOffset/gridMS); 
+  if(currentGrid<0 || currentGrid>=totalGrids)
+	  return;
 
   if (!playedGrids[currentGrid]) {
     //println("Playing grid:"+currentGrid);
@@ -3082,14 +3086,31 @@ public class AndroidAudioThread extends Thread
         // we add up using a 32bit int
         // to prevent clipping
         int val = 0;
-        if (audioGens.size() > 0) {
+        short totalPlaying=0;        
+        if (audioGens.size() > 0) {	
           for (int j=0;j<audioGens.size(); j++) {
             AudioGenerator ag = (AudioGenerator)audioGens.get(j);
-            val += ag.getSample();
+            short s=ag.getSample();
+            //val+=ag.getSample();
+            if(s!=0){
+            	val += s;
+            	totalPlaying++;
+            }
           }
-          //val /= audioGens.size();
         }
-        bufferS[i] = (short) (val*4.0f);
+        //if(totalPlaying>0)
+        	bufferS[i] = (short)(val*2);
+        //else
+        	//bufferS[i] = (short)(val*4);
+        /*
+        if(totalPlaying>4)
+        	bufferS[i] = (short)val;        
+        else if(totalPlaying>2)
+        	bufferS[i] = (short)(val*2);
+        else if(totalPlaying>1)
+        	bufferS[i] = (short)(val*2);
+        else 
+        	bufferS[i] = (short)(val*3);*/
       }
       // send it to the audio device!
       track.write( bufferS, 0, bufferS.length );
@@ -4748,16 +4769,20 @@ public class FFT {
   
    @Override public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
-            case R.id.loadSamples:
+            /*case R.id.loadSamples:
             	if(mainMode!=loadMode)
             		mainMode=loadMode;
             	else
             		mainMode=normalMode;
-            break;
+            break;*/
             case R.id.help:
             	startHelpShowCase();
             break;            
             case R.id.playPause:
+            	if(!liveMode)
+            		item.setTitle(R.string.play);
+            	else
+            		item.setTitle(R.string.pause);
             	toggleAudioPlayThread();
             break;            
             case R.id.toggleMode:

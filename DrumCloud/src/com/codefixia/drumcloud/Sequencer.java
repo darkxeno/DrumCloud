@@ -21,7 +21,7 @@ public class Sequencer {
   float buttonWidth=0;
   float buttonHeight=0;
 
-  float barOffset=0;
+  float barOffset=0,lastBarOffset=0;
 
   float xOffset=0, yOffset=0;
 
@@ -130,10 +130,16 @@ public class Sequencer {
   }
 
   public void drawPlayBar() {
-    drumCloud.fill(drumCloud.yellowColor);
-    barOffset=PApplet.map((drumCloud.millis()-drumCloud.totalPaused)%drumCloud.tempoMS, 0.0f, drumCloud.tempoMS, buttonHeight, maxTotalHeight);
-    //println("barOffset:"+barOffset+" val:"+(millis()-totalPaused)%tempoMS);
-    drumCloud.rect(visibleWidth-maxTotalWidth, barOffset, maxTotalWidth, buttonHeight);
+	if (drumCloud.pausedMS<0) {  
+		drumCloud.fill(drumCloud.yellowColor);
+    	barOffset=PApplet.map((drumCloud.millis()-drumCloud.totalPaused)%drumCloud.tempoMS, 0.0f, drumCloud.tempoMS, buttonHeight, maxTotalHeight);
+    	lastBarOffset=barOffset;
+    	//println("barOffset:"+barOffset+" val:"+(millis()-totalPaused)%tempoMS);
+    	drumCloud.rect(visibleWidth-maxTotalWidth, barOffset, maxTotalWidth, buttonHeight);
+	}else{
+		drumCloud.fill(150);
+		drumCloud.rect(visibleWidth-maxTotalWidth, lastBarOffset, maxTotalWidth, buttonHeight);
+	}   
   }
 
   public void updateTracksState() {
