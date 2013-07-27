@@ -3067,8 +3067,9 @@ public class AndroidAudioThread extends Thread
     bufferF = new float[bufferLength];
 
     track = new AudioTrack( AudioManager.STREAM_MUSIC, (int)samplingRate, 
-    AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, 
+    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 
     minSize, AudioTrack.MODE_STREAM);
+    track.setStereoVolume(2.0f, 2.0f);
 
     track.play();
   }     
@@ -3088,7 +3089,7 @@ public class AndroidAudioThread extends Thread
           }
           //val /= audioGens.size();
         }
-        bufferS[i] = (short) val;
+        bufferS[i] = (short) (val*4.0f);
       }
       // send it to the audio device!
       track.write( bufferS, 0, bufferS.length );
