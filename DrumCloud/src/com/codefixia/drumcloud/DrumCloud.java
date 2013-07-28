@@ -2928,6 +2928,10 @@ public class AudioPlayer implements Synth, AudioGenerator {
           isPlaying = false;
         }
       }
+      //FIX FOR STARTING AND ENDING WRONG SAMPLE VALUES !=0
+      if (readHead==0 || readHead==audioData.length-1) {
+    	  return 0;
+      }      
 
       // linear interpolation here
       // declaring these at the top...
@@ -4745,6 +4749,21 @@ public class FFT {
       return true;
    }
   
+  	public boolean onPrepareOptionsMenu (Menu menu){
+  		//MenuInflater inflater = getMenuInflater();
+
+    	if(liveMode){
+    		menu.getItem(0).setTitle(R.string.play);
+    		menu.getItem(0).setIcon(android.R.drawable.ic_media_play);
+    	}
+    	else{
+    		menu.getItem(0).setTitle(R.string.pause);
+    		menu.getItem(0).setIcon(android.R.drawable.ic_media_pause);
+    	}  		
+
+  		return true;        
+	}  
+  
   public void onClick(View view) {
 
 
@@ -4762,8 +4781,10 @@ public class FFT {
       sv1.setShowcaseIndicatorScale(0.3f);
       sv1.setOnShowcaseEventListener(this);	  
   }
+    
   
-   @Override public boolean onOptionsItemSelected(MenuItem item) {
+   @Override 
+   public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
             /*case R.id.loadSamples:
             	if(mainMode!=loadMode)
@@ -4775,14 +4796,6 @@ public class FFT {
             	startHelpShowCase();
             break;            
             case R.id.playPause:
-            	if(!liveMode){
-            		item.setTitle(R.string.play);
-            		item.setIcon(android.R.drawable.ic_media_play);
-            	}
-            	else{
-            		item.setTitle(R.string.pause);
-            		item.setIcon(android.R.drawable.ic_media_pause);
-            	}
             	toggleAudioPlayThread();
             break;            
             case R.id.toggleMode:
