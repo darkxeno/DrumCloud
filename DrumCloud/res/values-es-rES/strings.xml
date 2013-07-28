@@ -72,17 +72,17 @@ El slider horizontal de BPM permite configurar la duración actual de cada beat.
 Modo Live Tutorial 3/7
 </string> 
 <string name="helpDialogText3" tools:ignore="MissingTranslation">
-El botón \"CARGAR\" le permite cargar archivos almacenados en su teléfono (tarjeta SD o memoria interna) y también desde Google Drive.
-Cuando hacemos click en el mismo todos los botones \"TAP\" comienzan a brillar indicando q e debe presionar uno. Una vez seleccionado se mostrará un diálogo que nos permitirá cargar un sample en dicho botón \"TAP\".
-Si elegimos la opción \"Local Files\" podremos navegar por el listado de archivos y directorios de nuestro dispositivo.
+El botón \"CARGAR\" le permite cargar archivos almacenados en su teléfono (tarjeta SD o memoria interna) o en Google Drive.
+Al hacer click en el mismo todos los botones \"TAP\" comienzan a brillar indicando q e debe presionar uno. Una vez seleccionado se mostrará un diálogo que nos permitirá cargar un sample en dicho botón \"TAP\".
+Si elegimos la opción \"Local Files\" se mostrará el listado de archivos del dispositivo.
 </string>
 <string name="helpDialogTitle4" tools:ignore="MissingTranslation">
 Modo Live Tutorial 4/7
 </string>
 <string name="helpDialogText4" tools:ignore="MissingTranslation">
-Cuando seleccionado un archivo .wav o .aiff se asociará al botón \"TAP\" previamente seleccionado y se nos mostrará un nuevo dialogo que permite compartir dicho sample con la comunidad vía Google Drive. 
-Seleccione la categoría de su archivo de sonido si desea compartirlo. Por el contrarío si en el menú principal seleccionamos la opción \"Google Drive\" podremos 
-descargar paquetes o samples individuales desde la nube o que hayan sido compartidos por otros usuarios.
+Si elegimos un archivo .wav/.aiff se asociará al botón \"TAP\" previamente seleccionado y se nos mostrará un nuevo dialogo que permite compartir el sample con la comunidad vía Google Drive. 
+Seleccione la categoría del sample si desea compartirlo. Si en el menú principal seleccionamos la opción \"Google Drive\" podremos 
+descargar paquetes o samples individuales desde la nube o compartidos por otros usuarios.
 </string>
 <string name="helpDialogTitle5" tools:ignore="MissingTranslation">
 Modo Live Tutorial 5/7

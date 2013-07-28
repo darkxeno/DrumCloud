@@ -2529,8 +2529,6 @@ public class AudioPlayer implements Synth, AudioGenerator {
     fxChain = new FXChain(sampleRate);
   }
 
-
-
   public void resetAudioPlayer() {
     readHead = 0;
     startPos = 0;
@@ -3090,18 +3088,16 @@ public class AndroidAudioThread extends Thread
         if (audioGens.size() > 0) {	
           for (int j=0;j<audioGens.size(); j++) {
             AudioGenerator ag = (AudioGenerator)audioGens.get(j);
-            short s=ag.getSample();
-            //val+=ag.getSample();
-            if(s!=0){
-            	val += s;
+            val += ag.getSample();
+            if(ag.isPlaying()){
             	totalPlaying++;
             }
           }
         }
-        //if(totalPlaying>0)
-        	bufferS[i] = (short)(val*2);
-        //else
-        	//bufferS[i] = (short)(val*4);
+        if(totalPlaying>0)
+        	bufferS[i] = (short)(val*4/totalPlaying);
+        else
+        	bufferS[i] = (short)(val*4);
         /*
         if(totalPlaying>4)
         	bufferS[i] = (short)val;        
@@ -3148,6 +3144,7 @@ public class AndroidAudioThread extends Thread
 public interface AudioGenerator {
   /** AudioThread calls this when it wants a sample */
   public short getSample();
+  public boolean isPlaying();
 }
 
 
@@ -4764,7 +4761,6 @@ public class FFT {
     		  this, R.string.helpDialogTitle1, R.string.helpDialogText1, co);
       sv1.setShowcaseIndicatorScale(0.3f);
       sv1.setOnShowcaseEventListener(this);	  
-	  
   }
   
    @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -4779,10 +4775,14 @@ public class FFT {
             	startHelpShowCase();
             break;            
             case R.id.playPause:
-            	if(!liveMode)
+            	if(!liveMode){
             		item.setTitle(R.string.play);
-            	else
+            		item.setIcon(android.R.drawable.ic_media_play);
+            	}
+            	else{
             		item.setTitle(R.string.pause);
+            		item.setIcon(android.R.drawable.ic_media_pause);
+            	}
             	toggleAudioPlayThread();
             break;            
             case R.id.toggleMode:
