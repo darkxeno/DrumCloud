@@ -159,9 +159,9 @@ void setupPowerSpectrum() {
 void setupGeneral() {
   //frameRate(30);
   if (!isAndroidDevice) {
-    if (render3D)
-      size(480, 688, P3D);
-    else
+    //if (render3D)
+      //size(480, 688, P3D);
+    //else
       size(480, 688);
   }
   else
@@ -1156,6 +1156,7 @@ void keyPressed() {
     } 
     else if (keyCode == LEFT) {
       //if (gridsByBeat>2)gridsByBeat*=0.5;
+      sequencer.updateTracksState();
       sequencerMode=!sequencerMode;
     }
     else if (keyCode == RIGHT) {

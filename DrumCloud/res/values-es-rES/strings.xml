@@ -27,7 +27,8 @@
     <string name="close">Cerrar</string>
     <string name="cancel" tools:ignore="MissingTranslation">Cancelar</string>
     <string name="load_samples" tools:ignore="MissingTranslation">Cargar Samples</string>
-    <string name="help" tools:ignore="MissingTranslation">Ayuda</string>    
+    <string name="help" tools:ignore="MissingTranslation">Ayuda</string>
+    <string name="next">Siguiente</string>    
     <string name="aboutDialogText">
 <u>DISEÑO Y DESARROLLO</u>\n
 Constantino Fernández Traba\n
@@ -66,7 +67,7 @@ Presionando los 16 botones \"TAP\" de colores de la zona inferior de la pantalla
 Modo Live Tutorial 2/7
 </string>
 <string name="helpDialogText2" tools:ignore="MissingTranslation">
-El slider horizontal de BPM permite configurar la duración actual de cada beat. Llendo de izquierda a derecha podemos seleccionar desde el mínimo de 80 BPMs al máximo de 160 BPMs. 
+El slider horizontal de BPM permite configurar la duración actual de cada beat. Yendo de izquierda a derecha podemos seleccionar desde el mínimo de 80 BPMs al máximo de 160 BPMs. 
  </string>
 <string name="helpDialogTitle3" tools:ignore="MissingTranslation">
 Modo Live Tutorial 3/7

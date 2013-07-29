@@ -13,8 +13,10 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="com.android.vending.BILLING" />
 	
+    <!-- android:debuggable="true"  -->	
+	
     <application
-        android:debuggable="true"
+        android:allowBackup="true"
         android:icon="@drawable/icon"
         android:theme="@style/MyTheme" 
         android:label="DrumCloud" >

@@ -5,7 +5,7 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
-import themidibus.*; 
+//import themidibus.*; 
 import java.io.FileFilter; 
 import java.util.regex.Pattern; 
 import java.io.File; 
@@ -2051,7 +2051,7 @@ class HorizontalSlider extends Draggable{
 }
 class Midi{
 
-  MidiBus myBus=null;
+  //MidiBus myBus=null;
   PApplet processing; 
 
 Midi(PApplet processing){
@@ -2086,8 +2086,8 @@ public void noteOn(int channel, int pitch, int velocity) {
   println("Channel:"+channel);
   println("Pitch:"+pitch);
   println("Velocity:"+velocity);
-  if(myBus!=null)
-    myBus.sendNoteOn(channel, pitch, velocity);
+  //if(myBus!=null)
+    //myBus.sendNoteOn(channel, pitch, velocity);
 }
 
 public void noteOff(int channel, int pitch, int velocity) {
@@ -2098,8 +2098,8 @@ public void noteOff(int channel, int pitch, int velocity) {
   println("Channel:"+channel);
   println("Pitch:"+pitch);
   println("Velocity:"+velocity);
-  if(myBus!=null)
-    myBus.sendNoteOff(channel, pitch, velocity);
+  //if(myBus!=null)
+    //myBus.sendNoteOff(channel, pitch, velocity);
 }
 
 public void controllerChange(int channel, int number, int value) {

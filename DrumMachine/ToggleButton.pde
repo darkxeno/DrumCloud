@@ -68,6 +68,7 @@ public class ToggleButton extends Clickable{
       clicked = true;
       offsetX = x-mx;
       offsetY = y-my;
+      ON=!ON;
     }
     else {
       clicked =false;

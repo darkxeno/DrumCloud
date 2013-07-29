@@ -167,7 +167,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
     for (int i = 0; i< filenames.length;i++) {
       audioClipArray[i] = justLoadAudioFile(filenames[i], processing);
     }
-  }
+  }  
 
   public short[] loadWavFile(File f) {
 
@@ -182,8 +182,20 @@ public class AudioPlayer implements Synth, AudioGenerator {
 
       // check the format of the audio file first!
       // only accept mono 16 bit wavs
-      //InputStream is = getAssets().open(filename); 
-      BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f));
+      //InputStream is = getAssets().open(filename);
+      InputStream input = null;
+      BufferedInputStream bis = null;// new BufferedInputStream(new FileInputStream(f));
+      try{
+        String path="/data/"+f.getName();
+        println("Loading:"+path);
+        input=getClass().getResourceAsStream(path);
+        byteCount=input.available();
+        bis = new BufferedInputStream(input);
+      }catch(Exception ex){
+        println("ex:"+ex);
+        bis = new BufferedInputStream(new FileInputStream(f));
+      } 
+      //
 
       // chop!!
 
@@ -255,7 +267,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
       e.printStackTrace();
     } 
 
-    if ((float) fileSampleRate != this.sampleRate) {
+    if (fileSampleRate>0 && (float)fileSampleRate != this.sampleRate) {
       System.out.println("Resampling file: " +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
       return convertSampleRate(myAudioData, (int) (this.sampleRate), (int)fileSampleRate);
     }
@@ -313,7 +325,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
         sample ++;
       }
 
-      if (fileSampleRate != this.sampleRate) {
+      if (fileSampleRate>0 && fileSampleRate != this.sampleRate) {
         System.out.println("Resampling file" +fileName+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
         return convertSampleRate(myAudioData, (int) (this.sampleRate), fileSampleRate);
       }

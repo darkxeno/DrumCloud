@@ -58,7 +58,7 @@ All rights reserved\n
 <string name="cancel" tools:ignore="MissingTranslation">Cancel</string>
 <string name="load_samples" tools:ignore="MissingTranslation">Load Samples</string>
 <string name="help" tools:ignore="MissingTranslation">Help</string>
-<string name="next">Next</string>
+<string name="next" tools:ignore="MissingTranslation">Next</string>
 <string name="helpDialogTitle1" tools:ignore="MissingTranslation">
 Live Mode Tutorial 1/7
 </string>
