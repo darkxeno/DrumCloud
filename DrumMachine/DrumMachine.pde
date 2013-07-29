@@ -97,7 +97,8 @@ float pressBarWidth, pressBarHeight, pressBarHeightMargin;
 ClickablePad[] kick=new ClickablePad[4], bass=new ClickablePad[4], snare=new ClickablePad[4], hithat=new ClickablePad[4];
 Clickable panelModeButton, trackModeButton;
 ExpandableButtons deleteButtons;
-ToggleButton loadButton, playButton, deleteButton;
+ToggleButton loadButton, playButton;
+MenuButton menuButton;
 
 float valueX=0.0, valueY=0.0;
 float buttonSize, buttonsOriginX, buttonsOriginY, buttonMarginX, buttonMarginY;
@@ -136,6 +137,7 @@ void setup()
   setupMidi();
   setupPowerSpectrum();
   setupTopControls();
+  setupMenuButton();
   if (isAndroidDevice)
     setupAndroid();
   sequencer.setup();
@@ -397,6 +399,15 @@ void setupTopControls() {
     redColor, orangeColor, blueColor, greenColor, mediumGreyColor
   };
   deleteButtons.setOtherButtonColors(colors);
+}
+
+void setupMenuButton(){
+  menuButton=new MenuButton(width*0.92, -3, width*0.08, width*0.08);
+
+}
+
+void drawMenuButton() {
+  menuButton.drawState();
 }
 
 void drawTopControls() {
@@ -719,9 +730,11 @@ void draw()
     drawSliders();
     drawPowerSpectrum();
     drawTopControls();
+    drawMenuButton();
   }
   else {
     sequencer.draw();
+    drawMenuButton();
   }
 }
 
@@ -849,11 +862,15 @@ void mouseMoved()
     if (loadButton.isOver(mouseX, mouseY)) {
     }
     if (playButton.isOver(mouseX, mouseY)) {
-    }
+    }   
+    
   }
   else {
     sequencer.mouseMoved();
   }
+  
+  if (menuButton.isOver(mouseX, mouseY)) {
+  }   
 }
 
 void mouseDragged()
@@ -925,11 +942,16 @@ void mouseReleased() {
       //deleteSoundOfGroup(index);
     }
     loadButton.stopClick();
-    playButton.stopClick();
+    playButton.stopClick();     
   }
   else {
     sequencer.mouseReleased();
   }
+  
+  if (menuButton.isClicked(mouseX, mouseY)) {
+      sequencer.updateTracksState();
+      sequencerMode=!sequencerMode;      
+  }  
 }
 
 void deleteSoundType(int soundType) {
@@ -1077,7 +1099,7 @@ void mousePressed()
     } 
     if (playButton.isClicked(mouseX, mouseY)) {
       toggleAudioPlayThread();
-    }
+    }    
   }
   else {
     sequencer.mousePressed();

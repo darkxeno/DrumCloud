@@ -102,7 +102,7 @@ Se puede observar el nombre del parámetro debajo de cada slider:\n- Frecuencia/
 Modo Live Tutorial 7/7
 </string>
 <string name="helpDialogText7" tools:ignore="MissingTranslation">
-Finalmente pero no menos importante, los botones \"PAD\" que nos permitirán lanzar los samples categorizados por colores.\n
-Usandolos mientras tenemos pausada la reproducción podemos distrutar de las alteraciones asociadas a los diferentes niveles de presión de los mismos.
+Con los botones \"PAD\" podremos lanzar los samples categorizados por colores.\n
+Si pausamos la reproducción podemos usar los diferentes niveles de presión de los mismos.
 </string>   
 </resources>

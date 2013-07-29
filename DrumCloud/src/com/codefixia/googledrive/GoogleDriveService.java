@@ -64,8 +64,6 @@ import com.google.api.services.drive.model.FileList;
 
 public class GoogleDriveService extends IntentService {
 
-
-	static final int REQUEST_ACCOUNT_PICKER = 1;
 	static final int REQUEST_AUTHORIZATION = 2;
 	static final int CAPTURE_IMAGE = 3;
 	static final int REQUEST_FOLDER_FILES = 4;
@@ -185,6 +183,7 @@ public class GoogleDriveService extends IntentService {
 	}
 
 	public void filesInFolder(final String folderId){
+		final GoogleDriveService GDS=this;
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -198,7 +197,7 @@ public class GoogleDriveService extends IntentService {
 				try {
 					request = service.files().list().setQ("'"+((folderId==null)?googleDriveMainFolderId:folderId)+"' in parents");
 					do {
-						try {
+						//try {
 							FileList oneFile = request.execute();
 							
 							for (File child : oneFile.getItems()) {
@@ -208,15 +207,16 @@ public class GoogleDriveService extends IntentService {
 								System.out.println("File Id: " + child.toString());
 							}
 							request.setPageToken(oneFile.getNextPageToken());
-						} catch (IOException e) {
-							System.out.println("An error occurred: " + e);
-							request.setPageToken(null);
-						}
+						//} catch (IOException e) {
+						//	System.out.println("An error occurred: " + e);
+						//	request.setPageToken(null);
+						//}
 					} while (request.getPageToken() != null &&
 							request.getPageToken().length() > 0);			
 					
-				} catch (UserRecoverableAuthIOException e) {
-					//startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
+				} catch (final UserRecoverableAuthIOException e) {
+					Log.e("NOT AUTHORIZED","NOT AUTHORIZED");					
+					requestAuth(GDS,e);
 				}catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -225,6 +225,23 @@ public class GoogleDriveService extends IntentService {
 		});
 		t.start();		
 	}
+	
+	
+	private static void requestAuth(final Context context,final UserRecoverableAuthIOException e){		
+		DrumCloud.activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				delegate.hide();
+				Intent i=new Intent(DrumCloud.activity,DummyActivity.class);
+				i.setAction("REQUEST_AUTHORIZATION");
+				//i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				i.putExtra("operation", "REQUEST_AUTHORIZATION");
+				i.putExtra("intent", e.getIntent());
+				DrumCloud.activity.startActivity(i);
+				DrumCloud.activity.overridePendingTransition (R.anim.fade_in,R.anim.fade_out);
+			}
+		});		
+	}	
 	
 	private void returnFiles(final List<FileItem> childs) {
 		DrumCloud.activity.runOnUiThread(new Runnable() {
@@ -235,6 +252,15 @@ public class GoogleDriveService extends IntentService {
 		});		
 		//fa.finish();
 	}
+	
+	private static void hideDialog() {
+		DrumCloud.activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				delegate.hide();
+			}
+		});		
+	}	
 
 	private static FileItem getFileItem(String fileId) {
 		try {
@@ -248,8 +274,7 @@ public class GoogleDriveService extends IntentService {
 			Log.i("FILE INFO","MIME type: " + file.getMimeType());
 			return item;
 		}catch (UserRecoverableAuthIOException e) {
-			//if(e.getIntent()!=null)
-				//startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);			
+			requestAuth(delegate.getContext(),e);						
 		}catch (IOException e) {
 			Log.e("FILE INFO ERROR","An error occured: " + e);
 		}
@@ -294,8 +319,8 @@ public class GoogleDriveService extends IntentService {
 								service.getRequestFactory().buildGetRequest(new GenericUrl(fileUrl))
 								.execute();
 						returnInputStream(resp.getContent());
-					//}catch (UserRecoverableAuthIOException e) {
-			 	      //startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);						
+					}catch (UserRecoverableAuthIOException e) {
+						requestAuth(delegate.getContext(),e);												
 					}catch (IOException e) {
 						// An error occurred.
 						e.printStackTrace();
@@ -329,8 +354,8 @@ public class GoogleDriveService extends IntentService {
 						}else{
 							Log.e("DRIVE","Error obtaining downloadUrl of:"+fileId);
 						}
-					//}catch (UserRecoverableAuthIOException e) {
-			 	      //startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);						
+					}catch (UserRecoverableAuthIOException e) {
+						requestAuth(delegate.getContext(),e);						
 					}catch (IOException e) {
 						// An error occurred.
 						e.printStackTrace();
@@ -364,6 +389,7 @@ public class GoogleDriveService extends IntentService {
 	}	
 
 	private void uploadFile(final String localFilePath) {
+		final GoogleDriveService GDS=this;
 		AlertDialog.Builder  d = new AlertDialog.Builder(DrumCloud.activity).
 				//setMessage("Select the category of the sample.").
 				setTitle("Do you want to upload and share your sample on Google Drive?");
@@ -431,7 +457,7 @@ public class GoogleDriveService extends IntentService {
 						        	  Log.e("UPLOAD ERROR", "Error while uploading:"+selectedFile.getName());
 						          }
 							} catch (UserRecoverableAuthIOException e) {
-								//startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
+								requestAuth(delegate.getContext(),e);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
