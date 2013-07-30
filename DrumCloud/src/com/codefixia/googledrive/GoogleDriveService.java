@@ -419,12 +419,12 @@ public class GoogleDriveService extends IntentService {
 						@Override
 						public void run() {
 							try {
-								String selectedFolderID;
+								String selectedFolderID=folderCategoryIds[0];
 								if(selected>=0 && selected<folderCategoryIds.length){
 									selectedFolderID=folderCategoryIds[selected];
 									Log.d("CATEGORY",folderCategoryNames[selected]);
 								}
-								else
+								if(selectedFolderID==null)
 									selectedFolderID=googleDriveMainFolderId;								
 								// File's binary content					
 								if(localFilePath!=null){

@@ -2825,7 +2825,8 @@ public class AudioPlayer implements Synth, AudioGenerator {
     int val = 0;
     //LIMIT TO 16BITS
     int start=0;
-    if(wordSizeBytes>2)start=wordSizeBytes-2;
+    //if(wordSizeBytes>2)start=wordSizeBytes-2;
+    if(wordSizeBytes>2)wordSizeBytes=2;
     for (int i=start;i<wordSizeBytes; i++) {
       val <<= 8;
       val |= (int)bytes[i] & 0xFF;
