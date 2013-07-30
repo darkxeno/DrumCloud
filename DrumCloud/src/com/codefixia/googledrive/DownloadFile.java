@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.codefixia.drumcloud.DrumCloud;
 import com.codefixia.drumcloud.SelectDialog;
 
 import android.os.AsyncTask;
@@ -33,6 +34,7 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 	public String localPath=null;
 	public InputStream input=null;
 	public static int filesDownloaded=0;
+	public static int filesTotal=0;
 	public static boolean packMode=false;
 
 	@Override
@@ -118,6 +120,7 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 				}
 
 				sounds = new JSONArray(text.toString());
+				filesTotal=sounds.length();
 				System.out.println("Parsed:"+sounds.length()+" sounds"+sounds);
 			}
 			catch (IOException e) {
@@ -129,6 +132,32 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 		}    
 		return sounds;
 	}	
+	
+	public static void incDownloaded(){
+		DrumCloud.activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				synchronized ("sync") {
+					filesDownloaded++;
+				}
+				if(lastDelegate!=null)
+					lastDelegate.mProgressDialog.setProgress(filesDownloaded);
+				
+				if(filesDownloaded==filesTotal){
+					packMode=false;
+					if(lastDelegate!=null){
+						lastDelegate.mProgressDialog.setProgress(1);
+						lastDelegate.mProgressDialog.dismiss();
+						lastDelegate.postDownloadCallback(jsonOutputFilePath);
+						lastDelegate=null;
+					}
+				}
+			
+				
+			}
+		});			
+		
+	}
 
 	@Override
 	protected void onPostExecute(String result) {
@@ -136,12 +165,8 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 			if(delegate!=null)
 				delegate.mProgressDialog.setIndeterminate(false);
 		}else{
-			synchronized (this) {
-				filesDownloaded++;
-				if(lastDelegate!=null)
-					lastDelegate.mProgressDialog.setProgress(filesDownloaded);
-			}
-			if(filesDownloaded==16){
+			incDownloaded();
+			if(filesDownloaded==filesTotal){
 				packMode=false;
 				if(lastDelegate!=null){
 					delegate=lastDelegate;

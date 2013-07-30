@@ -352,12 +352,15 @@ public class GoogleDriveService extends IntentService {
 							  downloadFile.localPath=localPath.replace(downloadFile.filename, "");
 							  downloadFile.execute(fileUrl);							
 						}else{
+							DownloadFile.incDownloaded();
 							Log.e("DRIVE","Error obtaining downloadUrl of:"+fileId);
 						}
 					}catch (UserRecoverableAuthIOException e) {
+						DownloadFile.incDownloaded();
 						requestAuth(delegate.getContext(),e);						
 					}catch (IOException e) {
 						// An error occurred.
+						DownloadFile.incDownloaded();
 						e.printStackTrace();
 					}
 				}
