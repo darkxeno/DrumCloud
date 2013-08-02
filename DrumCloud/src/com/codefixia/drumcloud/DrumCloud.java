@@ -2550,123 +2550,152 @@ public class AudioPlayer implements Synth, AudioGenerator {
 
   public short[] loadWavFile(File f) {
 
-    short [] myAudioData = null;
-    int fileSampleRate = 0;
-    String filename=f.getName();    
-    try {
-      
-      // how long is the file in bytes?
-      long byteCount = 0;
-      BufferedInputStream bis=null;
+	  short [] myAudioData = null;
+	  int fileSampleRate = 0;
+	  String filename=f.getName();    
+	  try {
 
-      try {
-        byteCount = getAssets().openFd(filename).getLength();
-        // check the format of the audio file first!
-        // only accept mono 16 bit wavs
-        InputStream is = getAssets().open(filename); 
-        bis = new BufferedInputStream(is);
-      }
-      catch(FileNotFoundException e) {
-        println("getAssets not working");
-        e.printStackTrace();
-        
-      FileInputStream fIn = new FileInputStream(f);
-        if (fIn!=null) {
-          byteCount=fIn.available();
-          bis = new BufferedInputStream(fIn);        
-        }
-        else {
-          println("FileInputStream not working");
-        }
-      }
-      println("Opening file:"+filename);
-      
-      if (bis!=null) {
-        // chop!!
+		  // how long is the file in bytes?
+		  long byteCount = 0;
+		  BufferedInputStream bis=null;
 
-        int bitDepth;
-        int channels;
-        boolean isPCM;
+		  try {
+			  byteCount = getAssets().openFd(filename).getLength();
+			  // check the format of the audio file first!
+			  // only accept mono 16 bit wavs
+			  InputStream is = getAssets().open(filename); 
+			  bis = new BufferedInputStream(is);
+		  }
+		  catch(FileNotFoundException e) {
+			  println("getAssets not working");
+			  e.printStackTrace();
 
-        // allows us to read up to 4 bytes at a time 
-        byte[] byteBuff = new byte[4];
+			  FileInputStream fIn = new FileInputStream(f);
+			  if (fIn!=null) {
+				  byteCount=fIn.available();
+				  bis = new BufferedInputStream(fIn);        
+			  }
+			  else {
+				  println("FileInputStream not working");
+			  }
+		  }
+		  println("Opening file:"+filename);
 
-        // skip 20 bytes to get file format
-        // (1 byte)
-        bis.skip(20);
-        bis.read(byteBuff, 0, 2); // read 2 so we are at 22 now
-        isPCM = ((short)byteBuff[0]) == 1 ? true:false; 
-        //System.out.println("File isPCM "+isPCM);
+		  if (bis!=null) {
+			  // chop!!
 
-        // skip 22 bytes to get # channels
-        // (1 byte)
-        bis.read(byteBuff, 0, 2);// read 2 so we are at 24 now
-        channels = (short)byteBuff[0];
-        System.out.println("#channels "+channels+" "+byteBuff[0]);
-        // skip 24 bytes to get sampleRate
-        // (32 bit int)
-        bis.read(byteBuff, 0, 4); // read 4 so now we are at 28
+			  int bitDepth;
+			  int channels;
+			  boolean isPCM;
 
-        fileSampleRate = bytesToInt(byteBuff, 4);
-         //if((float) fileSampleRate != this.sampleRate){
-         //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
-         //}  
+			  // allows us to read up to 4 bytes at a time 
+			  byte[] byteBuff = new byte[4];
 
-        // skip 34 bytes to get bits per sample
-        // (1 byte)
-        bis.skip(6); // we were at 28...
-        bis.read(byteBuff, 0, 2);// read 2 so we are at 36 now
-        bitDepth = (short)byteBuff[0];
-        System.out.println("bit depth "+bitDepth);
-        // convert to word count...
-        bitDepth /= 8;
-        // now start processing the raw data
-        // data starts at byte 36
-        int sampleCount = (int) ((byteCount - 36) / (bitDepth * channels));
-        myAudioData = new short[sampleCount];
-        int skip = (channels -1) * bitDepth;
-        int sample = 0;
-        // skip a few sample as it sounds like shit
-        bis.skip(bitDepth * 4);
-        while (bis.available () >= (bitDepth+skip)) {
-          bis.read(byteBuff, 0, bitDepth);// read 2 so we are at 36 now
-          //int val = bytesToInt(byteBuff, bitDepth);
-          // resample to 16 bit by casting to a short
-          myAudioData[sample] = (short) bytesToInt(byteBuff, bitDepth);
-          bis.skip(skip);
-          sample ++;
-        }
+			  // skip 20 bytes to get file format
+			  // (1 byte)
+			  bis.skip(20);
+			  bis.read(byteBuff, 0, 2); // read 2 so we are at 22 now
+			  isPCM = ((short)byteBuff[0]) == 1 ? true:false; 
+			  //System.out.println("File isPCM "+isPCM);
 
-        float secs = (float)sample / (float)sampleRate;
-        //System.out.println("Read "+sample+" samples expected "+sampleCount+" time "+secs+" secs ");      
-        bis.close();
+			  // skip 22 bytes to get # channels
+			  // (1 byte)
+			  bis.read(byteBuff, 0, 2);// read 2 so we are at 24 now
+			  channels = (short)byteBuff[0];
+			  System.out.println("#channels "+channels+" "+byteBuff[0]);
+			  // skip 24 bytes to get sampleRate
+			  // (32 bit int)
+			  bis.read(byteBuff, 0, 4); // read 4 so now we are at 28
+			  fileSampleRate = bytesToInt(byteBuff, 4);
+			  System.out.println("Sample rate "+fileSampleRate);
+			  // skip 34 bytes to get bits per sample
+			  // (1 byte)
+			  //bis.skip(6); // we were at 28...
+			  bis.skip(4);
+			  bis.read(byteBuff, 0, 2);// read 2 so we are at 34 now
+			  short blockAlign = (short)byteBuff[0];    
+			  System.out.println("block align "+blockAlign);  
 
-        // unchop
-        readHead = 0;
-        startPos = 0;
-        // default to 1 sample shift per tick
-        dReadHead = 1;
-        isPlaying = false;
-        isLooping = true;
-        masterVolume = 1;
-      }
-    } 
+			  bis.read(byteBuff, 0, 2);// read 2 so we are at 36 now
+			  bitDepth = (short)byteBuff[0];
+			  System.out.println("bit depth "+bitDepth);
+			  // convert to word count...
+			  bitDepth /= 8;
+			  if (blockAlign/channels>bitDepth)bitDepth=blockAlign/channels;
+			  // now start processing the raw data
+			  //bis.skip(4); //skip Subchunk2ID now at 40
+			  bis.read(byteBuff, 0, 4);//read Subchunk2ID now at 40
+			  String subchunkId="";
+			  for (int i=0;i<4;i++)
+				  subchunkId+=(char)byteBuff[i];
+			  println("subchunkId: "+subchunkId);
+			  int sampleCount=0;
+			  if (subchunkId.equalsIgnoreCase("data")) {
+				  bis.read(byteBuff, 0, 4); //reads Subchunk2Size now at 44
+				  // data starts at byte 44
+				  sampleCount = bytesToInt(byteBuff, 4)/ (bitDepth * channels);
+				  println("0:"+byteBuff[0]+" 1:"+byteBuff[1]+" 2:"+byteBuff[2]+" 3:"+byteBuff[3]);
+			  }else{
+				  bis.read(byteBuff, 0, 2);
+				  int infoChars = bytesToInt(byteBuff, 2);
+				  println("skipping chars:"+infoChars);
+				  bis.skip(2);
+				  bis.skip(infoChars);
+				  bis.read(byteBuff, 0, 4);
+				  subchunkId="";
+				  for (int i=0;i<4;i++)
+					  subchunkId+=(char)byteBuff[i];
+				  println("subchunkId: "+subchunkId); 
+				  if (subchunkId.equalsIgnoreCase("data")){
+					  bis.read(byteBuff, 0, 4);
+					  sampleCount = bytesToInt(byteBuff, 4)/ (bitDepth * channels);
+				  }else{
+					  sampleCount = (int) ((byteCount - (44+infoChars)) / (bitDepth * channels));
+				  }       
+				  //println("0:"+byteBuff[0]+" 1:"+byteBuff[1]+" 2:"+byteBuff[2]+" 3:"+byteBuff[3]);        
+			  }
+			  System.out.println("total samples "+sampleCount+" resting bytes:"+(int) ((byteCount - 44) / (bitDepth * channels)));
+			  myAudioData = new short[sampleCount];      
+			  int skip = (channels -1) * bitDepth;
+			  int sample = 0;
+			  while (bis.available () >= (bitDepth+skip) && sample<sampleCount) {
+				  bis.read(byteBuff, 0, bitDepth);
+				  myAudioData[sample] = (short) bytesToIntLimited(byteBuff, bitDepth);
+				  bis.skip(skip);
+				  sample ++;
+			  }
 
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
+			  float secs = (float)sample / (float)sampleRate;
+			  //System.out.println("Read "+sample+" samples expected "+sampleCount+" time "+secs+" secs ");      
+			  bis.close();
 
-    if ((float) fileSampleRate != this.sampleRate) {
-      //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
-      Resampler resampler = new Resampler();
-      System.out.println("Resampling file" +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz"); 
-      return resampler.reSample(myAudioData, (int)fileSampleRate, (int) (this.sampleRate));
-    } 
-    return myAudioData;
+			  // unchop
+			  readHead = 0;
+			  startPos = 0;
+			  // default to 1 sample shift per tick
+			  dReadHead = 1;
+			  isPlaying = false;
+			  isLooping = true;
+			  masterVolume = 1;
+		  }
+	  } 
+
+	  catch (FileNotFoundException e) {
+		  e.printStackTrace();
+	  }
+	  catch (IOException e) {
+		  e.printStackTrace();
+	  }
+
+	  if ((float) fileSampleRate != this.sampleRate) {
+		  //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
+		  Resampler resampler = new Resampler();
+		  System.out.println("Resampling file" +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz"); 
+		  return resampler.reSample(myAudioData, (int)fileSampleRate, (int) (this.sampleRate));
+	  } 
+	  return myAudioData;
   }  
+
 
   public short[] convertSampleRate(short[] originalAudio, int targetRate, int originalRate) {
     if (targetRate==originalRate) {
@@ -2705,11 +2734,9 @@ public class AudioPlayer implements Synth, AudioGenerator {
       AudioInputStream ais=aiffFileReader.getAudioInputStream(f);
       myAudioData=new short[(int)ais.getFrameLength()];
       while ( (numBytesRead = ais.read (byteBuff)) != -1) {
-        //println("Readed:"+numBytesRead+" saved:"+byteBuff.length);
-        //println("orig. value:"+bytesToIntBigEndian(byteBuff, numBytesRead)+" final value:"+(short)bytesToIntBigEndian(byteBuff, numBytesRead));
-        
+
         if(!isBigEndian)
-          myAudioData[sample] = (short) bytesToInt(byteBuff, numBytesRead);
+          myAudioData[sample] = (short) bytesToIntLimited(byteBuff, numBytesRead);
         else
           myAudioData[sample] = (short) bytesToIntBigEndian(byteBuff, numBytesRead);
           
@@ -2810,15 +2837,24 @@ public class AudioPlayer implements Synth, AudioGenerator {
    *@param wordSizeBytes - the number of bytes to read from bytes array
    *@return int - the byte array as an int
    */
+  private int bytesToIntLimited(byte[] bytes, int wordSizeBytes) {
+	    int val = 0;
+	    //LIMIT TO 16BITS
+	    if (wordSizeBytes>2)wordSizeBytes=2;
+	    for (int i=wordSizeBytes-1; i>=0; i--) {
+	      val <<= 8;
+	      val |= (int)bytes[i] & 0xFF;
+	    }
+	    return val;
+	  }  
+
   private int bytesToInt(byte[] bytes, int wordSizeBytes) {
-    int val = 0;
-    //LIMIT TO 16BITS
-    if(wordSizeBytes>2)wordSizeBytes=2;
-    for (int i=wordSizeBytes-1; i>=0; i--) {
-      val <<= 8;
-      val |= (int)bytes[i] & 0xFF;
-    }
-    return val;
+	  int val = 0;
+	  for (int i=wordSizeBytes-1; i>=0; i--) {
+		  val <<= 8;
+		  val |= (int)bytes[i] & 0xFF;
+	  }
+	  return val;
   }
   
   private int bytesToIntBigEndian(byte[] bytes, int wordSizeBytes) {
