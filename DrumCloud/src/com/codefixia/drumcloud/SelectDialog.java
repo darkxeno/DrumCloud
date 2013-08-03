@@ -246,9 +246,10 @@ public class SelectDialog extends Dialog {
                 @Override
                 public void onClick(View v) {
                 	final FileItem fItem=(FileItem) v.getTag();
+                	Log.i("PREVIEW","File:"+fItem.getFile().getName()+" name:"+fItem.getName());
                 	if(!fItem.isOnline){
                 		if(fItem.getFile().exists()){
-                			if(fItem.getFile().getName().endsWith("wav")){
+                			if(fItem.getName().endsWith("wav")){
                 				MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(fItem.getFile()));
                 				if(mp!=null)
                 					mp.start();
@@ -260,6 +261,7 @@ public class SelectDialog extends Dialog {
                 		}
                 	}else{
                 		downloadPreview=true;
+                		lastSelectedFileItem=fItem;
                 		GoogleDriveService.downloadFile(fItem.downloadUrl);
                 	}
                 }
@@ -501,13 +503,12 @@ public class SelectDialog extends Dialog {
 	  File output=new File(outputFilePath);
 	  if(downloadPreview){
 		  downloadPreview=false;
-		  File file=new File(outputFilePath);
-		  if(file.getName().endsWith("wav")){
-			  MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(file));
+		  if(output.getName().endsWith("wav")){
+			  MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(output));
 			  if(mp!=null)
 				  mp.start();
 		  }else{
-			  selectCallback(file, "playSoundFile", parent);
+			  selectCallback(output, "playSoundFile", parent);
 		  }  		  
 	  }else{
 		  if(output.exists()){

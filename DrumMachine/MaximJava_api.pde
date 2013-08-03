@@ -281,11 +281,16 @@ public class AudioPlayer implements Synth, AudioGenerator {
       System.out.println("total samples "+sampleCount+" resting bytes:"+(int) ((byteCount - 44) / (bitDepth * channels)));
       myAudioData = new short[sampleCount];      
       int skip = (channels -1) * bitDepth;
+      /*if(channels==2 && bitDepth==3 && blockAlign==6){
+        skip=3;
+        bitDepth=3;
+        println("Detected .wav exception:"+filename);
+      }*/
       int sample = 0;
       while (bis.available () >= (bitDepth+skip) && sample<sampleCount) {
+        bis.skip(skip);        
         bis.read(byteBuff, 0, bitDepth);
         myAudioData[sample] = (short) bytesToIntLimited(byteBuff, bitDepth);
-        bis.skip(skip);
         sample ++;
       }
 

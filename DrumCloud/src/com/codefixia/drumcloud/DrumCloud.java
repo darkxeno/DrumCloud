@@ -1657,7 +1657,7 @@ class Draggable {
   float minX,minY,maxX,maxY;
   boolean limitedX=false,limitedY=false;
   float expandedFactor=1.0f;
-  boolean slideOnClick=true;
+  boolean slideOnClick=false;
   float minXZone,minYZone,maxXZone,maxYZone;
 
   Draggable(float tempX, float tempY, float tempW, float tempH) {
@@ -1743,7 +1743,7 @@ class Draggable {
         if(limitedY)y=my-h*0.5f;
         if(limitedX)x=mx-w*0.5f;
         intoLimits();
-        println("moved to x:"+x+" y:"+y);
+        //println("moved to x:"+x+" y:"+y);
       }    
     }
   }
@@ -2531,6 +2531,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
   private int fftInd;
   private float[] fftFrame;
   private float[] powerSpectrum;
+  private static final boolean STEREO_TO_MONO_AVERAGE=false;
 
   private int length;
   private short[] audioData;
@@ -2566,7 +2567,8 @@ public class AudioPlayer implements Synth, AudioGenerator {
     }
   }
 
-  public short[] loadWavFile(File f) {
+  @SuppressWarnings("unused")
+public short[] loadWavFile(File f) {
 
 	  short [] myAudioData = null;
 	  int fileSampleRate = 0;
@@ -2686,9 +2688,17 @@ public class AudioPlayer implements Synth, AudioGenerator {
 		      int skip = (channels -1) * bitDepth;
 		      int sample = 0;
 			  while (bis.available () >= (bitDepth+skip) && sample<sampleCount) {
-				  bis.read(byteBuff, 0, bitDepth);
-				  myAudioData[sample] = (short) bytesToIntLimited(byteBuff, bitDepth);
-				  bis.skip(skip);
+				  if(skip>0 && STEREO_TO_MONO_AVERAGE){
+					  bis.read(byteBuff, 0, bitDepth);
+					  short left=(short) bytesToIntLimited(byteBuff, bitDepth);
+					  bis.read(byteBuff, 0, bitDepth);
+					  short right=(short) bytesToIntLimited(byteBuff, bitDepth);
+					  myAudioData[sample] = (short)((left+right)/2.0f);
+				  }else{
+					  bis.skip(skip);
+					  bis.read(byteBuff, 0, bitDepth);
+					  myAudioData[sample] = (short) bytesToIntLimited(byteBuff, bitDepth);
+				  }
 				  sample ++;
 			  }
 
