@@ -613,7 +613,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
       // calc 
       y3 =  audioData[floor(readHead)];//;y1 + ((x3 - x1) * (y2 - y1));
       y3 *= masterVolume;
-      if (readHead>audioData.length-5000 && readHead<audioData.length-3000)println("x1:"+readHead+" x2:"+x2+" x3:"+x3+" y1:"+y1+" y2:"+y2+" y3:"+y3);
+      //if (readHead>audioData.length-5000 && readHead<audioData.length-3000)println("x1:"+readHead+" x2:"+x2+" x3:"+x3+" y1:"+y1+" y2:"+y2+" y3:"+y3);
       sample = fxChain.getSample((short) y3);
       if (analysing) {
         // accumulate samples for the fft

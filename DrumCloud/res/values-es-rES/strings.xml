@@ -104,5 +104,16 @@ Modo Live Tutorial 7/7
 <string name="helpDialogText7" tools:ignore="MissingTranslation">
 Con los botones \"PAD\" podremos lanzar los samples categorizados por colores.\n
 Si pausamos la reproducción podemos usar los diferentes niveles de presión de los mismos.
-</string>   
+</string>
+<string name="shareAppSubject" tools:ignore="MissingTranslation">
+DrumCloud - Producción Musical en la Nube
+</string>
+<string name="shareAppMessage" tools:ignore="MissingTranslation">
+DrumCloud, tu herramienta móvil de producción musical con almacenamiento ilimitado de samples.\n\n Pruebala ahora: https://play.google.com/store/apps/details?id=com.codefixia.drumcloud\n\nUn producto de Codefixia: http://codefixia.com
+</string>
+<string name="shareAppDialogTitle" tools:ignore="MissingTranslation">
+Compartir con tus amigos
+</string>  
+<string name="share">Compartir</string>
+<string name="moreOptions">Más Opciones&#8230;</string> 
 </resources>

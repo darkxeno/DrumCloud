@@ -109,4 +109,15 @@ Live Mode Tutorial 7/7
 Finally but not less important, the pad buttons that allows you to trigger all the samples categorized by colors.\n
 Using the pads on paused mode let\'s you enjoy the different pressure levels of the pads.
 </string>
+<string name="shareAppSubject" tools:ignore="MissingTranslation">
+DrumCloud - Mobile Audio Production on the Cloud
+</string>
+<string name="shareAppMessage" tools:ignore="MissingTranslation">
+DrumCloud, your mobile audio production tool with unlimited samples storage.\n\n Try it now:\n https://play.google.com/store/apps/details?id=com.codefixia.drumcloud\n\nFrom Codefixia: http://codefixia.com
+</string>
+<string name="shareAppDialogTitle" tools:ignore="MissingTranslation">
+Share with your friends
+</string>
+<string name="share" tools:ignore="MissingTranslation">Share</string>
+<string name="moreOptions" tools:ignore="MissingTranslation">More Options&#8230;</string>
 </resources>

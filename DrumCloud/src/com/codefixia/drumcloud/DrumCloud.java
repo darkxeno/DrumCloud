@@ -34,6 +34,7 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.media.*; 
@@ -4820,14 +4821,14 @@ public class FFT {
   public void onRotate(RotateEvent e){
 	  //println("Detected rotation angle:"+e.getAngle());
   }
-  
+    
   @Override public boolean onCreateOptionsMenu(Menu menu) {
       super.onCreateOptionsMenu(menu);
       MenuInflater inflater = getMenuInflater();
-      inflater.inflate(R.menu.menu, menu);    
+      inflater.inflate(R.menu.menu, menu);        
       return true;
    }
-  
+
   	public boolean onPrepareOptionsMenu (Menu menu){
   		//MenuInflater inflater = getMenuInflater();
 
@@ -4862,6 +4863,28 @@ public class FFT {
   }
     
   
+  public void shareApp(){
+	//create the send intent
+	  Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+
+	  //set the type
+	  shareIntent.setType("text/plain");
+
+	  //add a subject
+	  shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.shareAppSubject));
+
+	  //build the body of the message to be shared
+	  String shareMessage = getString(R.string.shareAppMessage);
+
+	  //add the message
+	  shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
+
+	  //start the chooser for sharing
+	  startActivity(Intent.createChooser(shareIntent, getString(R.string.shareAppDialogTitle)));
+
+  }
+  
+  
    @Override 
    public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
@@ -4873,7 +4896,10 @@ public class FFT {
             break;*/
             case R.id.help:
             	startHelpShowCase();
-            break;            
+            break; 
+            case R.id.shareApp:
+            	shareApp();
+            break;             
             case R.id.playPause:
             	toggleAudioPlayThread();
             break;            
