@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle; 
 import android.preference.PreferenceManager;
 import android.app.ProgressDialog;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -77,7 +78,7 @@ public class DrumCloud extends PApplet implements OnShowcaseEventListener {
 
 
 Midi midi;
-
+private AudioPlayer auxAudioPlayer;
 Maxim maxim;
 float BPM=120.0f;
 float beatMS=60000.0f/BPM;
@@ -179,6 +180,23 @@ final static boolean isAndroidDevice=true;
 
 SelectLibrary files;
 
+public void playSoundFile(File file){
+	if(file.exists() && file.isFile()){
+		Log.i("FILE PREVIEW","path: "+file.getAbsolutePath());
+		if(auxAudioPlayer==null){
+			auxAudioPlayer=maxim.loadFile(file.getAbsolutePath());
+			auxAudioPlayer.volume(1.0f);
+			auxAudioPlayer.setFilter(11025.0f, 0.5f);				
+		}else{
+			auxAudioPlayer.stop();
+			maxim.reloadFile(auxAudioPlayer, file.getAbsolutePath());
+		}
+		auxAudioPlayer.setLooping(false);	
+		auxAudioPlayer.cue(0);
+		auxAudioPlayer.play();
+	}
+}
+
 public void setupAndroid() {
   files = new SelectLibrary(this);
   files.filterExtension=".wav;.json;.aiff;.aif";
@@ -255,7 +273,7 @@ public void setupGeneral() {
   }
   background(0);
   maxim = new Maxim();
-  //maxim = new Minim(this);
+  //maxim = new Minim(this); 
   for (int i=0;i<playerKick.length;i++) {
     playerKick[i] = maxim.loadFile("kick_"+i+".wav");
     playerKick[i].setLooping(false);
@@ -275,7 +293,7 @@ public void setupGeneral() {
     playerHitHat[i].setFilter(filterFrequency, filterResonance);
   }
   //player.volume(1.0);
-  backTopMachine=loadImage("MPD26_mod.png");
+  //backTopMachine=loadImage("MPD26_mod.png");
   //lcdFont = loadFont("lcd.ttf");
   rectMode(CORNER);
 }
@@ -2616,48 +2634,57 @@ public class AudioPlayer implements Synth, AudioGenerator {
 			  short blockAlign = (short)byteBuff[0];    
 			  System.out.println("block align "+blockAlign);  
 
-			  bis.read(byteBuff, 0, 2);// read 2 so we are at 36 now
-			  bitDepth = (short)byteBuff[0];
-			  System.out.println("bit depth "+bitDepth);
-			  // convert to word count...
-			  bitDepth /= 8;
-			  if (blockAlign/channels>bitDepth)bitDepth=blockAlign/channels;
-			  // now start processing the raw data
-			  //bis.skip(4); //skip Subchunk2ID now at 40
-			  bis.read(byteBuff, 0, 4);//read Subchunk2ID now at 40
-			  String subchunkId="";
-			  for (int i=0;i<4;i++)
-				  subchunkId+=(char)byteBuff[i];
-			  println("subchunkId: "+subchunkId);
-			  int sampleCount=0;
-			  if (subchunkId.equalsIgnoreCase("data")) {
-				  bis.read(byteBuff, 0, 4); //reads Subchunk2Size now at 44
-				  // data starts at byte 44
-				  sampleCount = bytesToInt(byteBuff, 4)/ (bitDepth * channels);
-				  println("0:"+byteBuff[0]+" 1:"+byteBuff[1]+" 2:"+byteBuff[2]+" 3:"+byteBuff[3]);
-			  }else{
-				  bis.read(byteBuff, 0, 2);
-				  int infoChars = bytesToInt(byteBuff, 2);
-				  println("skipping chars:"+infoChars);
-				  bis.skip(2);
-				  bis.skip(infoChars);
-				  bis.read(byteBuff, 0, 4);
-				  subchunkId="";
-				  for (int i=0;i<4;i++)
-					  subchunkId+=(char)byteBuff[i];
-				  println("subchunkId: "+subchunkId); 
-				  if (subchunkId.equalsIgnoreCase("data")){
-					  bis.read(byteBuff, 0, 4);
-					  sampleCount = bytesToInt(byteBuff, 4)/ (bitDepth * channels);
-				  }else{
-					  sampleCount = (int) ((byteCount - (44+infoChars)) / (bitDepth * channels));
-				  }       
-				  //println("0:"+byteBuff[0]+" 1:"+byteBuff[1]+" 2:"+byteBuff[2]+" 3:"+byteBuff[3]);        
-			  }
-			  System.out.println("total samples "+sampleCount+" resting bytes:"+(int) ((byteCount - 44) / (bitDepth * channels)));
-			  myAudioData = new short[sampleCount];      
-			  int skip = (channels -1) * bitDepth;
-			  int sample = 0;
+		      bis.read(byteBuff, 0, 2);// read 2 so we are at 36 now
+		      bitDepth = (short)byteBuff[0];
+		      System.out.println("bit depth "+bitDepth);
+		      // convert to word count...
+		      bitDepth /= 8;
+		      if (blockAlign/channels>bitDepth)bitDepth=blockAlign/channels;
+		      // now start processing the raw data
+		      //bis.skip(4); //skip Subchunk2ID now at 40
+		      String subchunkId="";      
+		      int dataByteOffset=40;
+		      while (!subchunkId.equalsIgnoreCase("data") && bis.available()>=1) {
+		        bis.read(byteBuff, 0, 1);
+		        dataByteOffset++;
+		        subchunkId="";
+		        if((char)byteBuff[0]=='d' || (char)byteBuff[0]=='D'){
+		          subchunkId+=(char)byteBuff[0];
+		          if(bis.available()>=1){
+		            bis.read(byteBuff, 0, 1);
+		            dataByteOffset++;
+		            if((char)byteBuff[0]=='a' || (char)byteBuff[0]=='A'){
+		              subchunkId+=(char)byteBuff[0];
+		              if(bis.available()>=1){
+		                bis.read(byteBuff, 0, 1);
+		                if((char)byteBuff[0]=='t' || (char)byteBuff[0]=='T'){
+		                  subchunkId+=(char)byteBuff[0];
+		                  if(bis.available()>=1){
+		                    bis.read(byteBuff, 0, 1);
+		                    if((char)byteBuff[0]=='a' || (char)byteBuff[0]=='A'){
+		                      subchunkId+=(char)byteBuff[0];
+		                    }    
+		                  }  
+		                }
+		              }
+		            }
+		            //println("Search: "+subchunkId);            
+		          }
+		        }
+		      }
+		      if (!subchunkId.equalsIgnoreCase("data")) {
+		        println("Incompatible .wav file: "+filename);
+		        return new short[1];
+		      }
+		      int sampleCount=0;      
+		      bis.read(byteBuff, 0, 4); //reads Subchunk2Size now at 44
+		      println("Located \"data\" at byte:"+dataByteOffset);
+		      sampleCount = bytesToInt(byteBuff, 4)/ (bitDepth * channels);      
+		      //println("0:"+byteBuff[0]+" 1:"+byteBuff[1]+" 2:"+byteBuff[2]+" 3:"+byteBuff[3]);
+		      System.out.println("total samples "+sampleCount+" resting bytes:"+(int) ((byteCount - 44) / (bitDepth * channels)));
+		      myAudioData = new short[sampleCount];      
+		      int skip = (channels -1) * bitDepth;
+		      int sample = 0;
 			  while (bis.available () >= (bitDepth+skip) && sample<sampleCount) {
 				  bis.read(byteBuff, 0, bitDepth);
 				  myAudioData[sample] = (short) bytesToIntLimited(byteBuff, bitDepth);
@@ -2687,7 +2714,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
 		  e.printStackTrace();
 	  }
 
-	  if ((float) fileSampleRate != this.sampleRate) {
+	  if (fileSampleRate>0 && (float) fileSampleRate != this.sampleRate) {
 		  //throw new InputMismatchException("In File: "+filename+" The sample rate of: "+fileSampleRate+ " does not match the default sample rate of: "+this.sampleRate);
 		  Resampler resampler = new Resampler();
 		  System.out.println("Resampling file" +filename+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz"); 
@@ -2745,7 +2772,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
         sample ++;
       }
 
-      if (fileSampleRate != this.sampleRate) {
+      if (fileSampleRate>0 && fileSampleRate != this.sampleRate) {
         System.out.println("Resampling file" +fileName+" from "+fileSampleRate+" Hz to "+this.sampleRate+ " Hz");
         return convertSampleRate(myAudioData, (int) (this.sampleRate), fileSampleRate);
       }
@@ -2760,6 +2787,11 @@ public class AudioPlayer implements Synth, AudioGenerator {
     }    
 
     return myAudioData;
+  }
+  
+  public void reloadAudioFile (String filename) {
+	  this.setAudioData(this.justLoadAudioFile(filename));
+	  this.resetAudioPlayer();
   }
 
   public short[] justLoadAudioFile (String filename) {

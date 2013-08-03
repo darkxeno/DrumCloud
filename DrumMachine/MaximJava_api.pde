@@ -185,13 +185,14 @@ public class AudioPlayer implements Synth, AudioGenerator {
       //InputStream is = getAssets().open(filename);
       InputStream input = null;
       BufferedInputStream bis = null;// new BufferedInputStream(new FileInputStream(f));
-      try{
+      try {
         String path="/data/"+f.getName();
         println("Loading:"+path);
         input=getClass().getResourceAsStream(path);
         byteCount=input.available();
         bis = new BufferedInputStream(input);
-      }catch(Exception ex){
+      }
+      catch(Exception ex) {
         println("ex:"+ex);
         bis = new BufferedInputStream(new FileInputStream(f));
       } 
@@ -221,8 +222,7 @@ public class AudioPlayer implements Synth, AudioGenerator {
       // (32 bit int)
       bis.read(byteBuff, 0, 4); // read 4 so now we are at 28
       fileSampleRate = bytesToInt(byteBuff, 4);
-
-      //System.out.println("Sample rate "+sampleRate);
+      System.out.println("Sample rate "+fileSampleRate);
       // skip 34 bytes to get bits per sample
       // (1 byte)
       //bis.skip(6); // we were at 28...
@@ -238,19 +238,53 @@ public class AudioPlayer implements Synth, AudioGenerator {
       bitDepth /= 8;
       if (blockAlign/channels>bitDepth)bitDepth=blockAlign/channels;
       // now start processing the raw data
-      // data starts at byte 36
-      int sampleCount = (int) ((byteCount - 36) / (bitDepth * channels));
-      myAudioData = new short[sampleCount];
+      //bis.skip(4); //skip Subchunk2ID now at 40
+      String subchunkId="";      
+      int dataByteOffset=40;
+      while (!subchunkId.equalsIgnoreCase("data") && bis.available()>=1) {
+        bis.read(byteBuff, 0, 1);
+        dataByteOffset++;
+        subchunkId="";
+        if((char)byteBuff[0]=='d' || (char)byteBuff[0]=='D'){
+          subchunkId+=(char)byteBuff[0];
+          if(bis.available()>=1){
+            bis.read(byteBuff, 0, 1);
+            dataByteOffset++;
+            if((char)byteBuff[0]=='a' || (char)byteBuff[0]=='A'){
+              subchunkId+=(char)byteBuff[0];
+              if(bis.available()>=1){
+                bis.read(byteBuff, 0, 1);
+                if((char)byteBuff[0]=='t' || (char)byteBuff[0]=='T'){
+                  subchunkId+=(char)byteBuff[0];
+                  if(bis.available()>=1){
+                    bis.read(byteBuff, 0, 1);
+                    if((char)byteBuff[0]=='a' || (char)byteBuff[0]=='A'){
+                      subchunkId+=(char)byteBuff[0];
+                    }    
+                  }  
+                }
+              }
+            }
+            //println("Search: "+subchunkId);            
+          }
+        }
+      }
+      if (!subchunkId.equalsIgnoreCase("data")) {
+        println("Incompatible .wav file: "+filename);
+        return new short[1];
+      }
+      int sampleCount=0;      
+      bis.read(byteBuff, 0, 4); //reads Subchunk2Size now at 44
+      println("Located \"data\" at byte:"+dataByteOffset);
+      sampleCount = bytesToInt(byteBuff, 4)/ (bitDepth * channels);      
+      //println("0:"+byteBuff[0]+" 1:"+byteBuff[1]+" 2:"+byteBuff[2]+" 3:"+byteBuff[3]);
+      System.out.println("total samples "+sampleCount+" resting bytes:"+(int) ((byteCount - 44) / (bitDepth * channels)));
+      myAudioData = new short[sampleCount];      
       int skip = (channels -1) * bitDepth;
       int sample = 0;
-      // skip a few sample as it sounds like shit
-      bis.skip(bitDepth * 4);
-      while (bis.available () >= (bitDepth+skip)) {
-        bis.read(byteBuff, 0, bitDepth);// read 2 so we are at 36 now
-        //int val = bytesToInt(byteBuff, bitDepth);
-        // resample to 16 bit by casting to a short
-        //println("value:"+bytesToInt(byteBuff, bitDepth));
-        myAudioData[sample] = (short) bytesToInt(byteBuff, bitDepth);
+      while (bis.available () >= (bitDepth+skip) && sample<sampleCount) {
+        bis.read(byteBuff, 0, bitDepth);
+        myAudioData[sample] = (short) bytesToIntLimited(byteBuff, bitDepth);
         bis.skip(skip);
         sample ++;
       }
@@ -273,6 +307,15 @@ public class AudioPlayer implements Synth, AudioGenerator {
     }
 
     return myAudioData;
+  }
+
+  public void trimEnd(short[] audioData, int ms, int fileSampleRate) {
+    int size=audioData.length;
+    int samples=int((fileSampleRate/1000.0)*ms);
+    println("rate:"+fileSampleRate+" going back "+samples+" samples");
+    for (int i=size-samples-1;i<size;i++) {
+      println("audioData["+i+"]="+audioData[i]);
+    }
   }  
 
   public short[] convertSampleRate(short[] originalAudio, int targetRate, int originalRate) {
@@ -282,7 +325,9 @@ public class AudioPlayer implements Synth, AudioGenerator {
     }
     else {        
       Resampler resampler = new Resampler();
-      return resampler.reSample(originalAudio, originalRate, targetRate);
+      short[] audio=resampler.reSample(originalAudio, originalRate, targetRate);
+      //trimEnd(audio,1,targetRate);
+      return audio;
     }
   }
 
@@ -312,14 +357,12 @@ public class AudioPlayer implements Synth, AudioGenerator {
       AudioInputStream ais=aiffFileReader.getAudioInputStream(f);
       myAudioData=new short[(int)ais.getFrameLength()];
       while ( (numBytesRead = ais.read (byteBuff)) != -1) {
-        //println("Readed:"+numBytesRead+" saved:"+byteBuff.length);
-        //println("orig. value:"+bytesToIntBigEndian(byteBuff, numBytesRead)+" final value:"+(short)bytesToIntBigEndian(byteBuff, numBytesRead));
-        
-        if(!isBigEndian)
-          myAudioData[sample] = (short) bytesToInt(byteBuff, numBytesRead);
+
+        if (!isBigEndian)
+          myAudioData[sample] = (short) bytesToIntLimited(byteBuff, numBytesRead);
         else
           myAudioData[sample] = (short) bytesToIntBigEndian(byteBuff, numBytesRead);
-          
+
         if (skip>0 && ais.available()>=bitDepth)
           ais.skip(skip);
         sample ++;
@@ -424,21 +467,30 @@ public class AudioPlayer implements Synth, AudioGenerator {
    *@param wordSizeBytes - the number of bytes to read from bytes array
    *@return int - the byte array as an int
    */
-  private int bytesToInt(byte[] bytes, int wordSizeBytes) {
+  private int bytesToIntLimited(byte[] bytes, int wordSizeBytes) {
     int val = 0;
     //LIMIT TO 16BITS
-    if(wordSizeBytes>2)wordSizeBytes=2;
+    if (wordSizeBytes>2)wordSizeBytes=2;
+    for (int i=wordSizeBytes-1; i>=0; i--) {
+      val <<= 8;
+      val |= (int)bytes[i] & 0xFF;
+    }
+    return val;
+  }  
+
+  private int bytesToInt(byte[] bytes, int wordSizeBytes) {
+    int val = 0;
     for (int i=wordSizeBytes-1; i>=0; i--) {
       val <<= 8;
       val |= (int)bytes[i] & 0xFF;
     }
     return val;
   }
-  
+
   private int bytesToIntBigEndian(byte[] bytes, int wordSizeBytes) {
     int val = 0;
     //LIMIT TO 16BITS
-    if(wordSizeBytes>2)wordSizeBytes=2;
+    if (wordSizeBytes>2)wordSizeBytes=2;
     for (int i=0;i<wordSizeBytes; i++) {
       val <<= 8;
       val |= (int)bytes[i] & 0xFF;
@@ -542,18 +594,21 @@ public class AudioPlayer implements Synth, AudioGenerator {
         }
       }
 
+
+
       // linear interpolation here
       // declaring these at the top...
       // easy to understand version...
       //      float x1, x2, y1, y2, x3, y3;
-      x1 = floor(readHead);
-      x2 = x1 + 1;
-      y1 = audioData[(int)x1];
-      y2 = audioData[(int) (x2 % audioData.length)];
-      x3 = readHead;
+      /* x1 = floor(readHead);
+       x2 = x1 + 1;
+       y1 = audioData[(int)x1];
+       y2 = audioData[(int) (x2 % audioData.length)];
+       x3 = readHead;*/
       // calc 
-      y3 =  y1 + ((x3 - x1) * (y2 - y1));
+      y3 =  audioData[floor(readHead)];//;y1 + ((x3 - x1) * (y2 - y1));
       y3 *= masterVolume;
+      if (readHead>audioData.length-5000 && readHead<audioData.length-3000)println("x1:"+readHead+" x2:"+x2+" x3:"+x3+" y1:"+y1+" y2:"+y2+" y3:"+y3);
       sample = fxChain.getSample((short) y3);
       if (analysing) {
         // accumulate samples for the fft
@@ -565,8 +620,8 @@ public class AudioPlayer implements Synth, AudioGenerator {
         }
       }
 
-      return sample;
-      //return (short)y3;
+      //return sample;
+      return (short)y3;
     }
   }
 
@@ -1589,6 +1644,8 @@ public class LinearInterpolation {
     float lengthMultiplier=(float)newLength/samples.length;
     short[] interpolatedSamples = new short[newLength];
 
+    println("from:"+samples.length+" to:"+newLength+" samples lengthMultiplier:"+lengthMultiplier);
+
     // interpolate the value by the linear equation y=mx+c        
     for (int i = 0; i < newLength; i++) {
 
@@ -1596,14 +1653,19 @@ public class LinearInterpolation {
       float currentPosition = i / lengthMultiplier;
       int nearestLeftPosition = (int)currentPosition;
       int nearestRightPosition = nearestLeftPosition + 1;
+      //boolean pass=false;
       if (nearestRightPosition>=samples.length) {
         nearestRightPosition=samples.length-1;
+        //pass=true;
+        //println("Pasado limite:"+nearestRightPosition);
+        //println("interpolatedSamples["+(i-1)+"]:"+interpolatedSamples[i-1]);
       }
 
       float slope=samples[nearestRightPosition]-samples[nearestLeftPosition];     // delta x is 1
       float positionFromLeft = currentPosition - nearestLeftPosition;
 
       interpolatedSamples[i] = (short)(slope*positionFromLeft+samples[nearestLeftPosition]);      // y=mx+c
+      //if(pass)println("interpolatedSamples["+i+"]:"+interpolatedSamples[i]);
     }
 
     return interpolatedSamples;

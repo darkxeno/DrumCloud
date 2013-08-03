@@ -48,6 +48,9 @@ import com.codefixia.googledrive.GoogleDriveService.MyLocalBinder;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.model.ChildReference;
+import com.codefixia.drumcloud.DrumCloud.AudioPlayer;
+import com.codefixia.drumcloud.DrumCloud.Maxim;
+import com.codefixia.drumcloud.SelectConstants;
 
 import processing.core.PApplet;
 import android.app.Dialog;
@@ -57,15 +60,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.content.ComponentName;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -88,6 +99,8 @@ import android.widget.Toast;
 public class SelectDialog extends Dialog {
 
   private static final String CURRENT_PATH = "currentPath";
+  
+  private static boolean downloadPreview = false;
 
   public static final String EX_PATH = "extraPath";
   public static final String EX_STYLE = "selectStyle";
@@ -170,11 +183,12 @@ public class SelectDialog extends Dialog {
         currentPath = savedPath;
       }
     }
+   
 
     selectMode = SelectMode.createSelectMode(getIntent().getIntExtra(EX_STYLE, SelectMode.SELECT_FILE), this);
     selectMode.updateUI();
 
-    simpleAdapter = new ArrayAdapter<FileItem>(getContext(), android.R.layout.simple_list_item_2, android.R.id.text1) {
+    simpleAdapter = new ArrayAdapter<FileItem>(getContext(), R.layout.file_list_item, android.R.id.text1) {
       @Override
       public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
@@ -182,7 +196,7 @@ public class SelectDialog extends Dialog {
         FileItem fItem = this.getItem(position);
         //view.setLayoutParams(new LayoutParams(android.widget.AbsListView.LayoutParams.FILL_PARENT, android.widget.AbsListView.LayoutParams.WRAP_CONTENT));
         TextView tv1 = (TextView) view.findViewById(android.R.id.text1);
-        if(fItem.getFile().getName().endsWith("json")){
+        if(fItem.getName().endsWith("json")){
         	tv1.setText(fItem.getName().replace(".json", " PACK"));
         	view.setBackgroundColor(SelectConstants.COLOR_FILE_PACK);
         }
@@ -196,19 +210,60 @@ public class SelectDialog extends Dialog {
     	tv2.setTextColor(Color.WHITE);
     	tv2.setTextSize(10);
     	tv2.setShadowLayer((float) 0.01, 1, 1,Color.BLACK);
-        
+    	
+    	
+    	ImageButton play = (ImageButton) view.findViewById(R.id.imageButton1);
+    	play.setVisibility(View.VISIBLE);
         if(fItem.getName().equalsIgnoreCase("Up..")){
+        	//play.setVisibility(View.GONE);
+        	play.setEnabled(false);
+        	play.setImageResource(R.drawable.ic_menu_back);
         	if(fItem.isOnline)
         		tv2.setText("Press to go back");
         	else
         		tv2.setText("Press to go back to\n"+fItem.getFullPath());
         }else if(fItem.getType()==FileType.Folder){
+        	//play.setVisibility(View.GONE);
+        	play.setEnabled(false);
+        	play.setImageResource(R.drawable.ic_menu_archive);        	
         	if(fItem.isOnline)
         		tv2.setText(fItem.getFormattedCreationDate()+"\n"+fItem.getFormattedLastViewDate());
         	else        	
         		tv2.setText("Path:\n"+fItem.getFullPath());
-        }else if(fItem.getType()==FileType.File){
+        }else if(fItem.getType()==FileType.File){                   	
         	tv2.setText(fItem.getFormattedLastModifiedDate()+"\n"+fItem.getFormattedSize());
+        	//play.setText(R.string.play);        	
+        	play.setTag(fItem);
+        	if(fItem.getName().endsWith("json")){
+        		play.setEnabled(false);
+        		play.setImageResource(R.drawable.ic_menu_moreoverflow);
+        	}
+        	else{
+        		play.setEnabled(true);
+        		play.setImageResource(android.R.drawable.ic_media_play);
+        	}
+        	play.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                	final FileItem fItem=(FileItem) v.getTag();
+                	if(!fItem.isOnline){
+                		if(fItem.getFile().exists()){
+                			if(fItem.getFile().getName().endsWith("wav")){
+                				MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(fItem.getFile()));
+                				if(mp!=null)
+                					mp.start();
+                			}else{
+                				selectCallback(fItem.getFile(), "playSoundFile",DrumCloud.activity);                				                				
+                			}
+                		}else{
+                			Log.i("FILE ERROR","Unable to locate file:"+fItem.getFile().getAbsolutePath());
+                		}
+                	}else{
+                		downloadPreview=true;
+                		GoogleDriveService.downloadFile(fItem.downloadUrl);
+                	}
+                }
+            });    	
         }        
         
         return view;
@@ -444,16 +499,28 @@ public class SelectDialog extends Dialog {
   public void postDownloadCallback(String outputFilePath){
 	  Log.i("LOADING LOCAL FILE",outputFilePath);
 	  File output=new File(outputFilePath);
-	  if(output.exists()){
-		  if(!output.getName().endsWith("json")){
-			selectCallback(output, callbackMethod, parent);
-		  	Toast.makeText(DrumCloud.activity, "Sound downloaded: " + output.getName(), Toast.LENGTH_SHORT).show();
-		  }else{ 
-			selectCallback(output, callbackMethod, parent);  
-			Toast.makeText(DrumCloud.activity, "Downloading SoundPack: " + output.getName(), Toast.LENGTH_SHORT).show();  
-		  }
+	  if(downloadPreview){
+		  downloadPreview=false;
+		  File file=new File(outputFilePath);
+		  if(file.getName().endsWith("wav")){
+			  MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(file));
+			  if(mp!=null)
+				  mp.start();
+		  }else{
+			  selectCallback(file, "playSoundFile", parent);
+		  }  		  
 	  }else{
-		  Toast.makeText(DrumCloud.activity, "Error downlading file:"+outputFilePath, Toast.LENGTH_SHORT).show();
+		  if(output.exists()){
+			  if(!output.getName().endsWith("json")){
+				  selectCallback(output, callbackMethod, parent);
+				  Toast.makeText(DrumCloud.activity, "Sound downloaded: " + output.getName(), Toast.LENGTH_SHORT).show();
+			  }else{ 
+				  selectCallback(output, callbackMethod, parent);  
+				  Toast.makeText(DrumCloud.activity, "Downloading SoundPack: " + output.getName(), Toast.LENGTH_SHORT).show();  
+			  }
+		  }else{
+			  Toast.makeText(DrumCloud.activity, "Error downlading file:"+outputFilePath, Toast.LENGTH_SHORT).show();
+		  }
 	  }
   }
 
