@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.codefixia.drumcloud"
-    android:versionCode="3"
-    android:versionName="1.0.2" >
+    android:versionCode="4"
+    android:versionName="1.0.3" >
     
     <uses-sdk
         android:minSdkVersion="10"
@@ -30,6 +30,7 @@
         android:label="DrumCloud" >
         <activity
             android:name="com.codefixia.drumcloud.DrumCloud"
+            android:uiOptions="splitActionBarWhenNarrow"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,7 +41,7 @@
         <activity
             android:name="com.codefixia.googledrive.DummyActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
 
         <service android:name="com.codefixia.googledrive.GoogleDriveService" >

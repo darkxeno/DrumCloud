@@ -34,9 +34,10 @@ float beatOffset=0;
 float lastPlayTime;
 float firstKick=0;
 boolean snapToGrid=true;
-boolean liveMode=false;
-boolean sequencerMode=false;
+boolean paused=false;
+MainMode mode=MainMode.LIVE;
 Sequencer sequencer=new Sequencer(this);
+Automator automator=new Automator(this);
 final int totalSamples=16;
 final int totalGrids=(int)gridsByBeat*(int)beatsPerTempo;
 AudioPlayer[] playerKick=new AudioPlayer[4];
@@ -141,6 +142,7 @@ void setup()
   if (isAndroidDevice)
     setupAndroid();
   sequencer.setup();
+  automator.setup();
 }
 
 void setupPowerSpectrum() {
@@ -162,9 +164,9 @@ void setupGeneral() {
   //frameRate(30);
   if (!isAndroidDevice) {
     //if (render3D)
-      //size(480, 688, P3D);
+    //size(480, 688, P3D);
     //else
-      size(480, 688);
+    size(480, 688);
   }
   else
     size(420, 700);
@@ -181,7 +183,7 @@ void setupGeneral() {
   }
   else {
     //frameRate(10);    
-    liveMode=true;
+    paused=true;
   }
   background(0);
   maxim = new Maxim(this);
@@ -314,7 +316,7 @@ void setupSliders() {
 
 void toggleAudioPlayThread() {
 
-  if (liveMode) {
+  if (paused) {
     audioPlayThread= new AudioPlayThread(this, 1, "AudioPlayThread");
     audioPlayThread.start();
   }
@@ -324,7 +326,7 @@ void toggleAudioPlayThread() {
       audioPlayThread.quit();
   }
 
-  liveMode=!liveMode;
+  paused=!paused;
 }
 
 //synchronized 
@@ -361,7 +363,7 @@ void proccessTempoVars() {
         float dif=((millis()%tempoMS)-(currentGrid*gridMS));
         if (dif>maxDif)maxDif=dif;
         //println("Estimated play offset:"+(currentGrid*gridMS)+" real play offset:"+(millis()%tempoMS)+" dif:"+dif+" maxDif:"+maxDif);  
-        println("Dif:"+dif+" maxDif:"+maxDif);
+        //println("Dif:"+dif+" maxDif:"+maxDif);
       }
     }
     audioPlayThread.wait=(int)gridMS-10;
@@ -401,9 +403,8 @@ void setupTopControls() {
   deleteButtons.setOtherButtonColors(colors);
 }
 
-void setupMenuButton(){
+void setupMenuButton() {
   menuButton=new MenuButton(width*0.92, -3, width*0.08, width*0.08);
-
 }
 
 void drawMenuButton() {
@@ -435,12 +436,27 @@ void drawTempoBar() {
   float gridWidth=barWidth/beatsPerTempo/gridsByBeat;
 
   noStroke();
-  for (int i=0;i<totalSamples;i++) {
-    for (int j=0;j<32;j++) {
+  for (int j=0;j<32;j++) {
+      int count=0;
+      for (int i=0;i<totalSamples;i++) {
       if (samplesPerBeat[i][j]) {
+        count++;
         fill(getColorSoundType(i));
         float cOffset=gridWidth*j;
-        rect(barOriginX+cOffset, barOriginY, gridWidth, barHeight);
+        switch(count){
+          case 2:
+            rect(barOriginX+cOffset, barOriginY+barHeight*0.5, gridWidth, barHeight*0.5);
+          break;
+          case 3:
+            rect(barOriginX+cOffset, barOriginY+barHeight*0.33, gridWidth, barHeight*0.33);
+          break;
+          case 4:
+            rect(barOriginX+cOffset, barOriginY+barHeight*0.5, gridWidth, barHeight*0.25);
+          break;          
+          default:
+             rect(barOriginX+cOffset, barOriginY, gridWidth, barHeight);
+          break;
+        }
       }
     }
   }   
@@ -662,7 +678,7 @@ void animateTransition(float animTime, float startValue, float endValue) {
         rotateY(rot);
       }
       else {
-        if (sequencerMode) {
+        if (mode==MainMode.SEQUENCER) {
           float xPos=map(ms, animationStart, halfTime, 0, width*0.5);          
           float yPos=map(ms, animationStart, halfTime, 0, height*0.5);           
           float scale=map(ms, animationStart, halfTime, 1, 0);
@@ -679,7 +695,10 @@ void animateTransition(float animTime, float startValue, float endValue) {
       if (!animatingBack) {
         animatingBack=true;
         animationEnd=ms+animTime*0.5;
-        sequencerMode=!sequencerMode;
+        if (mode==MainMode.SEQUENCER)
+          mode=MainMode.LIVE;
+        else
+          mode=MainMode.SEQUENCER;
       } 
 
       if (render3D) {
@@ -690,7 +709,7 @@ void animateTransition(float animTime, float startValue, float endValue) {
         rotateY(rot);
       }
       else {
-        if (sequencerMode) {
+        if (mode==MainMode.SEQUENCER) {
           float xPos=map(ms, halfTime, animationEnd, width*0.5, 0);          
           float yPos=map(ms, halfTime, animationEnd, height*0.5, 0);          
           float scale=map(ms, halfTime, animationEnd, 0, 1);
@@ -716,26 +735,27 @@ void draw()
   clear();
   background(127, 127, 127);
 
-
   animateTransition(1000, 0, 90);
 
-
-  if (!sequencerMode) {
+  if (mode!=MainMode.SEQUENCER) {
     drawTempoBar();
     drawPadsContainer();
-    drawKickButtons();
-    drawBassButtons();
-    drawSnareButtons();
-    drawHitHatButtons();
-    drawSliders();
-    drawPowerSpectrum();
-    drawTopControls();
-    drawMenuButton();
+    if (mode!=MainMode.AUTOMATOR) {
+      drawKickButtons();
+      drawBassButtons();
+      drawSnareButtons();
+      drawHitHatButtons();      
+      drawSliders();
+      drawPowerSpectrum();
+      drawTopControls();
+    }else{
+      automator.draw();
+    }
   }
   else {
     sequencer.draw();
-    drawMenuButton();
   }
+  drawMenuButton();
 }
 
 
@@ -845,8 +865,8 @@ void proccessPanel() {
 
 void mouseMoved()
 {
-  if (!sequencerMode) {
-
+  switch(mode) {
+  case LIVE:
     for (int i=0;i<kick.length;i++) {
       if (kick[i].isOver(mouseX, mouseY)) {
       }
@@ -862,21 +882,24 @@ void mouseMoved()
     if (loadButton.isOver(mouseX, mouseY)) {
     }
     if (playButton.isOver(mouseX, mouseY)) {
-    }   
-    
-  }
-  else {
+    }      
+    break;    
+  case SEQUENCER:
     sequencer.mouseMoved();
+    break;    
+  case AUTOMATOR:
+    automator.mouseMoved();
+    break;
   }
-  
+
   if (menuButton.isOver(mouseX, mouseY)) {
-  }   
+  }
 }
 
 void mouseDragged()
 {
-
-  if (!sequencerMode) {
+  switch(mode) {
+  case LIVE:
     if (deleteButtons.isSelected(mouseX, mouseY)) {
     }  
 
@@ -911,17 +934,20 @@ void mouseDragged()
         }
         //println("frequency:"+filterFrequency+" resonance:"+filterResonance+" speed:"+valY*2);
       }
-    }
-  }
-  else {
+    }    
+    break;    
+  case SEQUENCER:
     sequencer.mouseDragged();
+    break;    
+  case AUTOMATOR:
+    automator.mouseDragged();
+    break;
   }
 }
 
 void mouseReleased() {
-
-  if (!sequencerMode) {
-
+  switch(mode) {
+  case LIVE:
     for (int i=0;i<sliders.length;i++) {
       sliders[i].stopDragging();
     }
@@ -942,16 +968,23 @@ void mouseReleased() {
       //deleteSoundOfGroup(index);
     }
     loadButton.stopClick();
-    playButton.stopClick();     
-  }
-  else {
+    playButton.stopClick();    
+    break;    
+  case SEQUENCER:
     sequencer.mouseReleased();
+    break;    
+  case AUTOMATOR:
+    automator.mouseReleased();
+    break;
   }
-  
+
   if (menuButton.isClicked(mouseX, mouseY)) {
-      sequencer.updateTracksState();
-      sequencerMode=!sequencerMode;      
-  }  
+    sequencer.updateState();
+    if(mode==MainMode.LIVE)
+      mode=MainMode.AUTOMATOR;
+    else
+      mode=MainMode.LIVE;
+  }
 }
 
 void deleteSoundType(int soundType) {
@@ -1047,7 +1080,8 @@ void loadSoundOnPlayer(int soundType, File selection) {
 
 void mousePressed()
 {
-  if (!sequencerMode) {
+  switch(mode) {
+  case LIVE:
     for (int i=0;i<kick.length;i++) {
       if (kick[i].isClicked(mouseX, mouseY)) {
         if (mainMode==normalMode)
@@ -1099,11 +1133,15 @@ void mousePressed()
     } 
     if (playButton.isClicked(mouseX, mouseY)) {
       toggleAudioPlayThread();
-    }    
-  }
-  else {
+    }     
+    break;    
+  case SEQUENCER:
     sequencer.mousePressed();
-  }
+    break;    
+  case AUTOMATOR:
+    automator.mousePressed();
+    break;
+  }  
 }
 
 AudioPlayer getPlayerBySoundType(int soundType) {
@@ -1159,9 +1197,29 @@ color getColorSoundType(int sountType) {
 
 void addSoundTypeToList(int soundType) {
   playSoundType(soundType);
-  if (!liveMode) {
+  if (!paused) {
     samplesPerBeat[soundType][currentGrid]=!samplesPerBeat[soundType][currentGrid];
     println("changed sound:"+soundType+" at position:"+currentGrid);
+  }
+}
+
+void addSoundTypeRepeated(int soundType,int repeatOffset) {
+  playSoundType(soundType);
+  if (!paused) {
+    int size=samplesPerBeat[soundType].length;
+    int times=size/repeatOffset;
+    for(int i=0;i<times;i++){
+      int index=(currentGrid+i*repeatOffset)%size;
+      samplesPerBeat[soundType][index]=true;
+      println("changed sound:"+soundType+" at position:"+currentGrid);
+    }
+  }
+}
+
+void removeAllSoundsOfType(int soundType){
+  int size=samplesPerBeat[soundType].length;
+  for(int i=0;i<size;i++){
+    samplesPerBeat[soundType][i]=false;
   }
 }
 
@@ -1178,11 +1236,18 @@ void keyPressed() {
     } 
     else if (keyCode == LEFT) {
       //if (gridsByBeat>2)gridsByBeat*=0.5;
-      sequencer.updateTracksState();
-      sequencerMode=!sequencerMode;
+      automator.updateState();
+      if(mode!=MainMode.AUTOMATOR)
+        mode=MainMode.AUTOMATOR;
+      else
+        mode=MainMode.LIVE;
     }
     else if (keyCode == RIGHT) {
-      if (gridsByBeat<32)gridsByBeat*=2;
+      sequencer.updateState();
+      if(mode!=MainMode.SEQUENCER)
+        mode=MainMode.SEQUENCER;
+      else
+        mode=MainMode.LIVE;
     }
     else if (keyCode == BACKSPACE) {
       if (savedCues.size()>0) {
@@ -1255,14 +1320,11 @@ void keyPressed() {
     //println("Pressed code:"+keyCode);
   }
 }
-  
-  void mouseWheel(MouseEvent event) {
-    float e = event.getAmount();
-    println("Scroll value:"+e);
-    if(sequencerMode)
-      sequencer.changeZoom(mouseX,mouseY,event.getAmount());
-  }
 
-
-
+void mouseWheel(MouseEvent event) {
+  float e = event.getAmount();
+  println("Scroll value:"+e);
+  if (mode==MainMode.SEQUENCER)
+    sequencer.changeZoom(mouseX, mouseY, event.getAmount());
+}
 

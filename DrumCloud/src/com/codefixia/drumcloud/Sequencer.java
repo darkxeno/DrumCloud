@@ -3,10 +3,11 @@ package com.codefixia.drumcloud;
 
 import java.util.LinkedList;
 
+import com.codefixia.ui.ToggleButton;
+
 import processing.core.PApplet;
 import processing.core.PVector;
 
-import com.codefixia.drumcloud.DrumCloud.ToggleButton;
 
 public class Sequencer {
 
@@ -77,39 +78,39 @@ public class Sequencer {
 
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=0;j<drumCloud.samplesPerBeat[i].length+1;j++) {
-        tracks[i][j]=drumCloud.new ToggleButton(drumCloud.width-((i+1)*buttonWidth), j*buttonHeight, buttonWidth, buttonHeight);
+        tracks[i][j]=new ToggleButton(drumCloud.width-((i+1)*buttonWidth), j*buttonHeight, buttonWidth, buttonHeight);
         if (j==0) {
-          tracks[i][j].text=(i%4)+1+"";
+          tracks[i][j].setText((i%4)+1+"");
         }
         if (((j-1)/8)%2==0) {
           switch((int)i/4) {
           case 0:
-            tracks[i][j].fillColor=drumCloud.redColor;
+            tracks[i][j].setFillColor(drumCloud.redColor);
             break;
           case 1:
-            tracks[i][j].fillColor=drumCloud.orangeColor;
+            tracks[i][j].setFillColor(drumCloud.orangeColor);
             break;
           case 2:
-            tracks[i][j].fillColor=drumCloud.blueColor;
+            tracks[i][j].setFillColor(drumCloud.blueColor);
             break;
           case 3:
-            tracks[i][j].fillColor=drumCloud.greenColor;
+            tracks[i][j].setFillColor(drumCloud.greenColor);
             break;
           }
         }
         else {
           switch((int)i/4) {
           case 0:
-            tracks[i][j].fillColor=drumCloud.color(drumCloud.red(drumCloud.redColor)*0.9f, drumCloud.green(drumCloud.redColor)*0.9f, drumCloud.blue(drumCloud.redColor)*0.9f);
+            tracks[i][j].setFillColor(drumCloud.color(drumCloud.red(drumCloud.redColor)*0.9f, drumCloud.green(drumCloud.redColor)*0.9f, drumCloud.blue(drumCloud.redColor)*0.9f));
             break;
           case 1:
-            tracks[i][j].fillColor=drumCloud.color(drumCloud.red(drumCloud.orangeColor)*0.9f, drumCloud.green(drumCloud.orangeColor)*0.9f, drumCloud.blue(drumCloud.orangeColor)*0.9f);
+            tracks[i][j].setFillColor(drumCloud.color(drumCloud.red(drumCloud.orangeColor)*0.9f, drumCloud.green(drumCloud.orangeColor)*0.9f, drumCloud.blue(drumCloud.orangeColor)*0.9f));
             break;
           case 2:
-            tracks[i][j].fillColor=drumCloud.color(drumCloud.red(drumCloud.blueColor)*0.9f, drumCloud.green(drumCloud.blueColor)*0.9f, drumCloud.blue(drumCloud.blueColor)*0.9f);
+            tracks[i][j].setFillColor(drumCloud.color(drumCloud.red(drumCloud.blueColor)*0.9f, drumCloud.green(drumCloud.blueColor)*0.9f, drumCloud.blue(drumCloud.blueColor)*0.9f));
             break;
           case 3:
-            tracks[i][j].fillColor=drumCloud.color(drumCloud.red(drumCloud.greenColor)*0.9f, drumCloud.green(drumCloud.greenColor)*0.9f, drumCloud.blue(drumCloud.greenColor)*0.9f);
+            tracks[i][j].setFillColor(drumCloud.color(drumCloud.red(drumCloud.greenColor)*0.9f, drumCloud.green(drumCloud.greenColor)*0.9f, drumCloud.blue(drumCloud.greenColor)*0.9f));
             break;
           }
         }
@@ -145,7 +146,7 @@ public class Sequencer {
   public void updateTracksState() {
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].ON=drumCloud.samplesPerBeat[i][j-1];
+        tracks[i][j].setON(drumCloud.samplesPerBeat[i][j-1]);
       }
     }
   }  
@@ -233,10 +234,10 @@ public class Sequencer {
       for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
         drumCloud.noFill();
         drumCloud.stroke(150);
-        if (tracks[i][j].ON)
-          drumCloud.rect(miniMapOriginX+tracks[i][j].x*miniMapScale, 
-          miniMapOriginY+tracks[i][j].y*miniMapScale, 
-          tracks[i][j].w*miniMapScale, tracks[i][j].h*miniMapScale);
+        if (tracks[i][j].isON())
+          drumCloud.rect(miniMapOriginX+tracks[i][j].getX()*miniMapScale, 
+          miniMapOriginY+tracks[i][j].getY()*miniMapScale, 
+          tracks[i][j].getW()*miniMapScale, tracks[i][j].getH()*miniMapScale);
       }
     }
   }  

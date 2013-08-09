@@ -3,7 +3,6 @@
     <style name="MyTheme" parent="@android:style/Theme.Holo">
         <!-- Any customizations for your app running on devices with Theme.Holo here -->
         <item name="android:panelFullBackground">@drawable/menu_full_bg</item>
-     
 	</style>
-    <drawable name="menu_full_bg">#000000</drawable>
+    <drawable name="menu_full_bg">#000000</drawable>   
 </resources>

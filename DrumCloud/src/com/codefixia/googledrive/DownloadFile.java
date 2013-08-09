@@ -16,7 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.codefixia.drumcloud.DrumCloud;
-import com.codefixia.drumcloud.SelectDialog;
+import com.codefixia.selectlibrary.SelectDialog;
 
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -134,7 +134,7 @@ public class DownloadFile extends AsyncTask<String, Integer, String> {
 	}	
 	
 	public static void incDownloaded(){
-		DrumCloud.activity.runOnUiThread(new Runnable() {
+		DrumCloud.X.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				synchronized ("sync") {

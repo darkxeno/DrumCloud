@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:icon="@android:drawable/ic_media_pause"
+    <item android:icon="@android:drawable/ic_media_pause" android:showAsAction="ifRoom"
          android:id="@+id/playPause" android:title="@string/pause"></item>
     <item android:icon="@drawable/ic_menu_selectall_holo_light"
          android:id="@+id/toggleMode" android:title="@string/sequencer_mode"></item>
@@ -10,11 +10,11 @@
          android:id="@+id/loadSamples" android:title="@string/load_samples"></item> -->            
     <item android:icon="@drawable/emo_im_money_mouth"
          android:id="@+id/donate" android:title="@string/donate"></item>
-    <item android:icon="@drawable/emo_im_money_mouth"
+    <item android:icon="@drawable/ic_menu_moreoverflow"
 	android:id="@+id/moreItem" android:title="@string/moreOptions">        
     <menu >
     <group android:id="@+id/moreGroup" android:checkableBehavior="single">
-		<item android:id="@+id/shareApp"
+		<item android:id="@+id/shareApp" android:icon="@android:drawable/ic_menu_share"
         	android:showAsAction="ifRoom" android:title="@string/share"
         	android:actionProviderClass="android.widget.ShareActionProvider" />     
     	<item android:icon="@android:drawable/ic_menu_help"

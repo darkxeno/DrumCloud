@@ -138,7 +138,7 @@ public class Sequencer {
     drumCloud.rect(visibleWidth-maxTotalWidth, barOffset, maxTotalWidth, buttonHeight);
   }
 
-  public void updateTracksState() {
+  public void updateState() {
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
         tracks[i][j].ON=drumCloud.samplesPerBeat[i][j-1];

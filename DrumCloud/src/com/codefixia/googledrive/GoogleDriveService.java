@@ -1,12 +1,4 @@
 package com.codefixia.googledrive;
-import android.R;
-import android.R.integer;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.IntentService;
-import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -15,37 +7,27 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import processing.core.PApplet;
-
+import android.R;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.IntentService;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.codefixia.drumcloud.DrumCloud;
-import com.codefixia.drumcloud.FileItem;
-import com.codefixia.drumcloud.FileType;
-import com.codefixia.drumcloud.SelectDialog;
+import com.codefixia.selectlibrary.FileItem;
+import com.codefixia.selectlibrary.FileType;
+import com.codefixia.selectlibrary.SelectDialog;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
@@ -54,10 +36,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.Drive.Children;
 import com.google.api.services.drive.Drive.Files;
-import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.ChildList;
 import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -228,23 +207,23 @@ public class GoogleDriveService extends IntentService {
 	
 	
 	private static void requestAuth(final Context context,final UserRecoverableAuthIOException e){		
-		DrumCloud.activity.runOnUiThread(new Runnable() {
+		DrumCloud.X.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				delegate.hide();
-				Intent i=new Intent(DrumCloud.activity,DummyActivity.class);
+				Intent i=new Intent(DrumCloud.X,DummyActivity.class);
 				i.setAction("REQUEST_AUTHORIZATION");
 				//i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				i.putExtra("operation", "REQUEST_AUTHORIZATION");
 				i.putExtra("intent", e.getIntent());
-				DrumCloud.activity.startActivity(i);
-				DrumCloud.activity.overridePendingTransition (R.anim.fade_in,R.anim.fade_out);
+				DrumCloud.X.startActivity(i);
+				DrumCloud.X.overridePendingTransition (R.anim.fade_in,R.anim.fade_out);
 			}
 		});		
 	}	
 	
 	private void returnFiles(final List<FileItem> childs) {
-		DrumCloud.activity.runOnUiThread(new Runnable() {
+		DrumCloud.X.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				delegate.callbackDriveFolderList(childs);
@@ -254,7 +233,7 @@ public class GoogleDriveService extends IntentService {
 	}
 	
 	private static void hideDialog() {
-		DrumCloud.activity.runOnUiThread(new Runnable() {
+		DrumCloud.X.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				delegate.hide();
@@ -370,7 +349,7 @@ public class GoogleDriveService extends IntentService {
 	}	
 	
 	private static void returnInputStream(final InputStream is) {
-		DrumCloud.activity.runOnUiThread(new Runnable() {
+		DrumCloud.X.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				delegate.preDownloadCallback(is);
@@ -379,13 +358,13 @@ public class GoogleDriveService extends IntentService {
 	}
 	
 	private static void returnCanceledLogin() {
-		DrumCloud.activity.runOnUiThread(new Runnable() {
+		DrumCloud.X.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				if(delegate!=null && delegate.mProgressDialog!=null){
 					delegate.mProgressDialog.dismiss();
 				}
-				Toast.makeText(DrumCloud.activity, "Login on Google Drive canceled", Toast.LENGTH_SHORT).show();
+				Toast.makeText(DrumCloud.X, "Login on Google Drive canceled", Toast.LENGTH_SHORT).show();
 				delegate.dismiss();
 			}
 		});		
@@ -393,7 +372,7 @@ public class GoogleDriveService extends IntentService {
 
 	private void uploadFile(final String localFilePath) {
 		final GoogleDriveService GDS=this;
-		AlertDialog.Builder  d = new AlertDialog.Builder(DrumCloud.activity).
+		AlertDialog.Builder  d = new AlertDialog.Builder(DrumCloud.X).
 				//setMessage("Select the category of the sample.").
 				setTitle("Do you want to upload and share your sample on Google Drive?");
 		d.setSingleChoiceItems(folderCategoryNames, 0 , new OnClickListener() {
@@ -402,7 +381,7 @@ public class GoogleDriveService extends IntentService {
 				// TODO Auto-generated method stub
 				          String str = folderCategoryNames[which];
 				          categorySelected=which;
-				          Toast.makeText(DrumCloud.activity,
+				          Toast.makeText(DrumCloud.X,
 				                    "You have selected the \""+str+"\" sample category.",
 				                     Toast.LENGTH_LONG).show();
 			}
@@ -473,10 +452,10 @@ public class GoogleDriveService extends IntentService {
 	}
 
 	public void showToast(final String toast) {
-		DrumCloud.activity.runOnUiThread(new Runnable() {
+		DrumCloud.X.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				Toast.makeText(DrumCloud.activity, toast, Toast.LENGTH_SHORT).show();
+				Toast.makeText(DrumCloud.X, toast, Toast.LENGTH_SHORT).show();
 				//fa.finish();
 			}
 		});
