@@ -60,6 +60,7 @@ import com.codefixia.ui.ExpandableButtons;
 import com.codefixia.ui.HorizontalSlider;
 import com.codefixia.ui.MenuButton;
 import com.codefixia.ui.ToggleButton;
+import com.codefixia.ui.ToggleButtonsBar;
 import com.codefixia.ui.VerticalSlider;
 import com.codefixia.utils.AndroidUtil;
 import com.codefixia.utils.FontAdjuster;
@@ -93,6 +94,7 @@ boolean snapToGrid=true;
 MainMode mode=MainMode.LIVE;
 boolean paused=true;
 boolean pressureEnabled=true;
+Automator automator=new Automator(this);
 Sequencer sequencer=new Sequencer(this);
 final int totalSamples=16;
 final int totalGrids=(int)gridsByBeat*(int)beatsPerTempo;
@@ -123,16 +125,16 @@ PImage backTopMachine, backBottomMachine;
 float filterFrequency=11025.0f, filterResonance=0.5f, delayTime=0, delayFeedback=0, speed=1.0f, speed1=1.0f, volumeKick=1.0f, volumeBass=1.0f, volume=1.0f;
 
 int candyPink=color(247, 104, 124);
-int redColor=0xffB90016;
-int orangeColor=0xffC18900;
-int blueColor=0xff5828A3;
+public int redColor=0xffB90016;
+public int orangeColor=0xffC18900;
+public int blueColor=0xff5828A3;
 int blueDarkColor=0xff380883;
 int blueLightColor=0xff380883;
-int greenColor=0xff22A300;
+public int greenColor=0xff22A300;
 int darkGreyColor=color(50);
 int mediumGreyColor=color(127);
 int lightGreyColor=color(200);
-int yellowColor=color(100, 100, 0);
+public int yellowColor=color(100, 100, 0);
 
 PFont lcdFont;
 
@@ -155,10 +157,10 @@ ClickablePad[] kick=new ClickablePad[4], bass=new ClickablePad[4], snare=new Cli
 Clickable panelModeButton, trackModeButton;
 ExpandableButtons deleteButtons;
 ToggleButton loadButton, playButton;
-MenuButton menuButton;
+ToggleButtonsBar menuBar;
 
 float valueX=0.0f, valueY=0.0f;
-float buttonSize, buttonsOriginX, buttonsOriginY, buttonMarginX, buttonMarginY;
+float buttonSize, buttonsOriginX, buttonsOriginY, buttonMarginX, buttonMarginY, padsContainerOriginY;
 float sliderWidth, sliderHeight, sliderOriginX, sliderMinY, sliderMaxY, sliderMarginX;
 VerticalSlider[] sliders=new VerticalSlider[6];
 HorizontalSlider bpmSlider;
@@ -175,12 +177,18 @@ final int SNARE=3;
 final int HITHAT=4;
 int trackMode=ALL;
 
-final static boolean isAndroidDevice=true;
+public final static boolean isAndroidDevice=true;
 
 SelectLibrary files;
 
 public static boolean isAndroidDevice(){
 	return isAndroidDevice;
+}
+
+
+
+public int getCurrentGrid() {
+	return currentGrid;
 }
 
 public void playSoundFile(File file){
@@ -231,6 +239,7 @@ public void setup()
   if (isAndroidDevice)
     setupAndroid();
   sequencer.setup();
+  automator.setup();
 }
 
 public void setupPowerSpectrum() {
@@ -365,7 +374,7 @@ public void setupTempoBar() {
   if (!isAndroidDevice)
     barOriginY=height*0.01f;
   else
-    barOriginY=height*0.05f;
+    barOriginY=height*0.025f;
 }
 
 public void setupPadButtons() {
@@ -375,11 +384,13 @@ public void setupPadButtons() {
   buttonMarginY=buttonSize*0.275f;
 
   if (isAndroidDevice) {
-    buttonsOriginY=height*0.45f;
+    buttonsOriginY=height*0.425f;
   }
   else {
     buttonsOriginY=height*0.445f;
   }
+  
+  padsContainerOriginY=buttonsOriginY-buttonSize*0.2f;
 }
 
 public void setupSliders() {
@@ -390,8 +401,8 @@ public void setupSliders() {
   sliderImage=loadImage("slider.png");
 
   if (isAndroidDevice) {
-    sliderMinY=height*0.20f;
-    sliderMaxY=height*0.33f;
+    sliderMinY=height*0.175f;
+    sliderMaxY=height*0.305f;
   }
   else {
     sliderMinY=height*0.162f;
@@ -455,7 +466,7 @@ public void processTempoVars() {
         float dif=((millis()%tempoMS)-(currentGrid*gridMS));
         if (dif>maxDif)maxDif=dif;
         //println("Estimated play offset:"+(currentGrid*gridMS)+" real play offset:"+(millis()%tempoMS)+" dif:"+dif+" maxDif:"+maxDif);  
-        println("Dif:"+dif+" maxDif:"+maxDif);
+        //println("Dif:"+dif+" maxDif:"+maxDif);
       }
     }
     audioPlayThread.setWait((int)gridMS-10);
@@ -473,7 +484,7 @@ public void setupTopControls() {
 
   playButton=new ToggleButton(barOriginX+barWidth*0.368f, barOriginY+barHeight*2.0f, buttonSize*0.5f, buttonSize*0.5f);
   playButton.setText("II");
-  playButton.setActivatedText(">");
+  playButton.setActiveText(">");
   playButton.setFillColor(color(150, 150, 0));
   //playButton.blinkWhenOn=true;  
 
@@ -508,14 +519,21 @@ public void drawTopControls() {
   deleteButtons.drawState();
 }
 
-public void drawMenuButton(){
+public void drawMenuBar(){
 	
-	if(showMenuButton && menuButton==null){
-		menuButton=new MenuButton(width*0.891f, -3, width*0.11f, width*0.11f);
+	if(showMenuBar && menuBar==null){
+		menuBar=new ToggleButtonsBar(0, height*0.95f, width, height*0.05f);
+		menuBar.setShowMenuButton(true);		
+		String[] buttons={
+				getString(R.string.live_menu_item),
+				getString(R.string.seq_menu_item),
+				getString(R.string.auto_menu_item)
+				};
+		menuBar.setButtons(buttons);
 	}
 
-	if(menuButton!=null)
-		menuButton.drawState();	
+	if(menuBar!=null)
+		menuBar.draw();	
 
 }
 
@@ -531,12 +549,27 @@ public void drawTempoBar() {
   float gridWidth=barWidth/beatsPerTempo/gridsByBeat;
 
   noStroke();
-  for (int i=0;i<totalSamples;i++) {
-    for (int j=0;j<32;j++) {
+  for (int j=0;j<32;j++) {
+      int count=0;
+      for (int i=0;i<totalSamples;i++) {
       if (samplesPerBeat[i][j]) {
+        count++;
         fill(getColorSoundType(i));
         float cOffset=gridWidth*j;
-        rect(barOriginX+cOffset, barOriginY, gridWidth, barHeight);
+        switch(count){
+          case 2:
+            rect(barOriginX+cOffset, barOriginY+barHeight*0.5f, gridWidth, barHeight*0.5f);
+          break;
+          case 3:
+            rect(barOriginX+cOffset, barOriginY+barHeight*0.33f, gridWidth, barHeight*0.33f);
+          break;
+          case 4:
+            rect(barOriginX+cOffset, barOriginY+barHeight*0.5f, gridWidth, barHeight*0.25f);
+          break;          
+          default:
+             rect(barOriginX+cOffset, barOriginY, gridWidth, barHeight);
+          break;
+        }
       }
     }
   }   
@@ -569,7 +602,7 @@ public void drawPadsContainer() {
   strokeWeight(3);
   stroke(100, 100, 100, 255);
   fill(50, 50, 50, 255);
-  rect(barOriginX, buttonsOriginY-buttonSize*0.2f, barWidth, buttonSize*5.295f);
+  rect(barOriginX, padsContainerOriginY, barWidth, buttonSize*5.295f);
 }
 
 public void drawPadButtons(int c, ClickablePad[] padArray, float buttonsOriginX, float buttonsOriginY, float buttonSize, float buttonMargin, String buttonText) {
@@ -819,25 +852,27 @@ public void draw()
   background(127, 127, 127);
 
   animateTransition(1000,0,90);
-
-  switch (mode) {
-  	case LIVE:
-  	    drawTempoBar();
-  	    drawPadsContainer();
-  	    drawKickButtons();
-  	    drawBassButtons();
-  	    drawSnareButtons();
-  	    drawHitHatButtons();
-  	    drawSliders();
-  	    drawPowerSpectrum();
-  	    drawTopControls();	
-	break;
-  	case SEQUENCER:
-  		sequencer.draw();	
-	break;	
+  
+  if (mode!=MainMode.SEQUENCER) {
+	  drawTempoBar();
+	  drawPadsContainer();
+	  if (mode!=MainMode.AUTOMATOR) {
+		  drawKickButtons();
+		  drawBassButtons();
+		  drawSnareButtons();
+		  drawHitHatButtons();      
+		  drawSliders();
+		  drawPowerSpectrum();
+		  drawTopControls();
+	  }else{
+		  automator.draw();
+	  }
   }
+  else {
+	  sequencer.draw();
+  }  
 
-  drawMenuButton();
+  drawMenuBar();
 }
 
 
@@ -845,6 +880,7 @@ public void controlVolume(float volume, int trackMode) {
   if (trackMode==KICK || trackMode==ALL) {
     for (int i=0;i<playerKick.length;i++)   
       playerKick[i].volume(volume);
+    	//playerKick[i].ramp(volume,10);	
   }
   if (trackMode==BASS || trackMode==ALL) {
     for (int i=0;i<playerBass.length;i++)
@@ -945,6 +981,98 @@ public void proccessPanel() {
 }
 
 
+
+/*
+public void mousePressed(){
+	mousePressed(-1,mouseX,mouseY,1.0);
+}
+*/
+public void mousePressed(int id,int mouseX,int mouseY,float pressure)
+{
+	  switch (mode) {
+	  	case LIVE:
+	  	    for (int i=0;i<kick.length;i++) {
+	  	      if (kick[i].isClicked(mouseX, mouseY)) {
+	  	        if (mainMode==normalMode)
+	  	          addSoundTypeToList(kick.length*i,pressure);
+	  	        else if (mainMode==loadMode)
+	  	          loadSoundType(kick.length*i, playerKick[i]);
+	  	        else if (mainMode==deleteMode)
+	  	          deleteSoundType(kick.length*i);
+	  	      }
+	  	      else if (bass[i].isClicked(mouseX, mouseY)) {
+	  	        if (mainMode==normalMode)
+	  	          addSoundTypeToList(1+bass.length*i,pressure);
+	  	        else if (mainMode==loadMode)
+	  	          loadSoundType(1+bass.length*i, playerBass[i]);
+	  	        else if (mainMode==deleteMode)
+	  	          deleteSoundType(1+bass.length*i);
+	  	      }
+	  	      else if (snare[i].isClicked(mouseX, mouseY)) {
+	  	        if (mainMode==normalMode)
+	  	          addSoundTypeToList(2+snare.length*i,pressure);
+	  	        else if (mainMode==loadMode)
+	  	          loadSoundType(2+snare.length*i, playerSnare[i]);
+	  	        else if (mainMode==deleteMode)
+	  	          deleteSoundType(2+snare.length*i);
+	  	      }
+	  	      else if (hithat[i].isClicked(mouseX, mouseY)) {
+	  	        if (mainMode==normalMode)
+	  	          addSoundTypeToList(3+hithat.length*i,pressure);
+	  	        else if (mainMode==loadMode)
+	  	          loadSoundType(3+snare.length*i, playerHitHat[i]);
+	  	        else if (mainMode==deleteMode)
+	  	          deleteSoundType(3+snare.length*i);
+	  	      }
+	  	    }
+	  	    for (int i=0;i<sliders.length;i++) {
+	  	      sliders[i].clicked(mouseX, mouseY);
+	  	    }
+	  	    bpmSlider.clicked(mouseX, mouseY);
+
+	  	    if (deleteButtons.isClicked(mouseX, mouseY)) {
+	  	    }
+	  	    if (loadButton.isClicked(mouseX, mouseY)) {
+	  	      if (loadButton.isON()) {
+	  	        mainMode=loadMode;
+	  	      }
+	  	      else {
+	  	        mainMode=normalMode;
+	  	      }
+	  	    } 
+	  	    if (playButton.isClicked(mouseX, mouseY)) {
+	  	      toggleAudioPlayThread();
+	  	    }
+		break;
+	  	case SEQUENCER:
+	  		sequencer.mousePressed(mouseX,mouseY);	
+		break;
+	  	case AUTOMATOR:
+	  		automator.mousePressed(id,mouseX,mouseY,pressure);	
+		break;		
+	  }	
+	  
+	  if (menuBar.isMenuClicked(mouseX, mouseY)) {
+		  this.openOptionsMenu();
+	  }
+	  switch (menuBar.isButtonClicked(mouseX, mouseY)) {
+	  	case 0:
+	  		  controlVolume(1.0f, ALL);
+			  mode=MainMode.LIVE;		
+		break;
+	  	case 1:
+	  		  controlVolume(1.0f, ALL);
+			  sequencer.updateState();	  
+			  mode=MainMode.SEQUENCER;			
+		break;
+	  	case 2:
+			  automator.updateState();	  
+			  mode=MainMode.AUTOMATOR;
+		break;		
+	}
+}
+
+
 public void mouseMoved()
 {
 	switch (mode) {
@@ -965,16 +1093,24 @@ public void mouseMoved()
 		}
 		if (playButton.isOver(mouseX, mouseY)) {
 		}
-		if (menuButton.isOver(mouseX, mouseY)) {
+		if (menuBar.isOver(mouseX, mouseY)) {
 		}   	
 		break;
 	case SEQUENCER:
 		sequencer.mouseMoved();	
 		break;	
+	case AUTOMATOR:
+		automator.mouseMoved();
+		break;		
 	}	
 }
 
-public void mouseDragged()
+public void mouseDragged(){
+	//if(mode==MainMode.SEQUENCER)
+		//mousePressed(-1,mouseX,mouseY,1.0f);
+}
+
+public void mouseDragged(int id,int mouseX,int mouseY,int pmouseX,int pmouseY,float pressure)
 {
 	  switch (mode) {
 	  	case LIVE:
@@ -1015,12 +1151,19 @@ public void mouseDragged()
 	  	    }  	
 		break;
 	  	case SEQUENCER:
-	  	    sequencer.mouseDragged();	
-		break;	
+	  	    sequencer.mouseDragged(pmouseX,pmouseY,mouseX,mouseY);	
+		break;
+	    case AUTOMATOR:
+	        automator.mouseDragged(id,mouseX,mouseY,pressure);
+	        break;		
 	  }	
 }
 
 public void mouseReleased() {
+	//mouseReleased(-1,mouseX,mouseY,1.0f);
+}
+
+public void mouseReleased(int id,int mouseX,int mouseY,float pressure) {
 	  switch (mode) {
 	  	case LIVE:
 	  	    for (int i=0;i<sliders.length;i++) {
@@ -1044,10 +1187,14 @@ public void mouseReleased() {
 	  	    playButton.stopClick();
 		break;
 	  	case SEQUENCER:
-	  		sequencer.mouseReleased();	
-		break;	
+	  		sequencer.mouseReleased(mouseX,mouseY);	
+		break;
+	    case AUTOMATOR:
+	        automator.mouseReleased(id,mouseX,mouseY,pressure);
+	        break;		
 	  }	
-  menuButton.stopClick();
+	  
+      menuBar.stopClick();
 }
 
 public void deleteSoundType(int soundType) {
@@ -1065,7 +1212,7 @@ public void deleteAllSounds() {
       samplesPerBeat[i][j]=false;
     }
   }
-  sequencer.updateTracksState();
+  sequencer.updateState();
 }
 
 public void deleteSoundOfGroup(int soundGroup) {
@@ -1073,7 +1220,7 @@ public void deleteSoundOfGroup(int soundGroup) {
   for (int i=0;i<totalSamples;i+=4) {
     deleteSoundType(i+soundGroup);
   }
-  sequencer.updateTracksState();
+  sequencer.updateState();
 }
 
 
@@ -1198,78 +1345,6 @@ public void loadSoundOnPlayer(int soundType,File selection) {
 	}
 }
 
-/*
-public void mousePressed(){
-	mousePressed(mouseX,mouseY,1.0);
-}
-*/
-public void mousePressed(int mouseX,int mouseY,float pressure)
-{
-	  switch (mode) {
-	  	case LIVE:
-	  	    for (int i=0;i<kick.length;i++) {
-	  	      if (kick[i].isClicked(mouseX, mouseY)) {
-	  	        if (mainMode==normalMode)
-	  	          addSoundTypeToList(kick.length*i,pressure);
-	  	        else if (mainMode==loadMode)
-	  	          loadSoundType(kick.length*i, playerKick[i]);
-	  	        else if (mainMode==deleteMode)
-	  	          deleteSoundType(kick.length*i);
-	  	      }
-	  	      else if (bass[i].isClicked(mouseX, mouseY)) {
-	  	        if (mainMode==normalMode)
-	  	          addSoundTypeToList(1+bass.length*i,pressure);
-	  	        else if (mainMode==loadMode)
-	  	          loadSoundType(1+bass.length*i, playerBass[i]);
-	  	        else if (mainMode==deleteMode)
-	  	          deleteSoundType(1+bass.length*i);
-	  	      }
-	  	      else if (snare[i].isClicked(mouseX, mouseY)) {
-	  	        if (mainMode==normalMode)
-	  	          addSoundTypeToList(2+snare.length*i,pressure);
-	  	        else if (mainMode==loadMode)
-	  	          loadSoundType(2+snare.length*i, playerSnare[i]);
-	  	        else if (mainMode==deleteMode)
-	  	          deleteSoundType(2+snare.length*i);
-	  	      }
-	  	      else if (hithat[i].isClicked(mouseX, mouseY)) {
-	  	        if (mainMode==normalMode)
-	  	          addSoundTypeToList(3+hithat.length*i,pressure);
-	  	        else if (mainMode==loadMode)
-	  	          loadSoundType(3+snare.length*i, playerHitHat[i]);
-	  	        else if (mainMode==deleteMode)
-	  	          deleteSoundType(3+snare.length*i);
-	  	      }
-	  	    }
-	  	    for (int i=0;i<sliders.length;i++) {
-	  	      sliders[i].clicked(mouseX, mouseY);
-	  	    }
-	  	    bpmSlider.clicked(mouseX, mouseY);
-
-	  	    if (deleteButtons.isClicked(mouseX, mouseY)) {
-	  	    }
-	  	    if (loadButton.isClicked(mouseX, mouseY)) {
-	  	      if (loadButton.isON()) {
-	  	        mainMode=loadMode;
-	  	      }
-	  	      else {
-	  	        mainMode=normalMode;
-	  	      }
-	  	    } 
-	  	    if (playButton.isClicked(mouseX, mouseY)) {
-	  	      toggleAudioPlayThread();
-	  	    }
-		break;
-	  	case SEQUENCER:
-	  		sequencer.mousePressed();	
-		break;	
-	  }	
-  
-  if (menuButton.isClicked(mouseX, mouseY)) {
-	  this.openOptionsMenu();
-  }  
-}
-
 public AudioPlayer getPlayerBySoundType(int soundType) {
   int soundNumber=soundType/4;
   switch(soundType%4) {
@@ -1285,10 +1360,10 @@ public AudioPlayer getPlayerBySoundType(int soundType) {
   return null;
 }
 
-public void playSoundType(int soundType,float pressure) {
+public void playSoundType(int soundType,float volume) {
   AudioPlayer ap=getPlayerBySoundType(soundType);
-  println("Using press:"+pressure);
-  ap.volume(pressure);  
+  println("Using volume:"+volume);
+  ap.ramp(ap.getVolume()*volume,2);  
   ap.cue(0);
   ap.play();
 }
@@ -1333,6 +1408,42 @@ public void addSoundTypeToList(int soundType,float pressure) {
     samplesPerBeat[soundType][currentGrid]=!samplesPerBeat[soundType][currentGrid];
     println("changed sound:"+soundType+" at position:"+currentGrid);
   }
+}
+
+void addSoundTypeRepeated(int soundType,float pressure,int repeatOffset) {
+	playSoundType(soundType,pressure);
+	if (!paused) {
+		int size=samplesPerBeat[soundType].length;
+		int times=size/repeatOffset;
+		for(int i=0;i<times;i++){
+			int index=(currentGrid+i*repeatOffset)%size;
+			samplesPerBeat[soundType][index]=true;
+			//println("changed sound:"+soundType+" at position:"+currentGrid);
+		}
+	}
+}
+
+void updateSoundTypeRepeated(int soundType,int startPos,int repeatOffset) {
+	if (!paused) {
+		removeAllSoundsOfType(soundType);
+		int size=samplesPerBeat[soundType].length;
+		int times=size/repeatOffset;
+		for(int i=0;i<times;i++){
+			int index=(startPos+i*repeatOffset)%size;
+			samplesPerBeat[soundType][index]=true;
+		}
+	}
+}
+
+void removeAllSoundsOfType(int soundType){
+	int size=samplesPerBeat[soundType].length;
+	//getPlayerBySoundType(soundType).ramp(0, 10);
+	//getPlayerBySoundType(soundType).stop();	
+	for(int i=0;i<size;i++){
+		if(samplesPerBeat[soundType][i]){			
+			samplesPerBeat[soundType][i]=false;
+		}
+	}
 }
 
 public void keyPressed() {
@@ -1522,9 +1633,11 @@ static class DrumMachine {
 	  // pass the events to the TouchProcessor
 	  if ( code == MotionEvent.ACTION_DOWN || code == MotionEvent.ACTION_POINTER_DOWN) {
 		 int numPointers = event.getPointerCount();
-		 println("Detected "+numPointers+" pointers.");
-		 onTouchDown(x, y, pressure);
-		 touch.pointDown(x, y, id, pressure);
+		 println("Pressed "+numPointers+" pointers.");
+		 onTouchDown(id, x, y, pressure);		 
+		 if(mode==MainMode.SEQUENCER){
+			 touch.pointDown(x, y, id, pressure);
+		 }
 		 /*
 		 for (int i=0; i < numPointers; i++) {
 		      id = event.getPointerId(i);
@@ -1537,16 +1650,34 @@ static class DrumMachine {
 		 }	*/	  				  
 	  }
 	  else if (code == MotionEvent.ACTION_UP || code == MotionEvent.ACTION_POINTER_UP) {
-	    touch.pointUp(event.getPointerId(index));
+		int numPointers = event.getPointerCount();  
+		println("Released "+numPointers+" pointers. Index:"+index);  
+		
+		if(mode==MainMode.SEQUENCER){ 
+			if(numPointers==1)
+				onTouchUp(event.getPointerId(index), x, y, pressure);			
+			touch.pointUp(event.getPointerId(index));		
+		}else{
+			onTouchUp(event.getPointerId(index), x, y, pressure);
+		}
 	  }
 	  else if ( code == MotionEvent.ACTION_MOVE) {
 	    int numPointers = event.getPointerCount();
-	    //println("Detected "+numPointers+" pointers.");
+	    final int historySize = event.getHistorySize();
+	    //println("Moved "+numPointers+" pointers.");
 	    for (int i=0; i < numPointers; i++) {
 	      id = event.getPointerId(i);
 	      x = event.getX(i);
 	      y = event.getY(i);
-	      touch.pointMoved(x, y, id);
+	      float px = x;
+	      if(historySize>0)px=event.getHistoricalX(i, 0);
+	      float py = y;
+	      if(historySize>0)py=event.getHistoricalY(i, 0);
+	      pressure = event.getPressure(i);
+	      onTouchMove(id, x, y, px, py, pressure);
+	      if(mode==MainMode.SEQUENCER){
+	    	  touch.pointMoved(x, y, id);
+	      }	      
 	    }
 	  } 
 	  
@@ -1565,30 +1696,31 @@ static class DrumMachine {
 	LinkedList<Float> tapPressures=new LinkedList<Float>();
 	  
 	
-  public void onTouchDown(float x,float y,float pressure){
-	  switch (mode) {
-	case LIVE:
-		  if(pressureEnabled){
-			  if(tapPressures.size()>=10){
-				  int pos=(int)random(0, tapPressures.size());
-				  println("removing:"+pos);
-				  tapPressures.remove(pos);
-			  }
-			  tapPressures.add(pressure);
-			  Collections.sort(tapPressures);
-		  }else{
-			  pressure=1;
+  public void onTouchDown(int id, float x,float y,float pressure){
+	  if(pressureEnabled){
+		  if(tapPressures.size()>=10){
+			  int pos=(int)random(0, tapPressures.size());
+			  println("removing:"+pos);
+			  tapPressures.remove(pos);
 		  }
-		  println("original pressure:"+pressure+" min:"+tapPressures.getFirst()+" max:"+tapPressures.getLast());
-		  pressure=map(pressure,tapPressures.getFirst(),tapPressures.getLast(),0.25f,1);
-		  println("end pressure:"+pressure);
-		  mousePressed((int)x, (int)y, pressure);		
-		break;
-		case SEQUENCER:
-		//sequencer.mouseReleased(x,y);
-		break;
-	}
+		  tapPressures.add(pressure);
+		  Collections.sort(tapPressures);
+	  }else{
+		  pressure=1;
+	  }
+	  println("original pressure:"+pressure+" min:"+tapPressures.getFirst()+" max:"+tapPressures.getLast());
+	  pressure=map(pressure,tapPressures.getFirst(),tapPressures.getLast(),0.25f,1);
+	  println("end pressure:"+pressure);
+	  mousePressed(id,(int)x, (int)y, pressure);		
+  }
+  
+  public void onTouchUp(int id, float x,float y,float pressure){
+	  mouseReleased(id, (int)x, (int)y, pressure);
   }	
+  
+  public void onTouchMove(int id, float x,float y,float px,float py,float pressure){
+	  mouseDragged(id, (int)x, (int)y,(int)px, (int)py, pressure);	
+  }	  
   
   public void onTap(TapEvent e){
 	  //println("Detected tap on:("+e.getX()+","+e.getY()+")");
@@ -1652,7 +1784,7 @@ static class DrumMachine {
 	   }
 	}
    
-   private static boolean showMenuButton=false;
+   private static boolean showMenuBar=false;
 
    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
    private void setupDefaultTheme() {
@@ -1664,7 +1796,7 @@ static class DrumMachine {
 			   Log.i("DEVICE SCREEN","screenType:"+screenType);
 			   if (screenType == Configuration.SCREENLAYOUT_SIZE_NORMAL || screenType == Configuration.SCREENLAYOUT_SIZE_LARGE || screenType == Configuration.SCREENLAYOUT_SIZE_XLARGE){
 				   setTheme(android.R.style.Theme_Holo);				   
-				   showMenuButton=true;
+				   showMenuBar=true;
 				   setTitle("DrumCloud");
 				   //recreate();
 				
@@ -1758,7 +1890,7 @@ static class DrumMachine {
             case R.id.toggleMode:
             	   if(mode!=MainMode.SEQUENCER){
             		   item.setTitle(R.string.live_mode);
-            		   sequencer.updateTracksState();
+            		   sequencer.updateState();
             		   mode=MainMode.SEQUENCER;
             	   }else{
             		   item.setTitle(R.string.sequencer_mode);

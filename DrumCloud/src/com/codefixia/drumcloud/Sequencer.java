@@ -63,7 +63,7 @@ public class Sequencer {
     buttonWidth=(float)(drumCloud.width/drumCloud.totalSamples);
     buttonHeight=buttonWidth;
     tracks=new ToggleButton[drumCloud.totalSamples][drumCloud.totalGrids+1];
-    totalHeight=(drumCloud.totalGrids+1)*buttonHeight;
+    totalHeight=(drumCloud.totalGrids+1)*buttonHeight+drumCloud.height*0.05f;
     maxTotalHeight=totalHeight;
     totalWidth=(drumCloud.totalSamples)*buttonWidth;
     maxTotalWidth=totalWidth;
@@ -74,7 +74,7 @@ public class Sequencer {
     scrollBarXSize=(visibleWidth/totalWidth)*visibleWidth;
     scrollBarWidth=drumCloud.width*0.02f;
     miniMapOriginX=(int) (drumCloud.width*0.05f);
-    miniMapOriginY=(int) (drumCloud.height*0.828f);  
+    miniMapOriginY=(int) (drumCloud.height*0.778f);  
 
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=0;j<drumCloud.samplesPerBeat[i].length+1;j++) {
@@ -132,18 +132,18 @@ public class Sequencer {
 
   public void drawPlayBar() {
 	if (drumCloud.pausedMS<0) {  
-		drumCloud.fill(drumCloud.yellowColor);
+		drumCloud.fill(drumCloud.yellowColor,180.0f);
     	barOffset=PApplet.map((drumCloud.millis()-drumCloud.totalPaused)%drumCloud.tempoMS, 0.0f, drumCloud.tempoMS, buttonHeight, maxTotalHeight);
     	lastBarOffset=barOffset;
     	//println("barOffset:"+barOffset+" val:"+(millis()-totalPaused)%tempoMS);
     	drumCloud.rect(visibleWidth-maxTotalWidth, barOffset, maxTotalWidth, buttonHeight);
 	}else{
-		drumCloud.fill(150);
+		drumCloud.fill(150,180.0f);
 		drumCloud.rect(visibleWidth-maxTotalWidth, lastBarOffset, maxTotalWidth, buttonHeight);
 	}   
   }
 
-  public void updateTracksState() {
+  public void updateState() {
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
         tracks[i][j].setON(drumCloud.samplesPerBeat[i][j-1]);
@@ -172,11 +172,7 @@ public class Sequencer {
   public void mousePressed(float x, float y) {
     mousePressed((int)x, (int)y);
   }  
-
-  public void mousePressed() {
-    mousePressed(drumCloud.mouseX, drumCloud.mouseY);
-  }
-
+  
   public void mousePressed(int mouseX, int mouseY) {
     lastClickX=mouseX;
     lastClickY=mouseY;
@@ -190,16 +186,15 @@ public class Sequencer {
     mouseReleased((int)x, (int)y);
   }  
 
-  public void mouseReleased() {	  
-    mouseReleased(drumCloud.mouseX, drumCloud.mouseY);
-  }
-
   public PVector mouseToScreen(int x, int y) {
     return new PVector((x/this.zoom)+xOffset, (y/this.zoom)+yOffset);
   }
 
   public void mouseReleased(int mouseX, int mouseY) {
     PApplet.println("Release on sequencer mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
+    if(mouseY>drumCloud.height*0.95f){
+    	return;
+    }
     PVector screenCoords=mouseToScreen(mouseX, mouseY);
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
@@ -211,7 +206,7 @@ public class Sequencer {
           }
         }
         else {
-          tracks[i][j].cancelClick((int)screenCoords.x, (int)screenCoords.y);
+          tracks[i][j].cancelClick();
         }
       }
     }
@@ -305,10 +300,10 @@ public class Sequencer {
     velocityX=PApplet.map(PApplet.constrain(avgX, -25, 25), -25, 25, -maxAccel, maxAccel);
   }
 
-  public void mouseDragged() {
+  public void mouseDragged(int pmouseX,int pmouseY,int mouseX,int mouseY) {
     //println("Drag on sequencer mx:"+mouseX+" my:"+mouseY);
 
-    processDragAccel(drumCloud.pmouseX, drumCloud.pmouseY, drumCloud.mouseX, drumCloud.mouseY);
+    processDragAccel(pmouseX, pmouseY, mouseX, mouseY);
 
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
@@ -327,7 +322,7 @@ public class Sequencer {
     if ( (pinchAmount>0 && this.zoom<2.0)||(pinchAmount<0 && this.zoom>1.0f) ) {
       this.zoom=PApplet.constrain(this.zoom+pinchAmount * 0.003f, 1, 2.0f);
       float newButtonWidth=(float)(drumCloud.width/drumCloud.totalSamples*this.zoom);
-      totalHeight=(drumCloud.totalGrids+1)*newButtonWidth;
+      totalHeight=(drumCloud.totalGrids+1)*newButtonWidth+drumCloud.height*0.05f;
       playBarWidth=totalHeight;
       totalWidth=(drumCloud.totalSamples)*newButtonWidth;
       scrollBarYSize=(visibleHeight/totalHeight)*visibleHeight;

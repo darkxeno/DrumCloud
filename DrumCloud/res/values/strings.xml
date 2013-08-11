@@ -3,6 +3,10 @@
     <string name="LOAD" tools:ignore="MissingTranslation">LOAD</string>
     <string name="DELETE" tools:ignore="MissingTranslation">DELETE</string>
     <string name="ALL" tools:ignore="MissingTranslation">ALL</string>
+    <string name="VOLUME" tools:ignore="MissingTranslation">VOLUME</string>
+    <string name="SAMPLE" tools:ignore="MissingTranslation">SAMPLE</string>
+    <string name="PITCH" tools:ignore="MissingTranslation">PITCH</string>
+    <string name="LOOP" tools:ignore="MissingTranslation">LOOP</string>
     <string name="toggle_mode" tools:ignore="MissingTranslation">Toggle Mode</string>
     <string name="delete_all" tools:ignore="MissingTranslation">Delete All</string>
     <string name="donate" tools:ignore="MissingTranslation">Donate</string>
@@ -28,6 +32,9 @@
     <string name="pause" tools:ignore="MissingTranslation">Pause</string>
     <string name="play" tools:ignore="MissingTranslation">Play</string>
     <string name="close" tools:ignore="MissingTranslation">Close</string>
+    <string name="live_menu_item" tools:ignore="MissingTranslation">LIVE</string>
+    <string name="seq_menu_item" tools:ignore="MissingTranslation">SEQ</string>
+    <string name="auto_menu_item" tools:ignore="MissingTranslation">AUTO</string>
     <string name="aboutDialogText" tools:ignore="MissingTranslation">
 <u>DEVELOPMENT AND DESIGN</u>\n
 Constantino Fernández Traba\n
