@@ -77,7 +77,7 @@ public class PressZones extends Clickable {
 		  DrumCloud.X.rect(getX(),getY(),getW(),getH());
 		  drawCommonContent();
 		  DrumCloud.X.stroke(255,127);
-		  DrumCloud.X.fill(255,127);
+		  DrumCloud.X.fill(255,187);
 		  //DrumCloud.X.line(x+getOffsetX()-DrumCloud.X.width*0.02f, y+getOffsetY(), x+getOffsetX()+DrumCloud.X.width*0.02f,y+getOffsetY());
 		  //DrumCloud.X.line(x+getOffsetX(), y+getOffsetY()-DrumCloud.X.width*0.02f, x+getOffsetX(),y+getOffsetY()+DrumCloud.X.width*0.02f);
 		  DrumCloud.X.ellipse(x+getOffsetX(), y+getOffsetY(), DrumCloud.X.width*0.05f, DrumCloud.X.width*0.05f);

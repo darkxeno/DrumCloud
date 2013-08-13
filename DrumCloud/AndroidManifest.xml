@@ -19,7 +19,12 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="com.android.vending.BILLING" />
 	<uses-permission android:name="android.permission.USE_CREDENTIALS" />
-	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />	
+	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+	
+	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.BLUETOOTH"></uses-permission>
 	
     <!-- android:debuggable="true"  -->	
 	
@@ -43,7 +48,8 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
-
+		<!-- Make nmj's control panel accessible -->
+		<activity android:name="de.humatic.nmj.NMJConfigDialog"></activity>
         <service android:name="com.codefixia.googledrive.GoogleDriveService" >
         </service>
         

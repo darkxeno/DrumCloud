@@ -19,6 +19,7 @@ import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -318,7 +319,6 @@ public void changeBPM(float newBPM) {
 }
 
 public void noteOn(int channel, int pitch, int velocity) {
-  midi.noteOff(channel, pitch, velocity);
   int soundPlayer=(pitch-24)%6;
   int soundNumber=(pitch-24)/6;
   int soundType=soundPlayer+soundNumber*4;  
@@ -343,11 +343,11 @@ public void noteOn(int channel, int pitch, int velocity) {
 }
 
 public void noteOff(int channel, int pitch, int velocity) {
-  midi.noteOff(channel, pitch, velocity);
+  //midi.noteOff(channel, pitch, velocity);
 }
 
 public void controllerChange(int channel, int number, int value) {
-  midi.controllerChange(channel, number, value);
+  //midi.controllerChange(channel, number, value);
   if (channel==15) {
     if (number==0) {
       speed=map(value, 0, 127, 0, 2);
@@ -1366,6 +1366,7 @@ public void playSoundType(int soundType,float volume) {
   ap.ramp(ap.getVolume()*volume,2);  
   ap.cue(0);
   ap.play();
+  midi.sendNoteOn(1, soundType, (int)(127*volume));
 }
 
 public int getColorByMs(float msOcc) {
@@ -1886,8 +1887,11 @@ static class DrumMachine {
             break;             
             case R.id.playPause:
             	toggleAudioPlayThread();
-            break;            
-            case R.id.toggleMode:
+            break;    
+            case R.id.midiSetup:
+            	midi.showMidiTransportDialog();
+            	break;
+            /*case R.id.toggleMode:
             	   if(mode!=MainMode.SEQUENCER){
             		   item.setTitle(R.string.live_mode);
             		   sequencer.updateState();
@@ -1897,7 +1901,7 @@ static class DrumMachine {
             		   //sequencer.updateSamplePerBeatState();
             		   mode=MainMode.LIVE;
             	   }
-                   break;
+                   break;*/
             case R.id.deleteAll:
                 	deleteAllSounds();
                 break;

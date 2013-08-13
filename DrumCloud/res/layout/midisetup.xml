@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+
+<Spinner android:id="@+id/Spinner01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"></Spinner>
+<Button android:id="@+id/midiTestButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="send MIDI test" android:layout_gravity="center"></Button>
+<Button android:id="@+id/midiSetupButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MIDI setup" android:layout_gravity="center"></Button>
+<TextView android:id="@+id/TextView01" android:gravity="center" android:layout_margin="10dip" android:layout_width="180dip" android:layout_height="wrap_content" android:minLines="10" android:layout_gravity="center" android:text="powered by nmj\n\nSend midi messages to this device to test midi connection."></TextView>
+</LinearLayout>
