@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="LOAD" tools:ignore="MissingTranslation">CARGAR</string>
+    <string name="load" tools:ignore="MissingTranslation">Cargar</string>
     <string name="DELETE" tools:ignore="MissingTranslation">BORRAR</string>
     <string name="ALL" tools:ignore="MissingTranslation">TODO</string>
     <string name="midi_setup" tools:ignore="MissingTranslation">Configuración</string>
@@ -11,6 +12,7 @@
     <string name="midi_open" tools:ignore="MissingTranslation">Abrir Archivo</string>
     <string name="midi_share" tools:ignore="MissingTranslation">Enviar por Email</string>
     <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composición</string>
+    <string name="midi_select_file" tools:ignore="MissingTranslation">Seleccione un archivo Midi:</string>
     <string name="file_save_text" tools:ignore="MissingTranslation">Su archivo se ha guardado en:</string>	    
     <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar Modo</string>
     <string name="delete_all" tools:ignore="MissingTranslation">Borrar Todo</string>

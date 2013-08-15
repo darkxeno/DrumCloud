@@ -1927,7 +1927,7 @@ static class DrumMachine {
             	MidiFileIO.showMidiPreLoadDialog(this,BPM, samplesPerBeat);
             	break;            	
             case R.id.deleteAll:
-                	deleteAllSounds();
+                deleteAllSounds();
                 break;
             case R.id.donate:
                 startActivity(new Intent(this, DonationsActivity.class));

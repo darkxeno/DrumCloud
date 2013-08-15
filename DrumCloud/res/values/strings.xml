@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="LOAD" tools:ignore="MissingTranslation">LOAD</string>
+    <string name="load" tools:ignore="MissingTranslation">Load</string>
     <string name="DELETE" tools:ignore="MissingTranslation">DELETE</string>
     <string name="ALL" tools:ignore="MissingTranslation">ALL</string>
     <string name="VOLUME" tools:ignore="MissingTranslation">VOLUME</string>
@@ -13,6 +14,7 @@
     <string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android™\n\nSend midi messages to this device to test midi connection.</string>
     <string name="midi_open" tools:ignore="MissingTranslation">Open File</string>
     <string name="midi_share" tools:ignore="MissingTranslation">Send by Mail</string>
+    <string name="midi_select_file" tools:ignore="MissingTranslation">Select Midi file:</string>
     <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composition</string>
     <string name="file_save_text" tools:ignore="MissingTranslation">Your file has been saved:</string>    
     <string name="export_midi" tools:ignore="MissingTranslation">Export</string>
