@@ -3,11 +3,19 @@
     <string name="LOAD" tools:ignore="MissingTranslation">CARGAR</string>
     <string name="DELETE" tools:ignore="MissingTranslation">BORRAR</string>
     <string name="ALL" tools:ignore="MissingTranslation">TODO</string>
-    <string name="midi_setup" tools:ignore="MissingTranslation">Configuración Midi</string>    
+    <string name="midi_setup" tools:ignore="MissingTranslation">Configuración</string>
+    <string name="midi_test" tools:ignore="MissingTranslation">Enviar nota de prueba</string>
+    <string name="export_midi" tools:ignore="MissingTranslation">Exportar</string>
+    <string name="import_midi" tools:ignore="MissingTranslation">Importar</string>
+	<string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android™\n\nEnvía mensajes midi a este dispositivo para probar la conexión.</string>
+    <string name="midi_open" tools:ignore="MissingTranslation">Abrir Archivo</string>
+    <string name="midi_share" tools:ignore="MissingTranslation">Enviar por Email</string>
+    <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composición</string>
+    <string name="file_save_text" tools:ignore="MissingTranslation">Su archivo se ha guardado en:</string>	    
     <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar Modo</string>
     <string name="delete_all" tools:ignore="MissingTranslation">Borrar Todo</string>
     <string name="donate" tools:ignore="MissingTranslation">Donar</string>
-    <string name="about" tools:ignore="MissingTranslation">Acerca de...</string>
+    <string name="about" tools:ignore="MissingTranslation">Acerca de&#8230;</string>
     <string name="donations__button_close">Cerrar</string>
     <string name="donations__flattr">Flattr</string>
     <string name="donations__description">¿Encuentra útil esta aplicación?\n¡Ayude en su desarrollo con Flattr o envíe donaciones al desarrollador!</string><string name="donations__flattr_description">¡Flattr toma un 10% como cuota mensual!</string>

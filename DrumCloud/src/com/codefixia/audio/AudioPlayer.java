@@ -15,6 +15,7 @@ import com.codefixia.drumcloud.DrumCloud;
  */
 public class AudioPlayer implements Synth, AudioGenerator {
  
+  private File file;	
   private FXChain fxChain;
   boolean isPlaying;
   private boolean isLooping;
@@ -39,11 +40,15 @@ public class AudioPlayer implements Synth, AudioGenerator {
 	this.sampleRate = sampleRate;
     fxChain = new FXChain(sampleRate);
   }
+
+  public File getFile() {
+	  return file;
+  }
   
   public float getVolume(){
 	  return masterVolume;
   }
-  
+
   public float getDurationMS(){
 	  return (float)audioData.length / (float)sampleRate * 0.001f;
   }
@@ -307,6 +312,7 @@ public short[] loadWavFile(File f) {
   public short[] justLoadAudioFile (String filename) {
 
     File f = new File(filename);
+    this.file=f;
     
     boolean isAiff=false;
     AiffFileReader aiffFileReader=new AiffFileReader();

@@ -7,7 +7,16 @@
     <string name="SAMPLE" tools:ignore="MissingTranslation">SAMPLE</string>
     <string name="PITCH" tools:ignore="MissingTranslation">PITCH</string>
     <string name="LOOP" tools:ignore="MissingTranslation">LOOP</string>
-    <string name="midi_setup" tools:ignore="MissingTranslation">Midi Setup</string>
+    <string name="midi" tools:ignore="MissingTranslation">Midi</string>
+    <string name="midi_setup" tools:ignore="MissingTranslation">Setup</string>
+    <string name="midi_test" tools:ignore="MissingTranslation">Send test note</string>
+    <string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android™\n\nSend midi messages to this device to test midi connection.</string>
+    <string name="midi_open" tools:ignore="MissingTranslation">Open File</string>
+    <string name="midi_share" tools:ignore="MissingTranslation">Send by Mail</string>
+    <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composition</string>
+    <string name="file_save_text" tools:ignore="MissingTranslation">Your file has been saved:</string>    
+    <string name="export_midi" tools:ignore="MissingTranslation">Export</string>
+    <string name="import_midi" tools:ignore="MissingTranslation">Import</string>    
     <string name="toggle_mode" tools:ignore="MissingTranslation">Toggle Mode</string>
     <string name="delete_all" tools:ignore="MissingTranslation">Delete All</string>
     <string name="donate" tools:ignore="MissingTranslation">Donate</string>

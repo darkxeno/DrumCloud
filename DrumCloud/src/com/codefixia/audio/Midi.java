@@ -1,5 +1,7 @@
 package com.codefixia.audio;
 
+import java.io.File;
+
 import com.codefixia.drumcloud.DrumCloud;
 import com.codefixia.drumcloud.R;
 
@@ -18,6 +20,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,10 +64,10 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 	private MidiLogger midiLogger;
 
 	private NetworkMidiSystem nmjs;
-	private DrumCloud drumCloud;
+	private static DrumCloud drumCloud;
 
-    public Midi(DrumCloud drumCloud) {
-    	this.drumCloud=drumCloud;
+    public Midi(DrumCloud drumCloudRef) {
+    	drumCloud=drumCloudRef;
  
         try{ 
 
@@ -146,22 +149,28 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
                		if (me.getAction() == MotionEvent.ACTION_DOWN) {
                			myNote[2] = (byte)100;
                 		midiOut.sendMidi(myNote);
+                		midiTestButton.setPressed(true);
+                		return true;
                     } else if (me.getAction() == MotionEvent.ACTION_UP) {
                     	myNote[2] = 0;
                 		midiOut.sendMidi(myNote);
+                		midiTestButton.setPressed(false);
+                		return false;
                     }
-                } catch (Exception ex){}
+                } catch (Exception ex){
+                	Log.d("ONTOUCH","ex:"+ex.getStackTrace());
+                }
             	return true;
            	}
-         });
+         });	    
 	    
-	    midiSetupButton.setOnTouchListener(new View.OnTouchListener() {
-	           public boolean onTouch(View v, MotionEvent me) {
-	            	final Intent si = new Intent((Context)drumCloud, de.humatic.nmj.NMJConfigDialog.class);
-	            	drumCloud.startActivity(si);	            	
-	            	return true;
-	           	}
-	         });	    	    
+	    midiSetupButton.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View arg0) {
+            	final Intent si = new Intent(dialog.getContext(), de.humatic.nmj.NMJConfigDialog.class);
+            	drumCloud.startActivity(si);
+			}
+		});	    	    
  
 	    final TextView tv = (TextView) dialog.findViewById(R.id.TextView01);
 
@@ -192,7 +201,8 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 	public void sendNoteOn(int channel, int pitch, int velocity) {
 		myNote[2] = (byte)(36+pitch);
 		try {
-			midiOut.sendMidi(myNote);
+			if(midiOut!=null)
+				midiOut.sendMidi(myNote);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -202,14 +212,15 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 	public void sendNoteOff(int channel, int pitch, int velocity) {
 		myNote[2] = 0;
 		try {
-			midiOut.sendMidi(myNote);
+			if(midiOut!=null)
+				midiOut.sendMidi(myNote);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}	
 
-	private class MidiLogger extends android.os.Handler {
+	private static class MidiLogger extends android.os.Handler {
 
     	private StringBuffer sb = new StringBuffer();
     	private TextView tv;

@@ -2,6 +2,7 @@ package com.codefixia.drumcloud;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 
 import org.donations.DonationsActivity;
@@ -26,7 +27,9 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,6 +50,7 @@ import com.codefixia.audio.AudioPlayThread;
 import com.codefixia.audio.AudioPlayer;
 import com.codefixia.audio.Maxim;
 import com.codefixia.audio.Midi;
+import com.codefixia.audio.MidiFileIO;
 import com.codefixia.googledrive.DownloadFile;
 import com.codefixia.input.multitouch.DragEvent;
 import com.codefixia.input.multitouch.FlickEvent;
@@ -241,6 +245,22 @@ public void setup()
     setupAndroid();
   sequencer.setup();
   automator.setup();
+}
+
+public AudioPlayer[] getPlayerKick() {
+	return playerKick;
+}
+
+public AudioPlayer[] getPlayerBass() {
+	return playerBass;
+}
+
+public AudioPlayer[] getPlayerSnare() {
+	return playerSnare;
+}
+
+public AudioPlayer[] getPlayerHitHat() {
+	return playerHitHat;
 }
 
 public void setupPowerSpectrum() {
@@ -1258,16 +1278,16 @@ public void fileSelected(File selection) {
     println("Window was closed or the user hit cancel.");
   } 
   else {
+  	final boolean toggled;
+  	if(paused){
+  		toggled=true;
+  		toggleAudioPlayThread();
+  	}else{
+  		toggled=false;
+  	}	  
     println("User selected " + selection.getAbsolutePath()+" name:"+selection.getName());
     if (selection.getName().endsWith("json")) {
     	JSONArray sounds=loadJsonSoundPack(selection);
-    	final boolean toggled;
-    	if(paused){
-    		toggled=true;
-    		toggleAudioPlayThread();
-    	}else{
-    		toggled=false;
-    	}
     	final ProgressDialog progressDialog= new ProgressDialog(DrumCloud.X);;
 		if(isAndroidDevice){
 			//progressDialog = new ProgressDialog(DrumCloud.activity);
@@ -1321,6 +1341,8 @@ public void fileSelected(File selection) {
     else {
       if (loadPlayerOfSoundType!=-1) {
         loadSoundOnPlayer(loadPlayerOfSoundType,selection);
+	    if(toggled)
+	    	toggleAudioPlayThread();        
       }
     }
   }
@@ -1362,7 +1384,7 @@ public AudioPlayer getPlayerBySoundType(int soundType) {
 
 public void playSoundType(int soundType,float volume) {
   AudioPlayer ap=getPlayerBySoundType(soundType);
-  println("Using volume:"+volume);
+  //println("Using volume:"+volume);
   ap.ramp(ap.getVolume()*volume,2);  
   ap.cue(0);
   ap.play();
@@ -1891,17 +1913,19 @@ static class DrumMachine {
             case R.id.midiSetup:
             	midi.showMidiTransportDialog();
             	break;
-            /*case R.id.toggleMode:
-            	   if(mode!=MainMode.SEQUENCER){
-            		   item.setTitle(R.string.live_mode);
-            		   sequencer.updateState();
-            		   mode=MainMode.SEQUENCER;
-            	   }else{
-            		   item.setTitle(R.string.sequencer_mode);
-            		   //sequencer.updateSamplePerBeatState();
-            		   mode=MainMode.LIVE;
-            	   }
-                   break;*/
+            case R.id.exportToMidi:
+            	String fileName="drumcloud_"+DateFormat.getDateFormat(this).format(new Date());
+            	fileName+="_"+DateFormat.getTimeFormat(this).format(new Date())+".midi";
+            	fileName=fileName.replaceAll("\\\\", "-").replaceAll("/", "-");
+            	File midiFile=new File(Environment.getExternalStorageDirectory().getPath()+"/drumcloud/midi/"+fileName);
+            	MidiFileIO.save(midiFile,BPM,samplesPerBeat);
+            	if(midiFile.exists() && midiFile.isFile()){
+            		MidiFileIO.showMidiPostSaveDialog(this, midiFile);          		
+            	}
+            	break;
+            case R.id.importFromMidi:
+            	MidiFileIO.showMidiPreLoadDialog(this,BPM, samplesPerBeat);
+            	break;            	
             case R.id.deleteAll:
                 	deleteAllSounds();
                 break;
