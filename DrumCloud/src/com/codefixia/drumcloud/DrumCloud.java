@@ -1298,18 +1298,24 @@ public JSONArray loadJsonSoundPack(File file) {
   return sounds;
 }
 
+static boolean toggled=false;
+
+public void toggleAudio(){
+	if(!paused){
+  		toggled=true;
+  		toggleAudioPlayThread();
+  		Log.d("TOGGLED AUDIO","TOGGLED AUDIO");
+  	}else{
+  		//toggled=false;
+  	}
+}
+
 public void fileSelected(File selection) {
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
   } 
   else {
-  	final boolean toggled;
-  	if(paused){
-  		toggled=true;
-  		toggleAudioPlayThread();
-  	}else{
-  		toggled=false;
-  	}	  
+	toggleAudio();
     println("User selected " + selection.getAbsolutePath()+" name:"+selection.getName());
     if (selection.getName().endsWith("json")) {
     	JSONArray sounds=loadJsonSoundPack(selection);
@@ -1348,8 +1354,10 @@ public void fileSelected(File selection) {
     	    	    					progressDialog.setProgress(soundsLoaded);
     	    	    					if(soundsLoaded==16){
     	    	    						progressDialog.dismiss();
-    	    	    					    if(toggled)
-    	    	    					    	toggleAudioPlayThread();    	    	    						
+    	    	    					    if(toggled){
+    	    	    					    	toggleAudioPlayThread();
+    	    	    					    	toggled=false;
+    	    	    					    }
     	    	    					}
     	    	    				}
     	    					}
@@ -1366,8 +1374,10 @@ public void fileSelected(File selection) {
     else {
       if (loadPlayerOfSoundType!=-1) {
         loadSoundOnPlayer(loadPlayerOfSoundType,selection);
-	    if(toggled)
-	    	toggleAudioPlayThread();        
+	    if(toggled){
+	    	toggleAudioPlayThread();
+	    	toggled=false;
+	    }
       }
     }
   }
@@ -2090,7 +2100,7 @@ public void onCreate(Bundle savedInstanceState) {
     //setContentView(R.layout.main);
     println("ON CREATE DRUMCLOUD");
  
-    setupActionBar();
+    //setupActionBar();
   	
 }
 

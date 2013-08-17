@@ -447,7 +447,7 @@ public class SelectDialog extends Dialog {
 		  }
 	  }else{
 		  if (file != null) {
-
+			  DrumCloud.X.toggleAudio();
 			  // instantiate it within the onCreate method
 			  mProgressDialog = new ProgressDialog(DrumCloud.X);
 			  mProgressDialog.setMessage("Downloading:  "+lastSelectedFileItem.getName());

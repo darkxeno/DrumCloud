@@ -22,7 +22,7 @@ public class HorizontalSlider extends Draggable{
     maxX=max;
     calculateClickZone();
     divWidth=(maxXZone-minXZone)/divisions;
-    DrumCloud.println("totalW:"+(maxXZone-minXZone)+" divWidth:"+divWidth);    
+    //DrumCloud.println("totalW:"+(maxXZone-minXZone)+" divWidth:"+divWidth);    
   }
  
   public void valuesX(float min,float max,float def){
