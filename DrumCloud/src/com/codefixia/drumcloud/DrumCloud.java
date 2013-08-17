@@ -2113,6 +2113,9 @@ public void onBackPressed() {
         .setNegativeButton(android.R.string.no, null)
         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
         	public void onClick(DialogInterface dialog, int which) {
+        		if(audioPlayThread.isAlive()){
+        			audioPlayThread.quit();
+        		} 
                 DrumCloud.super.onBackPressed();
             }
         }).create().show();
