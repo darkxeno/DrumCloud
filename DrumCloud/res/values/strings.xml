@@ -12,6 +12,8 @@
     <string name="HOLD" tools:ignore="MissingTranslation">HOLD</string>
     <string name="STOP" tools:ignore="MissingTranslation">STOP</string>
     <string name="midi" tools:ignore="MissingTranslation">Midi</string>
+    <string name="sureToExitTitle" tools:ignore="MissingTranslation">Really exit?</string>
+    <string name="sureToExitMessage" tools:ignore="MissingTranslation">Are you sure you want to exit?</string>
     <string name="midi_setup" tools:ignore="MissingTranslation">Setup</string>
     <string name="midi_test" tools:ignore="MissingTranslation">Send test note</string>
     <string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android™\n\nSend midi messages to this device to test midi connection.</string>
@@ -124,7 +126,7 @@ Live Mode Tutorial 6/7
 </string>
 <string name="helpDialogText6" tools:ignore="MissingTranslation">
 Using the different sliders you can control some of the global audio parameters that affects all the samples. 
-You can see the altered parameter at the bottom of each slider:\n- Filter frequency/resonance\n- Pitch/speed\n- Kick/Bass/Global volume</string>
+You can see the altered parameter at the bottom of each slider.</string>
 <string name="helpDialogTitle7" tools:ignore="MissingTranslation">
 Live Mode Tutorial 7/7
 </string>

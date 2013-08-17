@@ -243,6 +243,7 @@ public void setup() {
     		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.KICK]);
         	drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.KICK],kick.normalizedValue(),kickKnob.beatValue());
     	}else{
+    		drumCloud.playSoundType(offsetsSample[DrumCloud.X.KICK],pressure);
     		drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.KICK], kickGrid, kickKnob.beatValue());
     	}
         applyModeChanges(kick,DrumCloud.X.KICK);        
@@ -254,6 +255,7 @@ public void setup() {
     		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.BASS]);
     		drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.BASS],bass.normalizedValue(),bassKnob.beatValue());
     	}else{
+    		drumCloud.playSoundType(offsetsSample[DrumCloud.X.BASS],pressure);
     		drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.BASS], bassGrid, bassKnob.beatValue());
     	}
         applyModeChanges(bass,DrumCloud.X.BASS);
@@ -265,6 +267,7 @@ public void setup() {
     		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.SNARE]);
     		drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.SNARE],snare.normalizedValue(),snareKnob.beatValue());
       	}else{
+      		drumCloud.playSoundType(offsetsSample[DrumCloud.X.SNARE],pressure);
   			drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.SNARE], snareGrid, snareKnob.beatValue());
   		}
         applyModeChanges(snare,DrumCloud.X.SNARE);
@@ -276,6 +279,7 @@ public void setup() {
     		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.HITHAT]);
     		drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.HITHAT],hithat.normalizedValue(),hithatKnob.beatValue());
     	}else{
+    		drumCloud.playSoundType(offsetsSample[DrumCloud.X.HITHAT],pressure);
 			drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.HITHAT], hithatGrid, hithatKnob.beatValue());
 		}        
         applyModeChanges(hithat,DrumCloud.X.HITHAT);
@@ -283,7 +287,7 @@ public void setup() {
  
       
      if(kickKnob.startDragging(mouseX,mouseY)){
-    	 PApplet.println("Start dragging on click kick knob");
+    	 //PApplet.println("Start dragging on click kick knob");
      }
      if(bassKnob.startDragging(mouseX,mouseY)){
        

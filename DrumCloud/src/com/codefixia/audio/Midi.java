@@ -226,7 +226,7 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 		myNote[0] = (byte)144;
 		myNote[1] = (byte)(36+(pitch*2));
 		myNote[2] = (byte)(velocity);//(byte)(100);
-		PApplet.println("Sending midi note:"+(36+pitch*2)+" velocity:"+velocity+" midiOut:"+(midiOut!=null)+" mainthread:"+(Looper.myLooper() == Looper.getMainLooper()));
+		//PApplet.println("Sending midi note:"+(36+pitch*2)+" velocity:"+velocity+" midiOut:"+(midiOut!=null)+" mainthread:"+(Looper.myLooper() == Looper.getMainLooper()));
 		try {
 			if(midiOut!=null)
 				midiOut.sendMidi(myNote);

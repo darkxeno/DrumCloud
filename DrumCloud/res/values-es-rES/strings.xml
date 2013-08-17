@@ -11,6 +11,8 @@
     <string name="midi_test" tools:ignore="MissingTranslation">Enviar nota de prueba</string>
     <string name="export_midi" tools:ignore="MissingTranslation">Exportar</string>
     <string name="import_midi" tools:ignore="MissingTranslation">Importar</string>
+    <string name="sureToExitTitle" tools:ignore="MissingTranslation">Cerrar aplicación</string>
+    <string name="sureToExitMessage" tools:ignore="MissingTranslation">¿Seguro que desea cerrar la aplicación?</string>
 	<string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android™\n\nEnvía mensajes midi a este dispositivo para probar la conexión.</string>
 	<string name="midi_client_download" tools:ignore="MissingTranslation">Descarga el cliente Midi para PC/Mac desde aquí:\nhttp://codefixia.com/drumcloud/nmj.jar</string>
     <string name="midi_open" tools:ignore="MissingTranslation">Abrir Archivo</string>
@@ -112,7 +114,7 @@ Modo Live Tutorial 6/7
 </string>
 <string name="helpDialogText6" tools:ignore="MissingTranslation">
 Usando los diferentes sliders podemos controlar algunos de los parámetros de audio globales que afectarán a todos los samples. 
-Se puede observar el nombre del parámetro debajo de cada slider:\n- Frecuencia/resonancia filtro\n- Pitch/velocidad\n- Volumen Kick/Bass/Global</string>
+Se puede observar el nombre del parámetro debajo de cada slider.</string>
 <string name="helpDialogTitle7" tools:ignore="MissingTranslation">
 Modo Live Tutorial 7/7
 </string>

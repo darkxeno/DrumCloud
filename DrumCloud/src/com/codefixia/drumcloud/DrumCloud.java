@@ -18,9 +18,11 @@ import processing.data.FloatList;
 import processing.data.StringDict;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -31,6 +33,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -1498,10 +1501,24 @@ void removeAllSoundsOfType(int soundType){
 	}
 }
 
+public boolean surfaceKeyDown(int code, KeyEvent event) {
+	if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+		onBackPressed();
+		return false;
+	}
+	return super.surfaceKeyDown(code, event);
+}
+
+public boolean surfaceKeyUp(int code, KeyEvent event) {
+	return super.surfaceKeyDown(code, event);
+}
+
+
 public void keyPressed() {
-  if (key == CODED) {
-    //println("Pressed:"+keyCode);
-    if (keyCode == UP) {
+	
+  if (key == CODED) {	  
+    //println("Pressed:"+keyCode);	  
+	if (keyCode == UP) {
       if (BPM<140)
         changeBPM(BPM+1);
     } 
@@ -1887,6 +1904,7 @@ static class DrumMachine {
   
   ShowcaseView sv1,sv2,sv3,sv4,sv5,sv6,sv7,sv8;
   ShowcaseView.ConfigOptions co;
+  boolean noShowMore=false;
   
   public void startHelpShowCase(){
 	  
@@ -1895,9 +1913,20 @@ static class DrumMachine {
       sv1 = ShowcaseView.insertShowcaseView(barOriginX+barWidth*0.5f,barOriginY+barHeight*0.5f,
     		  this, R.string.helpDialogTitle1, R.string.helpDialogText1, co);
       sv1.setShowcaseIndicatorScale(0.3f);
-      sv1.setOnShowcaseEventListener(this);	  
+      sv1.setOnShowcaseEventListener(this);
+      sv1.overrideButtonClick(showcaseCustomClick(sv1));
   }
     
+  public OnClickListener showcaseCustomClick(final ShowcaseView showcaseView){
+	  return new OnClickListener() {		
+			@Override
+			public void onClick(View arg0) {
+				noShowMore=true;
+				showcaseView.setCustomButtomText(getString(R.string.close));
+				showcaseView.hide();			
+			}
+	 };  
+  }
   
   public void shareApp(){
 	//create the send intent
@@ -2003,42 +2032,53 @@ static class DrumMachine {
 
 @Override
 public void onShowcaseViewHide(ShowcaseView showcaseView) {
-	// TODO Auto-generated method stub
+	
+	if(noShowMore){
+		noShowMore=false;
+		return;
+	}
+	
 	if(showcaseView==sv1){
 		sv2 = ShowcaseView.insertShowcaseView(bpmSlider.getX()+bpmSlider.getW()*0.5f,bpmSlider.getY()+bpmSlider.getH()*0.5f, this,
 				R.string.helpDialogTitle2, R.string.helpDialogText2, co);
 		sv2.setShowcaseIndicatorScale(0.3f);
     	sv2.animateGesture(-bpmSlider.getW(), 0, bpmSlider.getW(), 0);
     	sv2.setOnShowcaseEventListener(this);
+    	sv2.overrideButtonClick(showcaseCustomClick(sv2));
 	}else if(showcaseView==sv2){
 		sv3 = ShowcaseView.insertShowcaseView(loadButton.getX()+loadButton.getW()*0.5f,loadButton.getY()+loadButton.getH()*0.5f, this, 
 				R.string.helpDialogTitle3, R.string.helpDialogText3, co); 
 		sv3.setShowcaseIndicatorScale(0.3f);
 	    sv3.animateGesture(0, width*0.05f, 0, 0);
-	    sv3.setOnShowcaseEventListener(this);				
+	    sv3.setOnShowcaseEventListener(this);
+	    sv3.overrideButtonClick(showcaseCustomClick(sv3));
 	}else if(showcaseView==sv3){
 		sv4 = ShowcaseView.insertShowcaseView(loadButton.getX()+loadButton.getW()*0.5f,loadButton.getY()+loadButton.getH()*0.5f, this,
 				R.string.helpDialogTitle4, R.string.helpDialogText4, co);  
 		sv4.setShowcaseIndicatorScale(0.3f);
-	    sv4.setOnShowcaseEventListener(this);				
+	    sv4.setOnShowcaseEventListener(this);
+	    sv4.overrideButtonClick(showcaseCustomClick(sv4));
 	}else if(showcaseView==sv4){
 		sv5 = ShowcaseView.insertShowcaseView(deleteButtons.getX()+deleteButtons.getW()*0.5f,deleteButtons.getY()+deleteButtons.getH()*0.5f, this, 
 				R.string.helpDialogTitle5, R.string.helpDialogText5, co);  
 		sv5.setShowcaseIndicatorScale(0.3f);
 		sv5.animateGesture(0, width*0.05f, 0, 0);
-	    sv5.setOnShowcaseEventListener(this);				
+	    sv5.setOnShowcaseEventListener(this);
+	    sv5.overrideButtonClick(showcaseCustomClick(sv5));
 	}else if(showcaseView==sv5){
 		sv6 = ShowcaseView.insertShowcaseView(width*0.5f,height*0.27f, this,
 				R.string.helpDialogTitle6, R.string.helpDialogText6, co);  
 		sv6.setShowcaseIndicatorScale(1.0f);
 		sv6.animateGesture(width*0.05f, -height*0.05f, width*0.05f, height*0.09f);
-	    sv6.setOnShowcaseEventListener(this);				
+	    sv6.setOnShowcaseEventListener(this);
+	    sv6.overrideButtonClick(showcaseCustomClick(sv6));
 	}else if(showcaseView==sv6){
 		sv7 = ShowcaseView.insertShowcaseView(width*0.5f,height*0.71f, this,
 				R.string.helpDialogTitle7, R.string.helpDialogText7, co);  
 		sv7.setShowcaseIndicatorScale(1.7f);
 		sv7.animateGesture(width*0.05f, height*0.05f, width*0.05f, height*0.15f);
-	    sv7.setOnShowcaseEventListener(this);				
+	    sv7.setOnShowcaseEventListener(this);
+	    sv7.overrideButtonClick(showcaseCustomClick(sv7));
 	}
 }
 
@@ -2052,6 +2092,20 @@ public void onCreate(Bundle savedInstanceState) {
  
     setupActionBar();
   	
+}
+
+@Override
+public void onBackPressed() {
+	Log.d("onBackPressed","onBackPressed");
+    new AlertDialog.Builder(this)
+        .setTitle(R.string.sureToExitTitle)
+        .setMessage(R.string.sureToExitMessage)
+        .setNegativeButton(android.R.string.no, null)
+        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        	public void onClick(DialogInterface dialog, int which) {
+                DrumCloud.super.onBackPressed();
+            }
+        }).create().show();
 }
 
 @Override
