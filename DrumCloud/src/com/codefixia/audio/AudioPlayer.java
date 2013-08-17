@@ -456,6 +456,10 @@ public short[] loadWavFile(File f) {
     //println("setting speed to "+speed);
     dReadHead = speed;
   }
+  
+  public float getSpeed() {
+	  return dReadHead;
+  }  
 
   /**
    * Set the master volume of the AudioPlayer

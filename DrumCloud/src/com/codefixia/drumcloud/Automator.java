@@ -2,6 +2,7 @@ package com.codefixia.drumcloud;
 
 
 
+import com.codefixia.ui.AnimatedBeatKnob;
 import com.codefixia.ui.BeatKnob;
 import com.codefixia.ui.PressZones;
 import com.codefixia.ui.ToggleButtonsBar;
@@ -14,22 +15,23 @@ import processing.core.PApplet;
 public class Automator {
 
   private final DrumCloud drumCloud;
-  
+  private boolean stopOnRelease=false;
   private PressZones kick;
   private PressZones bass;
   private PressZones snare;
   private PressZones hithat;
-  private BeatKnob kickKnob;
-  private BeatKnob bassKnob;
-  private BeatKnob snareKnob;
-  private BeatKnob hithatKnob;
+  private AnimatedBeatKnob kickKnob;
+  private AnimatedBeatKnob bassKnob;
+  private AnimatedBeatKnob snareKnob;
+  private AnimatedBeatKnob hithatKnob;
   private AutoMode mode=AutoMode.VOLUME;
   private int[] offsetsSample={ -1, 0, 1, 2, 3 };
   private int[][] offsetsX;
   private int[][] offsetsY;
-  private ToggleButtonsBar modeSelector;
+  private ToggleButtonsBar modeSelector,onReleaseSelector,deleteButtons;
   private int width,height;
   private float zoneWidth,zoneHeight,zoneOriginX,zoneOriginY,zoneMarginX,zoneMarginY,knobOriginX,knobOriginY;
+  private int kickGrid=0,bassGrid=0,snareGrid=0,hithatGrid=0;
 
   Automator(DrumCloud drumCloud) {
     this.drumCloud = drumCloud;
@@ -39,19 +41,36 @@ public class Automator {
 
 
 
-  public void setup() {
+  public float getContainerOriginX() {
+	return zoneOriginX-width*0.03f;
+  }
+
+
+
+public void setup() {
 	width=drumCloud.width;
 	height=drumCloud.height;	  
     zoneWidth=width*0.153f;
     zoneHeight=height*0.485f;
-    zoneOriginX=width*0.131f;
-    zoneMarginX=width*0.04437f;
+    zoneOriginX=width*0.05f;
+    zoneMarginX=width*0.0976f;
     zoneMarginY=width*0.428f;
     
     knobOriginY=height*0.2f;
     knobOriginX=zoneOriginX+zoneWidth*0.5f;
     
-    modeSelector=new ToggleButtonsBar(DrumCloud.X.barOriginX, DrumCloud.X.padsContainerOriginY-height*0.05f, DrumCloud.X.barWidth, height*0.05f);
+    onReleaseSelector=new ToggleButtonsBar(drumCloud.barOriginX, drumCloud.barOriginY+drumCloud.barHeight, drumCloud.barWidth, height*0.05f);
+    String[] modes={
+    		DrumCloud.X.getString(R.string.ON_RELEASE),
+    		DrumCloud.X.getString(R.string.HOLD),
+    		DrumCloud.X.getString(R.string.STOP)
+    };
+    onReleaseSelector.setActiveColor(drumCloud.blueColor);
+    onReleaseSelector.setHasLabel(true);
+    onReleaseSelector.setButtons(modes);
+    
+    
+    modeSelector=new ToggleButtonsBar(getContainerOriginX(), DrumCloud.X.padsContainerOriginY-height*0.1f, width-2*getContainerOriginX(), height*0.05f);
     String[] buttons={
     		DrumCloud.X.getString(R.string.VOLUME),
     		DrumCloud.X.getString(R.string.SAMPLE),
@@ -59,6 +78,18 @@ public class Automator {
     		DrumCloud.X.getString(R.string.PITCH)
     };
     modeSelector.setButtons(buttons);
+    
+    deleteButtons=new ToggleButtonsBar(getContainerOriginX(), DrumCloud.X.padsContainerOriginY-height*0.05f, width-2*getContainerOriginX(), height*0.05f);
+    String[] delButtons={
+    		DrumCloud.X.getString(R.string.DELETE),
+    		DrumCloud.X.getString(R.string.DELETE),
+    		DrumCloud.X.getString(R.string.DELETE),
+    		DrumCloud.X.getString(R.string.DELETE)
+    };
+    deleteButtons.setActiveColor(drumCloud.redColor);
+    deleteButtons.setMomentary(true);
+    deleteButtons.setButtons(delButtons);
+    //deleteButtons.setEnabled(false);
     
     if (DrumCloud.isAndroidDevice) {
       zoneOriginY=height*0.425f;
@@ -80,20 +111,23 @@ public class Automator {
     
     setSubZonesByMode(mode.value());
 
-    kickKnob=new BeatKnob(knobOriginX,knobOriginY,zoneWidth,zoneWidth);
+    kickKnob=new AnimatedBeatKnob(knobOriginX,knobOriginY,zoneWidth,zoneWidth,drumCloud);
     kickKnob.setFillColor(DrumCloud.X.redColor);
-    bassKnob=new BeatKnob(knobOriginX+1*(zoneWidth+zoneMarginX),knobOriginY,zoneWidth,zoneWidth);
+    bassKnob=new AnimatedBeatKnob(knobOriginX+1*(zoneWidth+zoneMarginX),knobOriginY,zoneWidth,zoneWidth,drumCloud);
     bassKnob.setFillColor(DrumCloud.X.orangeColor);
-    snareKnob=new BeatKnob(knobOriginX+2*(zoneWidth+zoneMarginX),knobOriginY,zoneWidth,zoneWidth);
+    snareKnob=new AnimatedBeatKnob(knobOriginX+2*(zoneWidth+zoneMarginX),knobOriginY,zoneWidth,zoneWidth,drumCloud);
     snareKnob.setFillColor(DrumCloud.X.blueColor);
-    hithatKnob=new BeatKnob(knobOriginX+3*(zoneWidth+zoneMarginX),knobOriginY,zoneWidth,zoneWidth);
+    hithatKnob=new AnimatedBeatKnob(knobOriginX+3*(zoneWidth+zoneMarginX),knobOriginY,zoneWidth,zoneWidth,drumCloud);
     hithatKnob.setFillColor(DrumCloud.X.greenColor);    
   }
 
 
 
   public void draw() {
-	modeSelector.draw();  
+	onReleaseSelector.draw();  
+	modeSelector.draw();
+	deleteButtons.draw();
+    drawLines();
     kick.drawState();
     bass.drawState();
     snare.drawState();
@@ -101,8 +135,23 @@ public class Automator {
     kickKnob.draw();
     bassKnob.draw();
     snareKnob.draw();
-    hithatKnob.draw();    
+    hithatKnob.draw();
   }
+  
+  public void drawLines(){
+	 DrumCloud.X.stroke(DrumCloud.X.color(100,128));
+	 DrumCloud.X.strokeWeight(3);
+		
+	 for(int i=1;i<4;i++){
+		 for(int j=0;j<4;j++){
+			 float x0=zoneOriginX+(i*zoneWidth)+((i-1)*zoneMarginX);
+			 float x1=zoneOriginX+(i*(zoneWidth+zoneMarginX));
+			 float y0=zoneOriginY+(((j+1)*zoneHeight/4.0f));
+			 float y1=zoneOriginY+((j*zoneHeight/4.0f));
+			 DrumCloud.X.line(x0, y0, x1, y1);
+		 }
+	 }
+  } 
 
   public void mousePressed(float x, float y) {
     mousePressed((int)x, (int)y);
@@ -165,32 +214,70 @@ public class Automator {
 			}	
 			break;
 		case PITCH:
-			PApplet.println("Changing pitch:"+pressZone.normalizedValue()*2.0f+" of:"+sampleType);
+			//PApplet.println("Changing pitch:"+pressZone.normalizedValue()*2.0f+" of:"+sampleType);
 			DrumCloud.X.controlPitch(pressZone.normalizedValue()*2.0f, sampleType);	
 			break;			
 		}
   }
 
   public void mousePressed(int id, int mouseX, int mouseY, float pressure) {
-	  PApplet.println("Press on automator mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);	  
-      if(kick.isClickStarted(id,mouseX,mouseY,drumCloud.getCurrentGrid())){
-        drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.KICK]);
-        drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.KICK],kick.normalizedValue(),kickKnob.beatValue());
+	  //PApplet.println("Press on automator mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);	  
+	  if(!stopOnRelease){
+		  kickGrid=kick.getStartGrid();
+		  if(kickGrid==-1)kickGrid=drumCloud.getCurrentGrid();
+		  
+		  bassGrid=bass.getStartGrid();
+		  if(bassGrid==-1)bassGrid=drumCloud.getCurrentGrid();
+		  
+		  snareGrid=snare.getStartGrid();
+		  if(snareGrid==-1)snareGrid=drumCloud.getCurrentGrid();
+		  
+		  hithatGrid=hithat.getStartGrid();
+		  if(hithatGrid==-1)hithatGrid=drumCloud.getCurrentGrid();		  
+	  }
+	  
+      if(kick.isClickStarted(id,mouseX,mouseY,stopOnRelease?drumCloud.getCurrentGrid():kickGrid)){
+    	kickKnob.setStartGrid(kick.getStartGrid());
+    	kickKnob.setAnimating(true);
+    	if(stopOnRelease){
+    		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.KICK]);
+        	drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.KICK],kick.normalizedValue(),kickKnob.beatValue());
+    	}else{
+    		drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.KICK], kickGrid, kickKnob.beatValue());
+    	}
         applyModeChanges(kick,DrumCloud.X.KICK);        
       }
-      if(bass.isClickStarted(id,mouseX,mouseY,drumCloud.getCurrentGrid())){
-        drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.BASS]);
-        drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.BASS],bass.normalizedValue(),bassKnob.beatValue());
+      if(bass.isClickStarted(id,mouseX,mouseY,stopOnRelease?drumCloud.getCurrentGrid():bassGrid)){
+    	bassKnob.setStartGrid(bass.getStartGrid());
+    	bassKnob.setAnimating(true);
+    	if(stopOnRelease){    		
+    		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.BASS]);
+    		drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.BASS],bass.normalizedValue(),bassKnob.beatValue());
+    	}else{
+    		drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.BASS], bassGrid, bassKnob.beatValue());
+    	}
         applyModeChanges(bass,DrumCloud.X.BASS);
       }
-      if(snare.isClickStarted(id,mouseX,mouseY,drumCloud.getCurrentGrid())){
-        drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.SNARE]);
-        drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.SNARE],snare.normalizedValue(),snareKnob.beatValue());
+      if(snare.isClickStarted(id,mouseX,mouseY,stopOnRelease?drumCloud.getCurrentGrid():snareGrid)){
+    	snareKnob.setStartGrid(snare.getStartGrid());
+		snareKnob.setAnimating(true);
+    	if(stopOnRelease){
+    		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.SNARE]);
+    		drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.SNARE],snare.normalizedValue(),snareKnob.beatValue());
+      	}else{
+  			drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.SNARE], snareGrid, snareKnob.beatValue());
+  		}
         applyModeChanges(snare,DrumCloud.X.SNARE);
       }
-      if(hithat.isClickStarted(id,mouseX,mouseY,drumCloud.getCurrentGrid())){
-        drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.HITHAT]);
-        drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.HITHAT],hithat.normalizedValue(),hithatKnob.beatValue());
+      if(hithat.isClickStarted(id,mouseX,mouseY,stopOnRelease?drumCloud.getCurrentGrid():hithatGrid)){
+    	hithatKnob.setStartGrid(hithat.getStartGrid());
+		hithatKnob.setAnimating(true);    	
+    	if(stopOnRelease){
+    		drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.HITHAT]);
+    		drumCloud.addSoundTypeRepeated(offsetsSample[DrumCloud.X.HITHAT],hithat.normalizedValue(),hithatKnob.beatValue());
+    	}else{
+			drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.HITHAT], hithatGrid, hithatKnob.beatValue());
+		}        
         applyModeChanges(hithat,DrumCloud.X.HITHAT);
       } 
  
@@ -207,6 +294,15 @@ public class Automator {
      if(hithatKnob.startDragging(mouseX,mouseY)){
              
      }
+          
+     int onReleaseSelected=onReleaseSelector.isButtonClicked(mouseX, mouseY);
+     if(onReleaseSelected==2){
+    	 stopOnRelease=true;
+    	 deleteButtons.setEnabled(false);
+     }else if(onReleaseSelected==1){
+    	 stopOnRelease=false;
+    	 deleteButtons.setEnabled(true);
+     }     
      
      int selected=modeSelector.isButtonClicked(mouseX, mouseY);
      if(selected!=-1){
@@ -216,12 +312,35 @@ public class Automator {
     	 loadOffsetsByMode(mode.value());
      }
      
+     int delete=deleteButtons.isButtonClicked(mouseX, mouseY);
+     if(delete!=-1){
+    	 drumCloud.deleteSoundOfGroup(delete);
+    	 switch (delete) {
+    	 case 0:
+    		 kickKnob.setAnimating(false);
+    		 kick.resetStartGrid();
+			break;
+    	 case 1:
+    		 bassKnob.setAnimating(false);
+    		 bass.resetStartGrid();
+			break;
+    	 case 2:
+    		 snareKnob.setAnimating(false);
+    		 snare.resetStartGrid();
+			break;
+    	 case 3:
+    		 hithatKnob.setAnimating(false);
+    		 hithat.resetStartGrid();
+			break;			
+		}
+     }     
+     
   }
   
   public void setSubZonesByMode(int mode){
  	 switch (mode) {
  	 	case 0:
- 		 String[] vSubzones = { "100%", "75%", "50%", "25%" };
+ 		 String[] vSubzones = { "100", "75", "50", "25" };
  		 kick.setSubZoneTexts(vSubzones);			
  		 bass.setSubZoneTexts(vSubzones);    
  		 snare.setSubZoneTexts(vSubzones);     
@@ -311,19 +430,25 @@ public class Automator {
 
 
   public void mouseReleased(int id, int mouseX, int mouseY, float pressure) {
-	 PApplet.println("Release on automator mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
-     if(kick.isClickStopped(id)){
-       drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.KICK]);
-     }
-     if(bass.isClickStopped(id)){
-       drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.BASS]);
-     }
-     if(snare.isClickStopped(id)){
-       drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.SNARE]);
-     }
-     if(hithat.isClickStopped(id)){
-       drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.HITHAT]);
-     }
+	 //PApplet.println("Release on automator mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
+	 if(stopOnRelease){
+		 if(kick.isClickStopped(id)){
+			 drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.KICK]);
+			 kickKnob.setAnimating(false);
+		 }
+		 if(bass.isClickStopped(id)){
+			 drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.BASS]);
+			 bassKnob.setAnimating(false);
+		 }
+		 if(snare.isClickStopped(id)){
+			 drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.SNARE]);
+			 snareKnob.setAnimating(false);
+		 }
+		 if(hithat.isClickStopped(id)){
+			 drumCloud.removeAllSoundsOfType(offsetsSample[DrumCloud.X.HITHAT]);
+			 hithatKnob.setAnimating(false);
+		 }
+	 }
      
      if(kickKnob.stopDragging()){
     	 if(kick.isClicked()){
@@ -344,7 +469,9 @@ public class Automator {
     	 if(hithat.isClicked()){
     		 drumCloud.updateSoundTypeRepeated(offsetsSample[DrumCloud.X.HITHAT], hithat.getStartGrid(), hithatKnob.beatValue());
     	 }
-     }    	      
+     }   
+     
+     deleteButtons.stopClick();
   }
 
 

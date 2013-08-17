@@ -8,6 +8,7 @@ public class ToggleButton extends Clickable{
   private String text="";
   private String activeText;
   
+  private boolean enabled=true;
   private boolean ON=false;
   private boolean blinkWhenOn=false;
   float blinkIntervalMS=500;
@@ -28,19 +29,26 @@ public class ToggleButton extends Clickable{
 	  this.activeColor = activeColor;
   }
 
+  public boolean isEnabled() {
+	  return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+	  this.enabled = enabled;
+  }
 
   public void drawState(){
-    if(isON()){
-      drawActivated();
-    }else if(overed){
-      drawOvered();
-    }else{
-      drawNormal();
-    }
+	  if(isON()){
+		  drawActivated();
+	  }else if(overed){
+		  drawOvered();
+	  }else{
+		  drawNormal();
+	  }
   }
-  
+
   public void drawActivated(){
-    if(isBlinkWhenOn()){
+	  if(isBlinkWhenOn()){
       if(DrumCloud.X.millis()%(blinkIntervalMS*2)<blinkIntervalMS){
         setBlinkOn(true);  
         DrumCloud.X.stroke(255);
@@ -60,7 +68,9 @@ public class ToggleButton extends Clickable{
   
   public void drawNormal(){
     DrumCloud.X.stroke(getStrokeColor());
-    if(activeColor==-1)
+    if(!enabled)
+    	DrumCloud.X.fill(150,200);
+    else if(activeColor==-1)
     	DrumCloud.X.fill(DrumCloud.X.red(getFillColor())-100,DrumCloud.X.green(getFillColor())-100,DrumCloud.X.blue(getFillColor())-100,200);
     else
     	DrumCloud.X.fill(getFillColor());
@@ -79,12 +89,17 @@ public class ToggleButton extends Clickable{
         DrumCloud.X.text(getText(), getX()+(getW()*0.5f), getY()+(getH()*0.7f));
     }
     else{
-      DrumCloud.X.fill(200);
+      if(!enabled)	
+    	  DrumCloud.X.fill(50);
+      else
+    	  DrumCloud.X.fill(200);
       DrumCloud.X.text(getText(), getX()+(getW()*0.5f), getY()+(getH()*0.7f));
     }    
   }
   
   public boolean isClicked(int mx, int my) {
+	if(!enabled)return false;
+	
     if (isOver(mx, my)) {
       clicked = true;
       setOffsetX(getX()-mx);
@@ -99,6 +114,8 @@ public class ToggleButton extends Clickable{
   }
   
   public boolean isReleased(int mx, int my) {
+	  if(!enabled)return false;
+	  
 	  if (!dragging && isOver(mx, my)) {
 		  released = true;
 		  setOffsetX(getX()-mx);
@@ -116,6 +133,8 @@ public class ToggleButton extends Clickable{
   }
   
   public boolean isDragging(int mx, int my) {
+	  if(!enabled)return false;
+	  
 	  if (clicked && isOver(mx, my)) {
 		  overed=false;
 		  dragging = true;
@@ -125,50 +144,51 @@ public class ToggleButton extends Clickable{
   }   
 	  
   public boolean cancelClick() {
-		  dragging=false;
-		  clicked =false;
-		  overed=false;
-		  return true;
+	  if(!enabled)return false;
+	  dragging=false;
+	  clicked =false;
+	  overed=false;
+	  return true;
   }
 
-public boolean isON() {
-	return ON;
-}
+  public boolean isON() {
+	  return ON;
+  }
 
-public void setON(boolean oN) {
-	ON = oN;
-}
+  public void setON(boolean oN) {
+	  ON = oN;
+  }
 
-public String getText() {
-	return text;
-}
+  public String getText() {
+	  return text;
+  }
 
-public void setText(String text) {
-	this.text = text;
-}
+  public void setText(String text) {
+	  this.text = text;
+  }
 
-public String getActiveText() {
-	return activeText;
-}
+  public String getActiveText() {
+	  return activeText;
+  }
 
-public void setActiveText(String activeText) {
-	this.activeText = activeText;
-}
+  public void setActiveText(String activeText) {
+	  this.activeText = activeText;
+  }
 
-public boolean isBlinkWhenOn() {
-	return blinkWhenOn;
-}
+  public boolean isBlinkWhenOn() {
+	  return blinkWhenOn;
+  }
 
-public void setBlinkWhenOn(boolean blinkWhenOn) {
-	this.blinkWhenOn = blinkWhenOn;
-}
+  public void setBlinkWhenOn(boolean blinkWhenOn) {
+	  this.blinkWhenOn = blinkWhenOn;
+  }
 
-public boolean isBlinkOn() {
-	return blinkOn;
-}
+  public boolean isBlinkOn() {
+	  return blinkOn;
+  }
 
-public void setBlinkOn(boolean blinkOn) {
-	this.blinkOn = blinkOn;
-}   
+  public void setBlinkOn(boolean blinkOn) {
+	  this.blinkOn = blinkOn;
+  }   
 
 }

@@ -1,22 +1,50 @@
 package com.codefixia.ui;
 
 import com.codefixia.drumcloud.DrumCloud;
+import com.codefixia.utils.FontAdjuster;
 
 public class ToggleButtonsBar {
 
 	String[] buttonTexts;
 	ToggleButton[] toggleButtons;
 	boolean showMenuButton=false;
+	boolean hasLabel=false;
 	float x,y,w,h;
 	MenuButton menuButton;
+	private boolean momentary=false;
+	private int activeColor=DrumCloud.X.greenColor;
+	private boolean enabled=true;
 	
 	public ToggleButtonsBar(float x, float y, float w, float h) {
 		this.x=x;
 		this.y=y;
 		this.w=w;
 		this.h=h;		
-	}	
+	}
 	
+	public void setMomentary(boolean momentary) {
+		this.momentary = momentary;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+		for (int i = 0; i < toggleButtons.length; i++) {
+			toggleButtons[i].setEnabled(enabled);
+		}
+	}
+
+	public int getActiveColor() {
+		return activeColor;
+	}
+
+	public void setActiveColor(int activeColor) {
+		this.activeColor = activeColor;
+	}
+
 	public boolean isShowMenuButton() {
 		return showMenuButton;
 	}
@@ -25,7 +53,13 @@ public class ToggleButtonsBar {
 		this.showMenuButton = showMenuButton;
 	}
 
+	public boolean hasLabel() {
+		return hasLabel;
+	}
 
+	public void setHasLabel(boolean hasLabel) {
+		this.hasLabel = hasLabel;
+	}
 
 	public void setButtons(String[] buttonTexts){
 		this.buttonTexts=buttonTexts;
@@ -41,12 +75,18 @@ public class ToggleButtonsBar {
 		for (int i = 0; i < buttonTexts.length; i++) {
 			toggleButtons[i]=new ToggleButton(x+(buttonWidth*i),y,buttonWidth,h);
 			toggleButtons[i].setFillColor(DrumCloud.X.color(50));
-			toggleButtons[i].setActiveColor(DrumCloud.X.color(100));
-			toggleButtons[i].setActiveColor(DrumCloud.X.greenColor);
+			toggleButtons[i].setActiveColor(activeColor);
 			toggleButtons[i].setText(buttonTexts[i]);
-			if(i==0)
+			if(!momentary && (i==0 && !hasLabel)||(i==1 && hasLabel))
 				toggleButtons[i].setON(true);
+			if(hasLabel && i==0){
+				toggleButtons[i].setEnabled(false);
+			}			
 		}
+	}
+	
+	public void drawLabel(String text){
+			
 	}
 	
 	public void draw(){
@@ -67,9 +107,13 @@ public class ToggleButtonsBar {
 	}
 
 	public void stopClick() {
-		menuButton.stopClick();
+		if(showMenuButton)
+			menuButton.stopClick();
 		for (int i = 0; i < buttonTexts.length; i++) {
 			toggleButtons[i].cancelClick();
+			if(momentary){
+				toggleButtons[i].setON(false);
+			}
 		}		
 	}
 

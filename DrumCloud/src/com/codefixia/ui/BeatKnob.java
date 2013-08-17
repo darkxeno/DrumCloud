@@ -45,12 +45,17 @@ public class BeatKnob extends Knob{
 	    DrumCloud.X.fill(fillColor);
 	    //stroke(100,255);
 	    DrumCloud.X.arc(x,y,w,h,PApplet.radians(65-angleValue),PApplet.radians(65),PConstants.PIE);
-	    float posY=y+h*.63f;
+	    
 	    if(innerRadius>0){
 	      DrumCloud.X.fill(backColor);
 	      //DrumCloud.X.arc(x,y,w*innerRadius,h*innerRadius,PApplet.radians(115),PApplet.radians(425),PConstants.OPEN);
 	      DrumCloud.X.ellipse(x,y,w*innerRadius,h*innerRadius);
-	    }    
+	    }
+	    drawTextIndicators();
+	  }
+
+	private void drawTextIndicators() {
+	    float posY=y+h*.63f;
 	    DrumCloud.X.fill(200);
 	    DrumCloud.X.textSize(FontAdjuster.getSize(20));
 	    DrumCloud.X.textSize(FontAdjuster.getSize(15));
@@ -68,6 +73,7 @@ public class BeatKnob extends Knob{
 	    DrumCloud.X.text(PApplet.round(minValue),x+w*.2f,posY);
 	    DrumCloud.X.textAlign(PConstants.RIGHT);
 	    DrumCloud.X.text(PApplet.round(maxValue),x-w*.2f,posY);
-	    DrumCloud.X.text(text,x+w*.5f,y+h*.5f);    
-	  }   
+	    DrumCloud.X.text(text,x+w*.5f,y+h*.5f); 
 	}
+	
+}

@@ -21,7 +21,7 @@ public class VerticalSlider extends Draggable{
     maxY=max;
     calculateClickZone();
     divHeight=(maxYZone-minYZone)/divisions;
-    DrumCloud.println("totalH:"+(maxYZone-minYZone)+" divHeight:"+divHeight);    
+    //DrumCloud.println("totalH:"+(maxYZone-minYZone)+" divHeight:"+divHeight);    
   } 
  
   public float normalizedValue(){

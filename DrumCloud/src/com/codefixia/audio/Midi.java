@@ -1,6 +1,8 @@
 package com.codefixia.audio;
 
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.codefixia.drumcloud.DrumCloud;
 import com.codefixia.drumcloud.R;
@@ -24,6 +26,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
@@ -65,25 +68,21 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 
 	private NetworkMidiSystem nmjs;
 	private static DrumCloud drumCloud;
-
+	private Spinner spinner;
+	private ArrayAdapter<CharSequence> adapter;
+	private String[] channelArray;
+	
     public Midi(DrumCloud drumCloudRef) {
     	drumCloud=drumCloudRef;
- 
         try{ 
-
         	nmjs = NetworkMidiSystem.get(drumCloud);
-        	
         } catch (Exception e) {
-
         	/*
         	 * This would happen if no network permissions were given.
         	 * See AndroidManifest.xml
         	 */
-
         	e.printStackTrace();
-  
         	return;
-  
         } 
 
         NMJConfig.addSystemListener(this); 
@@ -116,8 +115,8 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
         /* can't use "this" in the below event handler */
         final NetworkMidiListener ml = this;
 
-        Spinner spinner = (Spinner) dialog.findViewById(R.id.Spinner01);
-	    String[] channelArray = new String[NMJConfig.getNumChannels()];
+        spinner = (Spinner) dialog.findViewById(R.id.Spinner01);
+	    channelArray = new String[NMJConfig.getNumChannels()];
 	    for (int i = 0; i < NMJConfig.getNumChannels(); i++) channelArray[i] = NMJConfig.getName(i);
 	    ArrayAdapter<CharSequence> adapter = new ArrayAdapter(dialog.getContext(), android.R.layout.simple_spinner_item, channelArray);
 	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -130,11 +129,15 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 		        	try{ midiOut.close(null); } catch (NullPointerException ne){}
 		        	try{
 		        		midiIn = nmjs.openInput(position, ml);
-		        	} catch (Exception e){/* channel is output only */}
+		        	} catch (Exception e){
+		        		Log.e("MIDI IN","EX:"+e);
+		        		/* channel is output only */
+		        	}
 		        	midiTestButton.setEnabled(true);
 			        try{
 		        		midiOut = nmjs.openOutput(position, ml);
 		        	} catch (Exception e){
+		        		Log.e("MIDI OUT","EX:"+e);
 		        		/* channel is input only */
 		        		midiTestButton.setEnabled(false);
 		        	}
@@ -197,9 +200,33 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 
 	}
 	
+	public void sendNote(final int channel, final int pitch, final int velocity,int durationMS) {
+		
+		if(Looper.myLooper() == Looper.getMainLooper()){
+			new Timer().schedule(new TimerTask() {          
+			    @Override
+			    public void run() {
+			    	sendNoteOn(channel,pitch,velocity);       
+			    }
+			}, 0);		
+		}else{
+	    	sendNoteOn(channel,pitch,velocity);
+		}		
+		
+		new Timer().schedule(new TimerTask() {          
+		    @Override
+		    public void run() {
+		    	sendNoteOff(channel,pitch,velocity);       
+		    }
+		}, durationMS);
+	}
+	
 	
 	public void sendNoteOn(int channel, int pitch, int velocity) {
-		myNote[2] = (byte)(36+pitch);
+		myNote[0] = (byte)144;
+		myNote[1] = (byte)(36+(pitch*2));
+		myNote[2] = (byte)(velocity);//(byte)(100);
+		PApplet.println("Sending midi note:"+(36+pitch*2)+" velocity:"+velocity+" midiOut:"+(midiOut!=null)+" mainthread:"+(Looper.myLooper() == Looper.getMainLooper()));
 		try {
 			if(midiOut!=null)
 				midiOut.sendMidi(myNote);
@@ -210,6 +237,8 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 	}
 	
 	public void sendNoteOff(int channel, int pitch, int velocity) {
+		myNote[0] = (byte)128;
+		myNote[1] = (byte)(36+(pitch*2));		
 		myNote[2] = 0;
 		try {
 			if(midiOut!=null)
@@ -244,7 +273,7 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
     		sb.append("\n");
     		tv.setText(sb.toString());
     		String[] midiParts=lastMessage.toString().split("\\s+");
-    		Log.d("midiParts","total:"+midiParts.length+":"+midiParts[0]);
+    		//Log.d("midiParts","total:"+midiParts.length+":"+midiParts[0]);
     		if(midiParts.length==3){
     			int messageType=Integer.parseInt(midiParts[0]);
     			int pitch=Integer.parseInt(midiParts[1]);
@@ -307,13 +336,19 @@ public class Midi implements NetworkMidiListener, NMJSystemListener {
 			 * Time to update the spinner, which is not done in this sample. 
 			 * New channels will be available on the next launch.
 			 */
-		}
+		    channelArray = new String[NMJConfig.getNumChannels()];
+		    for (int i = 0; i < NMJConfig.getNumChannels(); i++){
+		    	channelArray[i] = NMJConfig.getName(i);
+		    	Log.d("NEW MIDI CHANNEL","->"+channelArray[i]);
+		    }
+		    adapter.notifyDataSetChanged();
+		    
+		}			
 
 	}
 
 	@Override
 	public void systemError(int channel, int err, String description) {
-		// TODO Auto-generated method stub
-
+		Log.e("MIDI SYSTEM ERROR","Desc:"+description+" on channel:"+channel);
 	}
 }

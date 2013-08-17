@@ -146,7 +146,7 @@ public class Sequencer {
   public void updateState() {
     for (int i=0;i<drumCloud.samplesPerBeat.length;i++) {
       for (int j=1;j<drumCloud.samplesPerBeat[i].length+1;j++) {
-        tracks[i][j].setON(drumCloud.samplesPerBeat[i][j-1]);
+        tracks[drumCloud.getSampleIndexBySoundType(i)][j].setON(drumCloud.samplesPerBeat[i][j-1]);
       }
     }
   }  
@@ -174,10 +174,10 @@ public class Sequencer {
   }  
   
   public void mousePressed(int mouseX, int mouseY) {
+	//PApplet.println("Press on sequencer mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);	  
     lastClickX=mouseX;
     lastClickY=mouseY;
-    released=false;
-    PApplet.println("Press on sequencer mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
+    released=false;    
   }
 
   public void mouseReleased(float x, float y) {
@@ -191,7 +191,7 @@ public class Sequencer {
   }
 
   public void mouseReleased(int mouseX, int mouseY) {
-    PApplet.println("Release on sequencer mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
+    //PApplet.println("Release on sequencer mx:"+drumCloud.mouseX+" my:"+drumCloud.mouseY);
     if(mouseY>drumCloud.height*0.95f){
     	return;
     }

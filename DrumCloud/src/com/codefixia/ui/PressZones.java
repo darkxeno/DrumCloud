@@ -17,7 +17,7 @@ public class PressZones extends Clickable {
 	  private String subZoneTexts[];
 	  private boolean showOtherZones=true; 
 	  private boolean dragReEnterEnabled=true;  
-	  private int startGrid=0;
+	  private int startGrid=-1;
 	  float subZoneHeight;
 
 	  String text="";
@@ -31,6 +31,11 @@ public class PressZones extends Clickable {
 	  public int getStartGrid() {
 		  return startGrid;
 	  }
+	  
+
+	  public void resetStartGrid() {
+		  startGrid=-1;
+	  }	  
 
 	  public int getLastZoneSelected() {
 		  PApplet.println("lastZoneSelected:"+lastZoneSelected);
@@ -103,16 +108,17 @@ public class PressZones extends Clickable {
 	    }
 	  }  
 
-	  void drawSubZones(){
-		  DrumCloud.X.fill(150);
-		  DrumCloud.X.stroke(150);
+	  void drawSubZones(){		  
+		  DrumCloud.X.stroke(getStrokeColor());
 		  DrumCloud.X.textSize(FontAdjuster.getSize(30));		  
 		  DrumCloud.X.textAlign(PConstants.CENTER);
 		  
 	      for (int i=0;i<subZoneTexts.length;i++) {
-	    	  DrumCloud.X.text(subZoneTexts[i],x+w*0.5f,y+(i*subZoneHeight+(subZoneHeight*0.6f)));
+	    	  DrumCloud.X.fill(150);
 	    	  if(i!=0)
 	    		  DrumCloud.X.line(x,y+i*subZoneHeight,x+w,y+i*subZoneHeight);
+			  DrumCloud.X.fill(200);
+	    	  DrumCloud.X.text(subZoneTexts[i],x+w*0.5f,y+(i*subZoneHeight+(subZoneHeight*0.6f)));
 	      }
 	  }
 	  

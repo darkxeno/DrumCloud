@@ -4,11 +4,15 @@
     <string name="load" tools:ignore="MissingTranslation">Cargar</string>
     <string name="DELETE" tools:ignore="MissingTranslation">BORRAR</string>
     <string name="ALL" tools:ignore="MissingTranslation">TODO</string>
+    <string name="ON_RELEASE" tools:ignore="MissingTranslation">AL SOLTAR:</string>
+    <string name="HOLD" tools:ignore="MissingTranslation">MANTENER</string>
+    <string name="STOP" tools:ignore="MissingTranslation">PARAR</string>    
     <string name="midi_setup" tools:ignore="MissingTranslation">Configuración</string>
     <string name="midi_test" tools:ignore="MissingTranslation">Enviar nota de prueba</string>
     <string name="export_midi" tools:ignore="MissingTranslation">Exportar</string>
     <string name="import_midi" tools:ignore="MissingTranslation">Importar</string>
 	<string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android™\n\nEnvía mensajes midi a este dispositivo para probar la conexión.</string>
+	<string name="midi_client_download" tools:ignore="MissingTranslation">Descarga el cliente Midi para PC/Mac desde aquí:\nhttp://codefixia.com/drumcloud/nmj.jar</string>
     <string name="midi_open" tools:ignore="MissingTranslation">Abrir Archivo</string>
     <string name="midi_share" tools:ignore="MissingTranslation">Enviar por Email</string>
     <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composición</string>

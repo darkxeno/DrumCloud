@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.codefixia.drumcloud"
     android:versionCode="4"
-    android:versionName="1.0.3" >
+    android:versionName="1.1.0" >
     
     <uses-sdk
         android:minSdkVersion="10"
@@ -51,6 +51,13 @@
         </activity>
 		<!-- Make nmj's control panel accessible -->
 		<activity android:name="de.humatic.nmj.NMJConfigDialog"></activity>
+     	<!-- activity android:name="com.codefixia.audio.USBListener">  
+		     <intent-filter>                
+		         <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />            
+		        </intent-filter>            
+		        <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"                
+		            android:resource="@xml/devices" />
+		</activity -->		
         <service android:name="com.codefixia.googledrive.GoogleDriveService" >
         </service>
         

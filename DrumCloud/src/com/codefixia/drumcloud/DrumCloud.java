@@ -180,7 +180,7 @@ final int KICK=1;
 final int BASS=2;
 final int SNARE=3;
 final int HITHAT=4;
-int trackMode=ALL;
+int filterTrackMode=ALL;
 
 public final static boolean isAndroidDevice=true;
 
@@ -342,7 +342,7 @@ public void noteOn(int channel, int pitch, int velocity) {
   int soundPlayer=(pitch-24)%6;
   int soundNumber=(pitch-24)/6;
   int soundType=soundPlayer+soundNumber*4;  
-  println("type:"+soundType+" player:"+soundPlayer+" number:"+soundNumber);
+  //println("type:"+soundType+" player:"+soundPlayer+" number:"+soundNumber);
   if (soundType>=0 && soundType<16 && soundNumber>=0 && soundNumber<4 && soundPlayer>=0 && soundPlayer<4) {
     switch(soundPlayer) {
     case 0:
@@ -443,6 +443,16 @@ public void toggleAudioPlayThread() {
   }
 
   paused=!paused;
+}
+
+public long getPlayedMS(){
+	return audioMs;
+}
+public float getTempoMS(){
+	return tempoMS;
+}
+public float getGridMS(){
+	return gridMS;
 }
 
 //synchronized 
@@ -622,7 +632,15 @@ public void drawPadsContainer() {
   strokeWeight(3);
   stroke(100, 100, 100, 255);
   fill(50, 50, 50, 255);
-  rect(barOriginX, padsContainerOriginY, barWidth, buttonSize*5.295f);
+  switch (mode) {
+  case LIVE:
+	  rect(barOriginX, padsContainerOriginY, barWidth, buttonSize*5.295f);	
+	  break;
+  case AUTOMATOR:
+	  rect(automator.getContainerOriginX(), padsContainerOriginY, width-2*automator.getContainerOriginX(), buttonSize*5.295f);	
+	  break;	
+  }
+
 }
 
 public void drawPadButtons(int c, ClickablePad[] padArray, float buttonsOriginX, float buttonsOriginY, float buttonSize, float buttonMargin, String buttonText) {
@@ -715,7 +733,7 @@ public void drawFiltersZone() {
   panelModeButton.drawState();    
 
   fill(0);
-  text("[TRACK MODE] ["+trackMode+"]", width*0.6f, height*0.525f);
+  //text("[TRACK MODE] ["+trackMode+"]", width*0.6f, height*0.525f);
 
   if (mouseY>height*0.5f) {
     stroke(0);
@@ -936,23 +954,27 @@ public void controlFilter(float filterFrequency, float filterResonance, int trac
   }
 }
 
-public void controlPitch(float speed, int trackmode) {
+public void controlPitch(float speed, int trackMode) {
 
   if (trackMode==KICK || trackMode==ALL) {   
-    for (int i=0;i<playerKick.length;i++) 
+    for (int i=0;i<playerKick.length;i++){ 
       playerKick[i].speed(speed);
+    }
   }
   if (trackMode==BASS || trackMode==ALL) {
-    for (int i=0;i<playerBass.length;i++)
+    for (int i=0;i<playerBass.length;i++){
       playerBass[i].speed(speed);
+    }
   }
   if (trackMode==SNARE || trackMode==ALL) {
-    for (int i=0;i<playerSnare.length;i++)
+    for (int i=0;i<playerSnare.length;i++){
       playerSnare[i].speed(speed);
+    }
   }
   if (trackMode==HITHAT || trackMode==ALL) {
-    for (int i=0;i<playerHitHat.length;i++)
+    for (int i=0;i<playerHitHat.length;i++){
       playerHitHat[i].speed(speed);
+    }
   }
 }
 
@@ -963,30 +985,30 @@ public void proccessPanel() {
   case FILTER:
     filterFrequency=map(valueY, 0.0f, 1.0f, 0.0f, 5000);
     filterResonance=map(valueX, 0.0f, 1.0f, -1.0f, 1.0f);  
-    controlFilter(filterFrequency, filterResonance, trackMode);
+    controlFilter(filterFrequency, filterResonance, filterTrackMode);
     break;
   case ECHO:
     delayTime=map(valueX, 0.0f, 1.0f, 0.0f, 3000);
     delayFeedback=map(valueY, 0.0f, 1.0f, 0.0f, 100.0f); 
-    if (trackMode==KICK || trackMode==ALL) {
+    if (filterTrackMode==KICK || filterTrackMode==ALL) {
       for (int i=0;i<playerKick.length;i++) {
         playerKick[i].setDelayTime(delayTime);
         playerKick[i].setDelayFeedback(delayFeedback);
       }
     }
-    if (trackMode==BASS || trackMode==ALL) {
+    if (filterTrackMode==BASS || filterTrackMode==ALL) {
       for (int i=0;i<playerBass.length;i++) {
         playerBass[i].setDelayTime(delayTime);
         playerBass[i].setDelayFeedback(delayFeedback);
       }
     }
-    if (trackMode==SNARE || trackMode==ALL) {
+    if (filterTrackMode==SNARE || filterTrackMode==ALL) {
       for (int i=0;i<playerSnare.length;i++) {
         playerSnare[i].setDelayTime(delayTime);
         playerSnare[i].setDelayFeedback(delayFeedback);
       }
     }
-    if (trackMode==HITHAT || trackMode==ALL) {
+    if (filterTrackMode==HITHAT || filterTrackMode==ALL) {
       for (int i=0;i<playerHitHat.length;i++) {
         playerHitHat[i].setDelayTime(delayTime);
         playerHitHat[i].setDelayFeedback(delayFeedback);
@@ -995,7 +1017,7 @@ public void proccessPanel() {
     break;
   case PITCH:
     speed=map(valueX, 0.0f, 1.0f, 0.0f, 2.0f);
-    controlPitch(speed, trackMode);
+    controlPitch(speed, filterTrackMode);
     break;
   }
 }
@@ -1236,7 +1258,7 @@ public void deleteAllSounds() {
 }
 
 public void deleteSoundOfGroup(int soundGroup) {
-  println("Deleting sound group:"+soundGroup);
+  //println("Deleting sound group:"+soundGroup);
   for (int i=0;i<totalSamples;i+=4) {
     deleteSoundType(i+soundGroup);
   }
@@ -1382,13 +1404,16 @@ public AudioPlayer getPlayerBySoundType(int soundType) {
   return null;
 }
 
+public int getSampleIndexBySoundType(int soundType) {
+	return (soundType%4*4)+(soundType/4);
+}
+
 public void playSoundType(int soundType,float volume) {
   AudioPlayer ap=getPlayerBySoundType(soundType);
-  //println("Using volume:"+volume);
   ap.ramp(ap.getVolume()*volume,2);  
   ap.cue(0);
   ap.play();
-  midi.sendNoteOn(1, soundType, (int)(127*volume));
+  midi.sendNote(1, getSampleIndexBySoundType(soundType), (int)(127*ap.getVolume()*volume),100);
 }
 
 public int getColorByMs(float msOcc) {
@@ -1429,7 +1454,7 @@ public void addSoundTypeToList(int soundType,float pressure) {
   playSoundType(soundType,pressure);
   if (!paused) {
     samplesPerBeat[soundType][currentGrid]=!samplesPerBeat[soundType][currentGrid];
-    println("changed sound:"+soundType+" at position:"+currentGrid);
+    //println("changed sound:"+soundType+" at position:"+currentGrid);
   }
 }
 
@@ -1452,7 +1477,11 @@ void updateSoundTypeRepeated(int soundType,int startPos,int repeatOffset) {
 		int size=samplesPerBeat[soundType].length;
 		int times=size/repeatOffset;
 		for(int i=0;i<times;i++){
-			int index=(startPos+i*repeatOffset)%size;
+			int index;
+			if(startPos>=0)
+				index=(startPos+i*repeatOffset)%size;
+			else
+				index=(i*repeatOffset)%size;
 			samplesPerBeat[soundType][index]=true;
 		}
 	}
@@ -1656,7 +1685,7 @@ static class DrumMachine {
 	  // pass the events to the TouchProcessor
 	  if ( code == MotionEvent.ACTION_DOWN || code == MotionEvent.ACTION_POINTER_DOWN) {
 		 int numPointers = event.getPointerCount();
-		 println("Pressed "+numPointers+" pointers.");
+		 //println("Pressed "+numPointers+" pointers.");
 		 onTouchDown(id, x, y, pressure);		 
 		 if(mode==MainMode.SEQUENCER){
 			 touch.pointDown(x, y, id, pressure);
@@ -1674,7 +1703,7 @@ static class DrumMachine {
 	  }
 	  else if (code == MotionEvent.ACTION_UP || code == MotionEvent.ACTION_POINTER_UP) {
 		int numPointers = event.getPointerCount();  
-		println("Released "+numPointers+" pointers. Index:"+index);  
+		//println("Released "+numPointers+" pointers. Index:"+index);  
 		
 		if(mode==MainMode.SEQUENCER){ 
 			if(numPointers==1)
@@ -1723,7 +1752,7 @@ static class DrumMachine {
 	  if(pressureEnabled){
 		  if(tapPressures.size()>=10){
 			  int pos=(int)random(0, tapPressures.size());
-			  println("removing:"+pos);
+			  //println("removing:"+pos);
 			  tapPressures.remove(pos);
 		  }
 		  tapPressures.add(pressure);
@@ -1731,9 +1760,9 @@ static class DrumMachine {
 	  }else{
 		  pressure=1;
 	  }
-	  println("original pressure:"+pressure+" min:"+tapPressures.getFirst()+" max:"+tapPressures.getLast());
+	  //println("original pressure:"+pressure+" min:"+tapPressures.getFirst()+" max:"+tapPressures.getLast());
 	  pressure=map(pressure,tapPressures.getFirst(),tapPressures.getLast(),0.25f,1);
-	  println("end pressure:"+pressure);
+	  //println("end pressure:"+pressure);
 	  mousePressed(id,(int)x, (int)y, pressure);		
   }
   

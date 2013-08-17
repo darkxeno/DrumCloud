@@ -8,10 +8,14 @@
     <string name="SAMPLE" tools:ignore="MissingTranslation">SAMPLE</string>
     <string name="PITCH" tools:ignore="MissingTranslation">PITCH</string>
     <string name="LOOP" tools:ignore="MissingTranslation">LOOP</string>
+    <string name="ON_RELEASE" tools:ignore="MissingTranslation">ON RELEASE:</string>
+    <string name="HOLD" tools:ignore="MissingTranslation">HOLD</string>
+    <string name="STOP" tools:ignore="MissingTranslation">STOP</string>
     <string name="midi" tools:ignore="MissingTranslation">Midi</string>
     <string name="midi_setup" tools:ignore="MissingTranslation">Setup</string>
     <string name="midi_test" tools:ignore="MissingTranslation">Send test note</string>
     <string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android™\n\nSend midi messages to this device to test midi connection.</string>
+    <string name="midi_client_download" tools:ignore="MissingTranslation">Download the PC/Mac Midi client from here:\nhttp://codefixia.com/drumcloud/nmj.jar</string>
     <string name="midi_open" tools:ignore="MissingTranslation">Open File</string>
     <string name="midi_share" tools:ignore="MissingTranslation">Send by Mail</string>
     <string name="midi_select_file" tools:ignore="MissingTranslation">Select Midi file:</string>
