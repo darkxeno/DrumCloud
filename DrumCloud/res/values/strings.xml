@@ -138,7 +138,16 @@ Using the pads on paused mode let\'s you enjoy the different pressure levels of 
 DrumCloud - Mobile Audio Production on the Cloud
 </string>
 <string name="shareAppMessage" tools:ignore="MissingTranslation">
-DrumCloud, your mobile audio production tool with unlimited samples storage.\n\n Try it now:\n https://play.google.com/store/apps/details?id=com.codefixia.drumcloud\n\nFrom Codefixia: http://codefixia.com
+DrumCloud, your mobile audio production tool with unlimited samples storage.\n\n Try it now:\n %1$s \n\nFrom Codefixia: http://codefixia.com
+</string>
+<string name="playMarketWebLink" tools:ignore="MissingTranslation">
+https://play.google.com/store/apps/details?id=com.codefixia.drumcloud
+</string>
+<string name="slidemeMarketWebLink" tools:ignore="MissingTranslation">
+http://slideme.org/application/drumcloud
+</string>
+<string name="amazonMarketWebLink" tools:ignore="MissingTranslation">
+http://www.amazon.com/gp/mas/dl/android?p=com.codefixia.drumcloud&amp;ref=mas_pm_drumcloud
 </string>
 <string name="shareAppDialogTitle" tools:ignore="MissingTranslation">
 Share with your friends

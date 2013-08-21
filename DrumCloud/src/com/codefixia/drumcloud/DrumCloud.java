@@ -25,7 +25,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -1948,9 +1952,26 @@ static class DrumMachine {
 	  //add a subject
 	  shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.shareAppSubject));
 
-	  //build the body of the message to be shared
-	  String shareMessage = getString(R.string.shareAppMessage);
+	  String market="";
 
+	  try {
+		  ApplicationInfo ai = getPackageManager().getApplicationInfo(this.getPackageName(),PackageManager.GET_META_DATA);
+		  Bundle bundle = ai.metaData;
+		  market = bundle.getString("market");
+	  } catch (Exception e) {
+		  e.printStackTrace();
+	  }
+
+	  //build the body of the message to be shared		
+	  String shareMessage="";
+	  Resources res=getResources();
+	  if(market.equalsIgnoreCase("amazon")){
+		  shareMessage = String.format(res.getString(R.string.shareAppMessage), res.getString(R.string.amazonMarketWebLink));
+	  }else if(market.equalsIgnoreCase("slideme")){
+		  shareMessage = String.format(res.getString(R.string.shareAppMessage), res.getString(R.string.slidemeMarketWebLink));
+	  }else{
+		  shareMessage = String.format(res.getString(R.string.shareAppMessage), res.getString(R.string.playMarketWebLink));
+	  }
 	  //add the message
 	  shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
 

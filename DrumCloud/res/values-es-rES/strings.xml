@@ -126,7 +126,7 @@ Si pausamos la reproducción podemos usar los diferentes niveles de presión de 
 DrumCloud - Producción Musical en la Nube
 </string>
 <string name="shareAppMessage" tools:ignore="MissingTranslation">
-DrumCloud, tu herramienta móvil de producción musical con almacenamiento ilimitado de samples.\n\n Pruebala ahora: https://play.google.com/store/apps/details?id=com.codefixia.drumcloud\n\nUn producto de Codefixia: http://codefixia.com
+DrumCloud, tu herramienta móvil de producción musical con almacenamiento ilimitado de samples.\n\n Pruebala ahora: %1$s \n\nUn producto de Codefixia: http://codefixia.com
 </string>
 <string name="shareAppDialogTitle" tools:ignore="MissingTranslation">
 Compartir con tus amigos
