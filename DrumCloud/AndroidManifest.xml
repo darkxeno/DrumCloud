@@ -6,7 +6,8 @@
     
     <uses-sdk
         android:minSdkVersion="10"
-        android:targetSdkVersion="17"
+        android:targetSdkVersion="10"
+        android:maxSdkVersion="10"
         />
 	<supports-screens 
                   android:smallScreens="true"
@@ -34,7 +35,7 @@
         android:icon="@drawable/icon"
         android:theme="@style/MyTheme" 
         android:label="DrumCloud" >
-    	<meta-data android:name="market" android:value="amazon" />        
+    	<meta-data android:name="market" android:value="play" />        
         <activity
             android:name="com.codefixia.drumcloud.DrumCloud"
             android:uiOptions="splitActionBarWhenNarrow"
