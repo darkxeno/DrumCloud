@@ -133,8 +133,8 @@ final int deleteMode=2;
 int mainMode=normalMode;
 
 PImage backTopMachine, backBottomMachine;
-
-float filterFrequency=11025.0f, filterResonance=0.5f, delayTime=0, delayFeedback=0, speed=1.0f, speed1=1.0f, volumeKick=1.0f, volumeBass=1.0f, volume=1.0f;
+public final static float mainFrequency=(AndroidUtil.numCores()>1)?22050:11025.0f;
+float filterFrequency=mainFrequency/4.0f, filterResonance=0.5f, delayTime=0, delayFeedback=0, speed=1.0f, speed1=1.0f, volumeKick=1.0f, volumeBass=1.0f, volume=1.0f;
 
 int candyPink=color(247, 104, 124);
 public int redColor=0xffB90016;
@@ -271,14 +271,14 @@ public AudioPlayer[] getPlayerHitHat() {
 }
 
 public void setupPowerSpectrum() {
-  //if (AndroidUtil.numCores()>1) {
-  for (int i=0;i<playerKick.length;i++) {
-    playerKick[i].setAnalysing(true);
-    playerBass[i].setAnalysing(true);
-    playerSnare[i].setAnalysing(true);
-    playerHitHat[i].setAnalysing(true);
+  if (AndroidUtil.numCores()>1) {
+	  for (int i=0;i<playerKick.length;i++) {
+		  playerKick[i].setAnalysing(true);
+		  playerBass[i].setAnalysing(true);
+		  playerSnare[i].setAnalysing(true);
+		  playerHitHat[i].setAnalysing(true);
+	  }
   }
-  //}
   maxLedWidth=buttonSize;
   ledHeight=(height*0.01f);      
   originPowerSpecX=0;
@@ -306,9 +306,10 @@ public void setupGeneral() {
   audioPlayThread.start();
   paused=false;
   background(0);
-  maxim = new Maxim(this);
+  maxim = new Maxim(this,mainFrequency);
   //maxim = new Minim(this); 
   for (int i=0;i<playerKick.length;i++) {
+	if(i<5){
     playerKick[i] = maxim.loadFile("kick_"+i+".wav");
     playerKick[i].setLooping(false);
     playerKick[i].volume(volume);
@@ -325,6 +326,12 @@ public void setupGeneral() {
     playerHitHat[i].setLooping(false);
     playerHitHat[i].volume(volume);
     playerHitHat[i].setFilter(filterFrequency, filterResonance);
+	}else{
+	    playerKick[i] = playerKick[0];
+	    playerBass[i] = playerBass[0];
+	    playerSnare[i] = playerSnare[0];
+	    playerHitHat[i] = playerHitHat[0];
+	}
   }
   //player.volume(1.0);
   //backTopMachine=loadImage("MPD26_mod.png");
@@ -378,7 +385,7 @@ public void controllerChange(int channel, int number, int value) {
   if (channel==15) {
     if (number==0) {
       speed=map(value, 0, 127, 0, 2);
-      filterFrequency=map(value, 0, 127, 0, 10000);
+      filterFrequency=map(value, 0, 127, 0, mainFrequency/4.0f);
     }
     if (number==1) {
       filterResonance=map(value, 0, 127, 0, 1);
@@ -435,6 +442,21 @@ public void setupSliders() {
     sliderMinY=height*0.162f;
     sliderMaxY=height*0.33f;
   }
+	for (int i=0;i<sliders.length;i++) {
+		if (sliders[i]==null) {
+			sliders[i]=new VerticalSlider(sliderOriginX+(sliderMarginX*i), sliderMinY+(sliderMaxY-sliderMinY)*0.5f, sliderWidth, sliderHeight);
+			sliders[i].limitY(sliderMinY, sliderMaxY);      
+			if (i>2) {
+				sliders[i].setY(sliderMinY);
+			}
+		}
+	}
+	sliders[0].setText("FILTER\nFREQ");
+	sliders[1].setText("FILTER\nRES");
+	sliders[2].setText("PITCH\nSPEED");
+	sliders[3].setText("KICK\nVOL");
+	sliders[4].setText("BASS\nVOL");
+	sliders[5].setText("MAIN\nVOL");  
 }
 
 public void toggleAudioPlayThread() {
@@ -558,7 +580,7 @@ public void drawTopControls() {
 
 public void drawMenuBar(){
 	
-	if(showMenuBar && menuBar==null){
+	if(menuBar==null){
 		menuBar=new ToggleButtonsBar(0, height*0.95f, width, height*0.05f);
 		menuBar.setShowMenuButton(true);		
 		String[] buttons={
@@ -695,27 +717,15 @@ public void drawHitHatButtons() {
   drawPadButtons(greenColor, hithat, buttonsOriginX, buttonsOriginY+(buttonSize+buttonMarginY)*3, buttonSize, buttonMarginX, "H");
 }
 
+
 public void drawSliders() {
   for (int i=0;i<sliders.length;i++) {
-    if (sliders[i]==null) {
-      sliders[i]=new VerticalSlider(sliderOriginX+(sliderMarginX*i), sliderMinY+(sliderMaxY-sliderMinY)*0.5f, sliderWidth, sliderHeight);
-      sliders[i].limitY(sliderMinY, sliderMaxY);      
-      if (i>2) {
-        sliders[i].setY(sliderMinY);
-      }
-    }
     sliders[i].rollover(mouseX, mouseY);
     sliders[i].dragVertically(mouseY);    
     //image(sliderImage, sliders[i].x, sliders[i].y, sliders[i].w, sliders[i].h);
     //sliders[i].debugDisplay();
     sliders[i].draw();
   }
-  sliders[0].setText("FILTER\nFREQ");
-  sliders[1].setText("FILTER\nRES");
-  sliders[2].setText("PITCH\nSPEED");
-  sliders[3].setText("KICK\nVOL");
-  sliders[4].setText("BASS\nVOL");
-  sliders[5].setText("MAIN\nVOL");
 }
 
 public void drawFiltersZone() {
@@ -754,12 +764,14 @@ public void drawFiltersZone() {
 }
 
 public void drawPowerSpectrum() {
-  for (int i=0;i<playerKick.length;i++) {
-    drawSpectrumOf(playerKick[i], redColor, i);
-    drawSpectrumOf(playerBass[i], orangeColor, i+4);
-    drawSpectrumOf(playerSnare[i], blueColor, i+8);
-    drawSpectrumOf(playerHitHat[i], greenColor, i+12);
-  }
+	if (AndroidUtil.numCores()>1) {	
+		for (int i=0;i<playerKick.length;i++) {
+			drawSpectrumOf(playerKick[i], redColor, i);
+			drawSpectrumOf(playerBass[i], orangeColor, i+4);
+			drawSpectrumOf(playerSnare[i], blueColor, i+8);
+			drawSpectrumOf(playerHitHat[i], greenColor, i+12);
+		}
+	}
 }
 
 public void drawSpectrumOf(AudioPlayer audioPlayer, int c, int soundType) {
@@ -896,7 +908,7 @@ public void draw()
   clear();
   background(127, 127, 127);
 
-  animateTransition(1000,0,90);
+  //animateTransition(1000,0,90);
   
   if (mode!=MainMode.SEQUENCER) {
 	  drawTempoBar();
@@ -990,7 +1002,7 @@ public void proccessPanel() {
   valueY=constrain(map(mouseY, height*0.5f, height*0.95f, 0.0f, 1.0f), 0.0f, 1.0f);   
   switch(panelMode) {
   case FILTER:
-    filterFrequency=map(valueY, 0.0f, 1.0f, 0.0f, 5000);
+    filterFrequency=map(valueY, 0.0f, 1.0f, 0.0f, mainFrequency/4.0f);
     filterResonance=map(valueX, 0.0f, 1.0f, -1.0f, 1.0f);  
     controlFilter(filterFrequency, filterResonance, filterTrackMode);
     break;
@@ -1171,7 +1183,7 @@ public void mouseDragged(int id,int mouseX,int mouseY,int pmouseX,int pmouseY,fl
 	  	        float valY=constrain(map(sliders[i].getY(), sliderMinY, sliderMaxY, 1.0f, 0.0f), 0.0f, 1.0f);    
 	  	        switch(i) {
 	  	        case 0:
-	  	          filterFrequency=map(valY, 0.0f, 1.0f, 0.0f, 10000);
+	  	          filterFrequency=map(valY, 0.0f, 1.0f, 0.0f, mainFrequency/4.0f);
 	  	          controlFilter(filterFrequency, filterResonance, 0);
 	  	          break;
 	  	        case 1:
@@ -1617,81 +1629,6 @@ public void keyPressed() {
     //println("Pressed code:"+keyCode);
   }
 }
-
-
-
-
-
-
-
-// A class for a draggable thing
-
-static class DrumMachine {
-
-  static boolean isAndroidDevice=true;
-
-}
-
-
-
-
-//Copyright (c) 2013 Mick Grierson, Matthew Yee-King, Marco Gillies
-
-//Permission is hereby granted, free of charge, to any person obtaining a copy\u2028of this software and associated documentation files (the "Software"), to deal\u2028in the Software without restriction, including without limitation the rights\u2028to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\u2028copies of the Software, and to permit persons to whom the Software is\u2028furnished to do so, subject to the following conditions:
-//The above copyright notice and this permission notice shall be included in\u2028all copies or substantial portions of the Software.
-
-//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\u2028IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\u2028FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\u2028AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\u2028LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\u2028OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\u2028THE SOFTWARE.
-// Modifications:  June 2013  Martin Bruner - Audio Analysis recovered by Constantino Fernandez Traba
-
-
-
-
-
-
-
-
-
-//import android.content.res.Resources;
- 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
- * Copyright (C) 2011 Jacquet Wong
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-//import com.sun.media.sound.FFT;
-
-
-
-
-
-
 
   //public int sketchWidth() { return 768; }
   //public int sketchHeight() { return 1280; }

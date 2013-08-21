@@ -6,11 +6,11 @@
          android:id="@+id/toggleMode" android:title="@string/sequencer_mode"></item> -->
     <item android:icon="@android:drawable/ic_menu_delete"
          android:id="@+id/deleteAll" android:title="@string/delete_all"></item>
-	<item android:icon="@android:drawable/ic_menu_share"
+	<item android:icon="@drawable/midi_icon"
          android:id="@+id/midiSetup" android:title="@string/midi"></item> 
-    <item android:icon="@android:drawable/ic_menu_share"
+    <item android:icon="@android:drawable/ic_menu_save"
          android:id="@+id/exportToMidi" android:title="@string/export_midi"></item>
-    <item android:icon="@android:drawable/ic_menu_share"
+    <item android:icon="@drawable/ic_menu_archive"
          android:id="@+id/importFromMidi" android:title="@string/import_midi"></item>         
     <!-- <item android:icon="@drawable/google_drive_icon"
          android:id="@+id/loadSamples" android:title="@string/load_samples"></item> -->            
