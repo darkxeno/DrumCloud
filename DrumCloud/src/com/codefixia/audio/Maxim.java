@@ -17,6 +17,11 @@ public class Maxim {
   private void initAudioThread() {
     audioThread = new AndroidAudioThread(sampleRate, 256);
     audioThread.start();
+  }
+  
+  public void stopAudioThread() {
+	if(audioThread!=null)
+		audioThread.quit();
   }  
 
   public Maxim (DrumCloud drumCloud) {

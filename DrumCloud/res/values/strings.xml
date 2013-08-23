@@ -12,6 +12,10 @@
     <string name="HOLD" tools:ignore="MissingTranslation">HOLD</string>
     <string name="STOP" tools:ignore="MissingTranslation">STOP</string>
     <string name="midi" tools:ignore="MissingTranslation">Midi</string>
+    <string name="set" tools:ignore="MissingTranslation">Set</string>
+    <string name="audioFrequencyToast" tools:ignore="MissingTranslation">Using audio frequency of:</string>
+    <string name="select_audio_frequency" tools:ignore="MissingTranslation">Select audio frequency/quality:</string>
+    <string name="change_frequency" tools:ignore="MissingTranslation">Audio Quality</string>
     <string name="sureToExitTitle" tools:ignore="MissingTranslation">Really exit?</string>
     <string name="sureToExitMessage" tools:ignore="MissingTranslation">Are you sure you want to exit?</string>
     <string name="midi_setup" tools:ignore="MissingTranslation">Setup</string>

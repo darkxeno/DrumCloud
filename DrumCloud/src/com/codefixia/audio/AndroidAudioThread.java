@@ -72,6 +72,12 @@ public class AndroidAudioThread extends Thread
       track.write( bufferS, 0, bufferS.length );
     }
   }
+  
+  public void quit(){
+	  System.out.println("Quitting AndroidAudioThread"); 	  
+	  this.running=false;	    
+	  interrupt();	  
+  }
 
   public void addAudioGenerator(AudioGenerator ag) {
     audioGens.add(ag);

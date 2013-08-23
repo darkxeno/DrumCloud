@@ -133,7 +133,7 @@ final int deleteMode=2;
 int mainMode=normalMode;
 
 PImage backTopMachine, backBottomMachine;
-public final static float mainFrequency=(AndroidUtil.numCores()>1)?22050:11025.0f;
+public static float mainFrequency=AndroidUtil.soundFrequency();
 float filterFrequency=mainFrequency/4.0f, filterResonance=0.5f, delayTime=0, delayFeedback=0, speed=1.0f, speed1=1.0f, volumeKick=1.0f, volumeBass=1.0f, volume=1.0f;
 
 int candyPink=color(247, 104, 124);
@@ -271,18 +271,18 @@ public AudioPlayer[] getPlayerHitHat() {
 }
 
 public void setupPowerSpectrum() {
-  if (AndroidUtil.numCores()>1) {
-	  for (int i=0;i<playerKick.length;i++) {
-		  playerKick[i].setAnalysing(true);
-		  playerBass[i].setAnalysing(true);
-		  playerSnare[i].setAnalysing(true);
-		  playerHitHat[i].setAnalysing(true);
-	  }
-  }
-  maxLedWidth=buttonSize;
-  ledHeight=(height*0.01f);      
-  originPowerSpecX=0;
-  originPowerSpecY=(int)height;
+	if (!AndroidUtil.isLowVersion() || AndroidUtil.numCores()>1){
+		for (int i=0;i<playerKick.length;i++) {
+			playerKick[i].setAnalysing(true);
+			playerBass[i].setAnalysing(true);
+			playerSnare[i].setAnalysing(true);
+			playerHitHat[i].setAnalysing(true);
+		}
+	}
+	maxLedWidth=buttonSize;
+	ledHeight=(height*0.01f);      
+	originPowerSpecX=0;
+	originPowerSpecY=(int)height;
 }
 
 public void setupGeneral() {
@@ -302,41 +302,41 @@ public void setupGeneral() {
   //smooth(8);
   hint(DISABLE_DEPTH_TEST);
   FontAdjuster.setWidth(width);
-  audioPlayThread=new AudioPlayThread(1, "AudioPlayThread");
-  audioPlayThread.start();
-  paused=false;
   background(0);
-  maxim = new Maxim(this,mainFrequency);
-  //maxim = new Minim(this); 
-  for (int i=0;i<playerKick.length;i++) {
-	if(i<5){
-    playerKick[i] = maxim.loadFile("kick_"+i+".wav");
-    playerKick[i].setLooping(false);
-    playerKick[i].volume(volume);
-    playerKick[i].setFilter(filterFrequency, filterResonance);
-    playerBass[i] = maxim.loadFile("bass_"+i+".wav");
-    playerBass[i].setLooping(false);
-    playerBass[i].volume(volume);
-    playerBass[i].setFilter(filterFrequency, filterResonance);
-    playerSnare[i] = maxim.loadFile("snare_"+i+".wav");
-    playerSnare[i].setLooping(false);
-    playerSnare[i].volume(volume);
-    playerSnare[i].setFilter(filterFrequency, filterResonance);
-    playerHitHat[i] = maxim.loadFile("hithat_"+i+".wav");
-    playerHitHat[i].setLooping(false);
-    playerHitHat[i].volume(volume);
-    playerHitHat[i].setFilter(filterFrequency, filterResonance);
-	}else{
-	    playerKick[i] = playerKick[0];
-	    playerBass[i] = playerBass[0];
-	    playerSnare[i] = playerSnare[0];
-	    playerHitHat[i] = playerHitHat[0];
-	}
-  }
-  //player.volume(1.0);
-  //backTopMachine=loadImage("MPD26_mod.png");
-  //lcdFont = loadFont("lcd.ttf");
   rectMode(CORNER);
+  setupAudio();
+}
+
+public void setupAudio(){
+	  audioPlayThread=new AudioPlayThread(1, "AudioPlayThread");
+	  audioPlayThread.start();
+	  paused=false;
+	  SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(X);
+	  if(prefs.getFloat("mainFrequency",-1)!=-1) {
+		  mainFrequency=prefs.getFloat("mainFrequency",-1);
+	  }
+	  println("Using main frequency of:"+mainFrequency);
+	  AndroidUtil.showToast(getString(R.string.audioFrequencyToast)+" "+(int)round(mainFrequency)+"Hz");
+	  maxim = new Maxim(this,mainFrequency);
+	  //maxim = new Minim(this); 
+	  for (int i=0;i<playerKick.length;i++) {
+	    playerKick[i] = maxim.loadFile("kick_"+i+".wav");
+	    playerKick[i].setLooping(false);
+	    playerKick[i].volume(volume);
+	    playerKick[i].setFilter(filterFrequency, filterResonance);
+	    playerBass[i] = maxim.loadFile("bass_"+i+".wav");
+	    playerBass[i].setLooping(false);
+	    playerBass[i].volume(volume);
+	    playerBass[i].setFilter(filterFrequency, filterResonance);
+	    playerSnare[i] = maxim.loadFile("snare_"+i+".wav");
+	    playerSnare[i].setLooping(false);
+	    playerSnare[i].volume(volume);
+	    playerSnare[i].setFilter(filterFrequency, filterResonance);
+	    playerHitHat[i] = maxim.loadFile("hithat_"+i+".wav");
+	    playerHitHat[i].setLooping(false);
+	    playerHitHat[i].volume(volume);
+	    playerHitHat[i].setFilter(filterFrequency, filterResonance);
+	  }
 }
 
 public void setupMidi() {
@@ -482,6 +482,18 @@ public float getTempoMS(){
 }
 public float getGridMS(){
 	return gridMS;
+}
+
+public void changeMainFrequency(float frequency){
+	mainFrequency=frequency;
+	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(X);
+	SharedPreferences.Editor editor = prefs.edit();
+    editor.putFloat("mainFrequency", frequency);
+	editor.commit();	
+	filterFrequency=frequency/4;
+	audioPlayThread.quit();
+	maxim.stopAudioThread();
+	setupAudio();
 }
 
 //synchronized 
@@ -666,7 +678,7 @@ public void drawPadsContainer() {
 	  rect(barOriginX, padsContainerOriginY, barWidth, buttonSize*5.295f);	
 	  break;
   case AUTOMATOR:
-	  rect(automator.getContainerOriginX(), padsContainerOriginY, width-2*automator.getContainerOriginX(), buttonSize*5.295f);	
+	  rect(automator.getContainerOriginX(), automator.getContainerOriginY(), automator.getContainerWidth(), automator.getContainerHeight());	
 	  break;	
   }
 
@@ -764,7 +776,7 @@ public void drawFiltersZone() {
 }
 
 public void drawPowerSpectrum() {
-	if (AndroidUtil.numCores()>1) {	
+	if (!AndroidUtil.isLowVersion() || AndroidUtil.numCores()>1){	
 		for (int i=0;i<playerKick.length;i++) {
 			drawSpectrumOf(playerKick[i], redColor, i);
 			drawSpectrumOf(playerBass[i], orangeColor, i+4);
@@ -1133,6 +1145,24 @@ public void mousePressed(int id,int mouseX,int mouseY,float pressure)
 	}
 }
 
+@Override
+public void openOptionsMenu() {
+
+    Configuration config = getResources().getConfiguration();
+
+    if((config.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) 
+            > Configuration.SCREENLAYOUT_SIZE_LARGE) {
+
+        int originalScreenLayout = config.screenLayout;
+        config.screenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE;
+        super.openOptionsMenu();
+        config.screenLayout = originalScreenLayout;
+
+    } else {
+        super.openOptionsMenu();
+    }
+}
+
 
 public void mouseMoved()
 {
@@ -1408,9 +1438,9 @@ public void loadSoundOnPlayer(int soundType,File selection) {
 		ap.stop();
 		maxim.reloadFile(ap, selection.getAbsolutePath()); 
 		if (ap!=null) {
-			//if (AndroidUtil.numCores()>1) {
-			ap.setAnalysing(true);
-			//}
+			if (!AndroidUtil.isLowVersion() || AndroidUtil.numCores()>1) {
+				ap.setAnalysing(true);
+			}
 			ap.setLooping(false);
 		}else {
 			println("loaded Player is null");
@@ -1825,9 +1855,6 @@ public void keyPressed() {
 	   }
 	}
    
-   
-
-   
    @Override
    protected void onResume() {
 	// TODO Auto-generated method stub
@@ -1927,6 +1954,9 @@ public void keyPressed() {
             	else
             		mainMode=normalMode;
             break;*/
+            case R.id.changeFrequency:
+            	MenuDialogs.showChangeFrequencyDialog(this);
+            break;
             case R.id.help:
             	startHelpShowCase();
             break; 

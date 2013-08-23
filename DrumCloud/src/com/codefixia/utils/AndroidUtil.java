@@ -4,6 +4,12 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.regex.Pattern;
 
+import com.codefixia.drumcloud.DrumCloud;
+
+import android.R.bool;
+import android.os.Build;
+import android.widget.Toast;
+
 public class AndroidUtil{
 
   private static int numCores=-1;
@@ -16,6 +22,21 @@ public class AndroidUtil{
       return numCores;
     }
   }
+  
+  public static boolean isLowVersion(){
+	 return (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB);
+  }
+  
+  public static float soundFrequency(){
+	  switch (numCores()) {
+	  case 1:
+		  return 11025;
+	  case 2:
+		  return 22050;		
+	  }
+
+	  return 44100;	
+  }  
   
 /**
  * Gets the number of cores available in this device, across all processors.
@@ -47,6 +68,15 @@ private static int getNumCores() {
         //Default to return 1 core
         return 1;
     }
+}
+
+public static void showToast(final String toast) {
+	DrumCloud.X.runOnUiThread(new Runnable() {
+		@Override
+		public void run() {
+			Toast.makeText(DrumCloud.X, toast, Toast.LENGTH_SHORT).show();
+		}
+	});
 }
 
 }

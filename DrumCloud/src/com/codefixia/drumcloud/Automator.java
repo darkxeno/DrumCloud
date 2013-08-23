@@ -38,14 +38,22 @@ public class Automator {
     offsetsX=new int[4][4];
     offsetsY=new int[4][4];
   }
-
-
-
+  
   public float getContainerOriginX() {
 	return zoneOriginX-width*0.03f;
   }
+  
+  public float getContainerOriginY() {
+	return drumCloud.padsContainerOriginY;
+  }  
+  
+  public float getContainerHeight() {
+	return zoneHeight+(width*0.03f)+(height*0.1f);
+  }  
 
-
+  public float getContainerWidth() {
+	return width-2*getContainerOriginX();
+  }
 
 public void setup() {
 	width=drumCloud.width;

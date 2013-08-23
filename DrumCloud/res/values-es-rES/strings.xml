@@ -9,6 +9,10 @@
     <string name="STOP" tools:ignore="MissingTranslation">PARAR</string>    
     <string name="midi_setup" tools:ignore="MissingTranslation">Configuración</string>
     <string name="midi_test" tools:ignore="MissingTranslation">Enviar nota de prueba</string>
+    <string name="audioFrequencyToast" tools:ignore="MissingTranslation">Usando frecuencia de audio de:</string>
+    <string name="select_audio_frequency" tools:ignore="MissingTranslation">Seleccione la calidad/frecuencia del audio:</string>
+    <string name="set" tools:ignore="MissingTranslation">Establecer</string>
+    <string name="change_frequency" tools:ignore="MissingTranslation">Calidad de audio</string>
     <string name="export_midi" tools:ignore="MissingTranslation">Exportar</string>
     <string name="import_midi" tools:ignore="MissingTranslation">Importar</string>
     <string name="sureToExitTitle" tools:ignore="MissingTranslation">Cerrar aplicación</string>
@@ -20,8 +24,8 @@
     <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composición</string>
     <string name="midi_select_file" tools:ignore="MissingTranslation">Seleccione un archivo Midi:</string>
     <string name="file_save_text" tools:ignore="MissingTranslation">Su archivo se ha guardado en:</string>	    
-    <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar Modo</string>
-    <string name="delete_all" tools:ignore="MissingTranslation">Borrar Todo</string>
+    <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar modo</string>
+    <string name="delete_all" tools:ignore="MissingTranslation">Borrar todo</string>
     <string name="donate" tools:ignore="MissingTranslation">Donar</string>
     <string name="about" tools:ignore="MissingTranslation">Acerca de&#8230;</string>
     <string name="donations__button_close">Cerrar</string>
@@ -132,5 +136,5 @@ DrumCloud, tu herramienta móvil de producción musical con almacenamiento ilimi
 Compartir con tus amigos
 </string>  
 <string name="share">Compartir</string>
-<string name="moreOptions">Más Opciones&#8230;</string> 
+<string name="moreOptions">Más opciones&#8230;</string> 
 </resources>
