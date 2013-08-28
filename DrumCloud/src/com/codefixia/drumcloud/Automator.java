@@ -48,7 +48,7 @@ public class Automator {
   }  
   
   public float getContainerHeight() {
-	return zoneHeight+(width*0.03f)+(height*0.1f);
+	return zoneHeight+((zoneOriginY-getContainerOriginY())*2);
   }  
 
   public float getContainerWidth() {

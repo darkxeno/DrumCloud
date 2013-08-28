@@ -6,7 +6,15 @@
     <string name="ALL" tools:ignore="MissingTranslation">TODO</string>
     <string name="ON_RELEASE" tools:ignore="MissingTranslation">AL SOLTAR:</string>
     <string name="HOLD" tools:ignore="MissingTranslation">MANTENER</string>
-    <string name="STOP" tools:ignore="MissingTranslation">PARAR</string>    
+    <string name="STOP" tools:ignore="MissingTranslation">PARAR</string>
+    <string name="feedback" tools:ignore="MissingTranslation">Feedback</string>
+    <string name="send" tools:ignore="MissingTranslation">Enviar</string> 
+    <string name="thank_you" tools:ignore="MissingTranslation">Gracias</string> 
+    <string name="developer_message" tools:ignore="MissingTranslation">Mensaje del Desarrollador</string>
+    <string name="feedback_message" tools:ignore="MissingTranslation">¿Te gusta nuestra aplicación? ¿La odias? ¿Te gustaría sugerir una nueva funcionalidad o informar de un error? Nos encantaría saber tu opinión:</string>
+    <string name="feedback_comments" tools:ignore="MissingTranslation">Tus comentarios</string>
+    <string name="feedback_question" tools:ignore="MissingTranslation">pregunta</string> 
+    <string name="inOutOptions" tools:ignore="MissingTranslation">Entrada/Salida...</string> 
     <string name="midi_setup" tools:ignore="MissingTranslation">Configuración</string>
     <string name="midi_test" tools:ignore="MissingTranslation">Enviar nota de prueba</string>
     <string name="audioFrequencyToast" tools:ignore="MissingTranslation">Usando frecuencia de audio de:</string>

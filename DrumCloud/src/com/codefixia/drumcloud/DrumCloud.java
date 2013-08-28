@@ -3,7 +3,9 @@ package com.codefixia.drumcloud;
 import java.io.File;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.donations.DonationsActivity;
 import org.json.JSONArray;
@@ -48,6 +50,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -78,15 +81,27 @@ import com.codefixia.utils.AndroidUtil;
 import com.codefixia.utils.FontAdjuster;
 import com.codefixia.utils.MainMode;
 import com.codefixia.utils.PanelMode;
+import com.flurry.android.FlurryAdListener;
+import com.flurry.android.FlurryAdSize;
+import com.flurry.android.FlurryAdType;
+import com.flurry.android.FlurryAds;
+import com.flurry.android.FlurryAgent;
 import com.github.espiandev.showcaseview.ShowcaseView;
 import com.github.espiandev.showcaseview.ShowcaseView.OnShowcaseEventListener;
+import com.google.gson.JsonObject;
+import com.suredigit.inappfeedback.FeedbackDialog;
+import com.suredigit.inappfeedback.FeedbackSettings;
 
 
-public class DrumCloud extends PApplet implements OnShowcaseEventListener {
+public class DrumCloud extends PApplet implements OnShowcaseEventListener, FlurryAdListener  {
 
 	public static DrumCloud X;
 	private static int soundsLoaded=0;
-
+	FrameLayout mBanner;
+	String adSpace;
+	boolean adsLoaded=false;
+	static boolean adsEnabled=false;
+	private FeedbackDialog feedBack;
 
 Midi midi;
 private AudioPlayer auxAudioPlayer;
@@ -241,6 +256,7 @@ public void setupAndroid() {
 
 public void setup()
 {
+  setupRemoteSettings(this);	
   setupGeneral();
   setupTempoBar();
   setupSliders(); 
@@ -1128,21 +1144,33 @@ public void mousePressed(int id,int mouseX,int mouseY,float pressure)
 	  if (menuBar.isMenuClicked(mouseX, mouseY)) {
 		  this.openOptionsMenu();
 	  }
-	  switch (menuBar.isButtonClicked(mouseX, mouseY)) {
-	  	case 0:
-	  		  controlVolume(1.0f, ALL);
-			  mode=MainMode.LIVE;		
-		break;
-	  	case 1:
-	  		  controlVolume(1.0f, ALL);
+	  int clickRes=menuBar.isButtonClicked(mouseX, mouseY);
+	  if(clickRes!=-1){
+		  Map<String, String> params = new HashMap<String, String>();	  
+		  switch (clickRes) {
+		  case 0:
+			  controlVolume(1.0f, ALL);
+			  mode=MainMode.LIVE;
+			  params.put("MainMode", "LIVE");			  
+			  break;
+		  case 1:
+			  controlVolume(1.0f, ALL);
 			  sequencer.updateState();	  
-			  mode=MainMode.SEQUENCER;			
-		break;
-	  	case 2:
+			  mode=MainMode.SEQUENCER;
+			  params.put("MainMode", "SEQUENCER");
+			  break;
+		  case 2:
 			  automator.updateState();	  
 			  mode=MainMode.AUTOMATOR;
-		break;		
-	}
+			  params.put("MainMode", "AUTOMATOR");
+			  break;		
+		  }
+		  FlurryAgent.logEvent("MainMode Change", params);
+		  if(this.adsLoaded && this.adsEnabled){
+			  Log.d("ADS","SHOWING");
+			  FlurryAds.displayAd(this, adSpace, mBanner);
+		  }
+	  }
 }
 
 @Override
@@ -1319,13 +1347,18 @@ public void loadSoundType(int soundType, AudioPlayer player) {
   loadPlayerOfSoundType=soundType;
   //if (isAndroidDevice)
   files.selectInput("Select a .wav,.aif file to load:", "fileSelected");
-
+  Map<String, String> params = new HashMap<String, String>();	   
+  params.put("SoundType", "Type:"+soundType);    
+  FlurryAgent.logEvent("Start Load Sound",params);
   //selectInput("Select a .wav,.aif file to load:", "fileSelected");
 }
 
 public JSONArray loadJsonSoundPack(File file) {
 	JSONArray sounds=null;
   if (file.exists() && file.isFile()) {
+	  Map<String, String> params = new HashMap<String, String>();	   
+	  params.put("File", "Path:"+file.getAbsolutePath());    
+	  FlurryAgent.logEvent("End Load Sound");	  
     if(isAndroidDevice){
       String text = join( loadStrings( file.getAbsolutePath() ), "");
       println("Loaded JSON:"+text);
@@ -1857,9 +1890,15 @@ public void keyPressed() {
    
    @Override
    protected void onResume() {
-	// TODO Auto-generated method stub
-	super.onResume();
+	super.onResume();	
    }
+   
+   @Override
+   protected void onRestart() {
+	super.onRestart();
+	setupRemoteSettings(this);
+	setupFeedbackDialog();
+   }   
 
   	public boolean onPrepareOptionsMenu (Menu menu){
   		//MenuInflater inflater = getMenuInflater();
@@ -1947,29 +1986,33 @@ public void keyPressed() {
   
    @Override 
    public boolean onOptionsItemSelected(MenuItem item) {
+		Map<String, String> params = new HashMap<String, String>();	   
             switch (item.getItemId()) {
-            /*case R.id.loadSamples:
-            	if(mainMode!=loadMode)
-            		mainMode=loadMode;
-            	else
-            		mainMode=normalMode;
-            break;*/
+            case R.id.feedback:
+                feedBack.show();
+            break;            
             case R.id.changeFrequency:
+        		params.put("Option", "Change frequency");            	
             	MenuDialogs.showChangeFrequencyDialog(this);
             break;
             case R.id.help:
+            	params.put("Option", "Show help");
             	startHelpShowCase();
             break; 
             case R.id.shareApp:
+            	params.put("Option", "Share app");
             	shareApp();
             break;             
             case R.id.playPause:
+            	params.put("Option", "Play/pause");
             	toggleAudioPlayThread();
             break;    
             case R.id.midiSetup:
+            	params.put("Option", "Midi setup");
             	midi.showMidiTransportDialog();
             	break;
             case R.id.exportToMidi:
+            	params.put("Option", "Export");
             	String fileName="drumcloud_"+DateFormat.getDateFormat(this).format(new Date());
             	fileName+="_"+DateFormat.getTimeFormat(this).format(new Date())+".midi";
             	fileName=fileName.replaceAll("\\\\", "-").replaceAll("/", "-");
@@ -1980,50 +2023,23 @@ public void keyPressed() {
             	}
             	break;
             case R.id.importFromMidi:
+            	params.put("Option", "Import");
             	MidiFileIO.showMidiPreLoadDialog(this,BPM, samplesPerBeat);
             	break;            	
             case R.id.deleteAll:
+            	params.put("Option", "Delete all");
                 deleteAllSounds();
                 break;
             case R.id.donate:
+            	params.put("Option", "Donate");
                 startActivity(new Intent(this, DonationsActivity.class));
                 break;
             case R.id.about:
-            	 final Dialog dialog = new Dialog(this);
-                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                 dialog.setContentView(R.layout.about_dialog);
-                 //dialog.setTitle(R.string.about);
-                 dialog.setCancelable(true);
-                 //there are a lot of settings, for dialog, check them all out!
-  
-                 //set up text
-                 TextView text = (TextView) dialog.findViewById(R.id.TextView01);
-                 text.setText(R.string.aboutDialogText);
-  
-                 //set up image view
-                 ImageView img = (ImageView) dialog.findViewById(R.id.ImageView01);
-                 img.setImageResource(R.drawable.codefixia_logo);
-                 img.setOnClickListener(new OnClickListener() {
-                	    public void onClick(View v) {
-                	    	String url = "http://www.codefixia.com";
-                	    	Intent i = new Intent(Intent.ACTION_VIEW);
-                	    	i.setData(Uri.parse(url));
-                	    	startActivity(i);
-                	    }
-                	});
-  
-                 //set up button
-                 Button button = (Button) dialog.findViewById(R.id.Button01);
-                 button.setOnClickListener(new OnClickListener() {
-                 @Override
-                     public void onClick(View v) {
-                	 	dialog.dismiss();
-                     }
-                 });
-                 //now that the dialog is set up, it's time to show it    
-                 dialog.show();            	
+            	params.put("Option", "About");
+            	MenuDialogs.showAboutDialog(this);
                 break;                
             }
+    		FlurryAgent.logEvent("Menu Option Selected", params);            
             return true;
    }
 
@@ -2082,15 +2098,68 @@ public void onShowcaseViewHide(ShowcaseView showcaseView) {
 
 @Override
 public void onCreate(Bundle savedInstanceState) {
+    println("ON CREATE DRUMCLOUD");
 	setupDefaultTheme();
 	X = this;
     super.onCreate(savedInstanceState);
+    mBanner = new FrameLayout(this);
+    //allow us to get callbacks for ad events
+    FlurryAds.setAdListener(this);    
+    
     //setContentView(R.layout.main);
-    println("ON CREATE DRUMCLOUD");
- 
     //setupActionBar();
-  	
+ 
+    setupFeedbackDialog();
 }
+
+public void setupFeedbackDialog(){
+	FeedbackSettings feedbackSettings = new FeedbackSettings();
+	feedbackSettings.setCancelButtonText(getString(android.R.string.cancel));
+	feedbackSettings.setSendButtonText(getString(R.string.send));
+	feedbackSettings.setText(getString(R.string.feedback_message));
+	feedbackSettings.setYourComments(getString(R.string.feedback_comments));
+	feedbackSettings.setToast(getString(R.string.thank_you));
+	feedbackSettings.setReplyTitle(getString(R.string.developer_message));
+	feedbackSettings.setQuestionLabel(getString(R.string.feedback_question));
+	feedbackSettings.setReplyCloseButtonText(getString(android.R.string.cancel));
+	feedBack = new FeedbackDialog(this, "AF-8B4461B8D09E-F4", feedbackSettings);	
+} 
+
+public void setupRemoteSettings(final Context context){
+	  Thread thread = new Thread(new Runnable(){
+		    @Override
+		    public void run() {
+		        try {
+		        	JSONObject jObject=AndroidUtil.HTTPGetJSON("http://codefixia.com/drumcloud/drumcloud.json");
+		        	if(jObject!=null){		
+		        		adsEnabled=jObject.optBoolean("adsEnabled", false);
+		        		if(adsEnabled){
+		        			runOnUiThread(new Runnable() {							
+		        				@Override
+		        				public void run() {
+		        					FlurryAds.fetchAd(context, "INTERSTITIAL_MAIN_VIEW", mBanner, FlurryAdSize.FULLSCREEN);
+		        				}
+		        			});		       
+		        		}
+		        		Log.i("ADS","Configured remotely:"+adsEnabled+" data:"+jObject.toString());
+		        	}else{
+		        		adsEnabled=false;
+		        	}
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+		    }
+		});
+
+		thread.start();	
+}
+
+@Override
+protected void onPause() {
+    super.onPause();
+    feedBack.dismiss();
+}
+
 
 @Override
 public void onBackPressed() {
@@ -2113,6 +2182,102 @@ public void onBackPressed() {
 public void onShowcaseViewShow(ShowcaseView showcaseView) {
 	// TODO Auto-generated method stub
 	
-}  
+}
+
+@Override
+protected void onStart()
+{
+	super.onStart();
+	FlurryAgent.onStartSession(this, "PGH75YBNTNST937S4MKJ");
+	Map<String, String> params = new HashMap<String, String>();
+	params.put("MainMode", "LIVE");
+	FlurryAgent.logEvent("MainMode Change", params);
+	if(this.adsEnabled){
+		//FlurryAds.enableTestAds(true);
+		FlurryAds.fetchAd(this, "INTERSTITIAL_MAIN_VIEW", mBanner, FlurryAdSize.FULLSCREEN); 
+    	// use FlurryAdSize.BANNER_BOTTOM or FlurryAdSize.BANNER_TOP for banner ads	
+	}
+}
+ 
+@Override
+protected void onStop()
+{
+	super.onStop();
+	FlurryAds.removeAd(this, "INTERSTITIAL_MAIN_VIEW", mBanner);	
+	FlurryAgent.onEndSession(this);
+}
+
+
+@Override
+public void onAdClicked(String arg0) {
+	Log.d("ADS","onAdClicked");
+}
+
+
+
+@Override
+public void onAdClosed(String arg0) {
+	Log.d("ADS","onAdClosed");
+	if(this.adsEnabled){
+		FlurryAds.fetchAd(this, "INTERSTITIAL_MAIN_VIEW", mBanner, FlurryAdSize.FULLSCREEN);
+	}	
+}
+
+
+
+@Override
+public void onAdOpened(String arg0) {
+	Log.d("ADS","onAdOpened");
+}
+
+
+
+@Override
+public void onApplicationExit(String arg0) {
+	Log.d("ADS","onApplicationExit");	
+}
+
+
+
+@Override
+public void onRenderFailed(String arg0) {
+	Log.d("ADS","RENDER FAILED");
+}
+
+
+
+@Override
+public void onVideoCompleted(String arg0) {
+	Log.d("ADS","VIDEO COMPLETED");
+}
+
+
+
+@Override
+public boolean shouldDisplayAd(String arg0, FlurryAdType arg1) {
+	return true;
+}
+
+
+
+@Override
+public void spaceDidFailToReceiveAd(String adSpace) {
+	Log.d("ADS","LOAD FAILED");
+	this.adsLoaded=false;
+	if(this.adsEnabled){
+		FlurryAds.fetchAd(this, "INTERSTITIAL_MAIN_VIEW", mBanner, FlurryAdSize.FULLSCREEN);
+	}
+}
+
+
+
+@Override
+public void spaceDidReceiveAd(String adSpace) {
+	// called when the ad has been prepared, ad can be displayed:
+    this.adSpace=adSpace;
+    this.adsLoaded=true;
+    Log.d("ADS","LOADED");
+    //FlurryAds.displayAd(this, adSpace, mBanner);
+}
   
 }

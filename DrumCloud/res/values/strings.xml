@@ -13,6 +13,16 @@
     <string name="STOP" tools:ignore="MissingTranslation">STOP</string>
     <string name="midi" tools:ignore="MissingTranslation">Midi</string>
     <string name="set" tools:ignore="MissingTranslation">Set</string>
+    <string name="feedback" tools:ignore="MissingTranslation">Feedback</string>
+    <string name="send" tools:ignore="MissingTranslation">Send</string>
+    <string name="thank_you" tools:ignore="MissingTranslation">Thank you</string>
+    <string name="feedback_message" tools:ignore="MissingTranslation">Love it? Hate it? Would you like to suggest a new feature or report a bug? We would love to hear from you:</string>
+    <string name="feedback_comments" tools:ignore="MissingTranslation">Your comments</string>
+    <string name="feedback_question" tools:ignore="MissingTranslation">question</string>
+    <string name="feedback_idea" tools:ignore="MissingTranslation">idea</string>
+    <string name="feedback_bug" tools:ignore="MissingTranslation">bug</string> 
+    <string name="inOutOptions" tools:ignore="MissingTranslation">In/Out...</string>   
+    <string name="developer_message" tools:ignore="MissingTranslation">Message from the Developer</string>
     <string name="audioFrequencyToast" tools:ignore="MissingTranslation">Using audio frequency of:</string>
     <string name="select_audio_frequency" tools:ignore="MissingTranslation">Select audio frequency/quality:</string>
     <string name="change_frequency" tools:ignore="MissingTranslation">Audio Quality</string>
