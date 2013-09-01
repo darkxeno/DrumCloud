@@ -56,6 +56,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.codefixia.ads.AdsMode;
+import com.codefixia.ads.HtmlAdsActivity;
 import com.codefixia.audio.AudioPlayThread;
 import com.codefixia.audio.AudioPlayer;
 import com.codefixia.audio.Maxim;
@@ -81,6 +83,7 @@ import com.codefixia.utils.AndroidUtil;
 import com.codefixia.utils.FontAdjuster;
 import com.codefixia.utils.MainMode;
 import com.codefixia.utils.PanelMode;
+import com.codefixia.utils.UserEmailFetcher;
 import com.flurry.android.FlurryAdListener;
 import com.flurry.android.FlurryAdSize;
 import com.flurry.android.FlurryAdType;
@@ -100,7 +103,14 @@ public class DrumCloud extends PApplet implements OnShowcaseEventListener, Flurr
 	FrameLayout mBanner;
 	String adSpace;
 	boolean adsLoaded=false;
-	static boolean adsEnabled=false;
+	static final boolean defaultAdsEnabled=false;
+	static boolean adsEnabled=defaultAdsEnabled;
+	static final long defaultInterTime=300000;
+	static long minInterAdsTime=defaultInterTime;
+	static long lastAdShowTime=0;	
+	static boolean clickToDisableAds=false;
+	static AdsMode adsMode=AdsMode.FLURRY;
+	static String adsExternalUrl=null;
 	private FeedbackDialog feedBack;
 
 Midi midi;
@@ -247,7 +257,7 @@ public void setupAndroid() {
 			      SharedPreferences.Editor editor = prefs.edit();
 			      editor.putBoolean("firstTime", true);
 			      editor.commit();
-			      startHelpShowCase();
+			      MenuDialogs.showHelpDialog(DrumCloud.X);			      
 			  }
 		}
 	});      
@@ -1165,12 +1175,27 @@ public void mousePressed(int id,int mouseX,int mouseY,float pressure)
 			  params.put("MainMode", "AUTOMATOR");
 			  break;		
 		  }
+		  showFullscreenAd();		  
 		  FlurryAgent.logEvent("MainMode Change", params);
-		  if(this.adsLoaded && this.adsEnabled){
-			  Log.d("ADS","SHOWING");
-			  FlurryAds.displayAd(this, adSpace, mBanner);
-		  }
 	  }
+}
+
+public void showFullscreenAd(){
+	long now=System.currentTimeMillis();
+	Log.d("ADS", "ENABLED:"+adsEnabled+" NETWORK:"+AndroidUtil.isNetworkAvailable(this)+" INT.TIME:"+minInterAdsTime+" REM.TIME:"+(minInterAdsTime-(now-lastAdShowTime)));	
+	if(adsEnabled && now-lastAdShowTime>minInterAdsTime){
+		//Log.d("ADS",);
+		if(adsMode==AdsMode.FLURRY && AndroidUtil.isNetworkAvailable(this)){
+			if(this.adsLoaded){
+				Log.d("ADS","SHOWING FLURRY ADS");
+				FlurryAds.displayAd(this, adSpace, mBanner);
+			}
+		}else{
+			Log.d("ADS","SHOWING EXTERNAL ADS");			
+    		HtmlAdsActivity.tryToShowOccasionalAds(this);
+    		lastAdShowTime=now;
+		}
+	}
 }
 
 @Override
@@ -1345,20 +1370,17 @@ public void deleteSoundOfGroup(int soundGroup) {
 
 public void loadSoundType(int soundType, AudioPlayer player) {
   loadPlayerOfSoundType=soundType;
-  //if (isAndroidDevice)
-  files.selectInput("Select a .wav,.aif file to load:", "fileSelected");
   Map<String, String> params = new HashMap<String, String>();	   
   params.put("SoundType", "Type:"+soundType);    
-  FlurryAgent.logEvent("Start Load Sound",params);
+  FlurryAgent.logEvent("Start Load Sound");  
+  //if (isAndroidDevice)
+  files.selectInput("Select a .wav,.aif file to load:", "fileSelected");
   //selectInput("Select a .wav,.aif file to load:", "fileSelected");
 }
 
 public JSONArray loadJsonSoundPack(File file) {
 	JSONArray sounds=null;
-  if (file.exists() && file.isFile()) {
-	  Map<String, String> params = new HashMap<String, String>();	   
-	  params.put("File", "Path:"+file.getAbsolutePath());    
-	  FlurryAgent.logEvent("End Load Sound");	  
+  if (file.exists() && file.isFile()) {	  
     if(isAndroidDevice){
       String text = join( loadStrings( file.getAbsolutePath() ), "");
       println("Loaded JSON:"+text);
@@ -1396,6 +1418,9 @@ public void fileSelected(File selection) {
   else {
 	toggleAudio();
     println("User selected " + selection.getAbsolutePath()+" name:"+selection.getName());
+    Map<String, String> params = new HashMap<String, String>();	   
+    params.put("File", "Path:"+selection.getAbsolutePath());    
+    FlurryAgent.logEvent("FileSelected",params);    
     if (selection.getName().endsWith("json")) {
     	JSONArray sounds=loadJsonSoundPack(selection);
     	final ProgressDialog progressDialog= new ProgressDialog(DrumCloud.X);;
@@ -1924,7 +1949,10 @@ public void keyPressed() {
   boolean noShowMore=false;
   
   public void startHelpShowCase(){
-	  
+	  if(mode!=MainMode.LIVE){
+		  controlVolume(1.0f, ALL);
+		  mode=MainMode.LIVE;
+	  }
       co = new ShowcaseView.ConfigOptions();
       //co.hideOnClickOutside = true;
       sv1 = ShowcaseView.insertShowcaseView(barOriginX+barWidth*0.5f,barOriginY+barHeight*0.5f,
@@ -1983,12 +2011,21 @@ public void keyPressed() {
 
   }
   
+  public void showExternalAds(){
+    HtmlAdsActivity.tryToShowOccasionalAds(this);
+    minInterAdsTime=3600000;	  
+  }
   
    @Override 
    public boolean onOptionsItemSelected(MenuItem item) {
 		Map<String, String> params = new HashMap<String, String>();	   
             switch (item.getItemId()) {
+            case R.id.supportDrumCloud:
+            	params.put("Option", "Support DrumCloud");
+            	showExternalAds();
+            break;            
             case R.id.feedback:
+            	params.put("Option", "Feedback");
                 feedBack.show();
             break;            
             case R.id.changeFrequency:
@@ -2132,8 +2169,15 @@ public void setupRemoteSettings(final Context context){
 		        try {
 		        	JSONObject jObject=AndroidUtil.HTTPGetJSON("http://codefixia.com/drumcloud/drumcloud.json");
 		        	if(jObject!=null){		
-		        		adsEnabled=jObject.optBoolean("adsEnabled", false);
-		        		if(adsEnabled){
+		        		adsEnabled=jObject.optBoolean("adsEnabled", defaultAdsEnabled);
+		        		clickToDisableAds=jObject.optBoolean("clickToDisableAds", false);
+		        		minInterAdsTime=jObject.optLong("minInterAdsTime", defaultInterTime);
+		        		adsMode=AdsMode.fromInt(jObject.optInt("adsMode", 0));
+		        		adsExternalUrl=jObject.optString("adsExternalUrl", null);
+		        		if(adsExternalUrl!=null){
+		        			HtmlAdsActivity.AD_URL=adsExternalUrl;
+		        		}		        		
+		        		if(adsEnabled && adsMode==AdsMode.FLURRY){
 		        			runOnUiThread(new Runnable() {							
 		        				@Override
 		        				public void run() {
@@ -2143,7 +2187,7 @@ public void setupRemoteSettings(final Context context){
 		        		}
 		        		Log.i("ADS","Configured remotely:"+adsEnabled+" data:"+jObject.toString());
 		        	}else{
-		        		adsEnabled=false;
+		        		
 		        	}
 		        } catch (Exception e) {
 		            e.printStackTrace();
@@ -2158,6 +2202,7 @@ public void setupRemoteSettings(final Context context){
 protected void onPause() {
     super.onPause();
     feedBack.dismiss();
+    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 }
 
 
@@ -2168,6 +2213,11 @@ public void onBackPressed() {
         .setTitle(R.string.sureToExitTitle)
         .setMessage(R.string.sureToExitMessage)
         .setNegativeButton(android.R.string.no, null)
+        .setNeutralButton(R.string.support_drumcloud, new DialogInterface.OnClickListener() {
+        	public void onClick(DialogInterface dialog, int which) {
+        		showExternalAds();
+            }
+        })
         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
         	public void onClick(DialogInterface dialog, int which) {
         		if(audioPlayThread.isAlive()){
@@ -2189,10 +2239,16 @@ protected void onStart()
 {
 	super.onStart();
 	FlurryAgent.onStartSession(this, "PGH75YBNTNST937S4MKJ");
+	if(UserEmailFetcher.getEmail(this)!=null){
+		FlurryAds.clearUserCookies();
+		Map<String, String> cookies = new HashMap<String, String>();
+		cookies.put("email", UserEmailFetcher.getEmail(this));
+		FlurryAds.setUserCookies(cookies);
+	}
 	Map<String, String> params = new HashMap<String, String>();
 	params.put("MainMode", "LIVE");
 	FlurryAgent.logEvent("MainMode Change", params);
-	if(this.adsEnabled){
+	if(adsEnabled && adsMode==AdsMode.FLURRY){
 		//FlurryAds.enableTestAds(true);
 		FlurryAds.fetchAd(this, "INTERSTITIAL_MAIN_VIEW", mBanner, FlurryAdSize.FULLSCREEN); 
     	// use FlurryAdSize.BANNER_BOTTOM or FlurryAdSize.BANNER_TOP for banner ads	
@@ -2211,6 +2267,9 @@ protected void onStop()
 @Override
 public void onAdClicked(String arg0) {
 	Log.d("ADS","onAdClicked");
+	if(clickToDisableAds){
+		adsEnabled=false;
+	}
 }
 
 
@@ -2218,7 +2277,7 @@ public void onAdClicked(String arg0) {
 @Override
 public void onAdClosed(String arg0) {
 	Log.d("ADS","onAdClosed");
-	if(this.adsEnabled){
+	if(adsEnabled && adsMode==AdsMode.FLURRY){
 		FlurryAds.fetchAd(this, "INTERSTITIAL_MAIN_VIEW", mBanner, FlurryAdSize.FULLSCREEN);
 	}	
 }
@@ -2228,6 +2287,7 @@ public void onAdClosed(String arg0) {
 @Override
 public void onAdOpened(String arg0) {
 	Log.d("ADS","onAdOpened");
+	lastAdShowTime=System.currentTimeMillis();
 }
 
 
@@ -2264,7 +2324,7 @@ public boolean shouldDisplayAd(String arg0, FlurryAdType arg1) {
 public void spaceDidFailToReceiveAd(String adSpace) {
 	Log.d("ADS","LOAD FAILED");
 	this.adsLoaded=false;
-	if(this.adsEnabled){
+	if(adsEnabled && adsMode==AdsMode.FLURRY){
 		FlurryAds.fetchAd(this, "INTERSTITIAL_MAIN_VIEW", mBanner, FlurryAdSize.FULLSCREEN);
 	}
 }

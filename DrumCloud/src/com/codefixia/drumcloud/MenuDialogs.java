@@ -1,6 +1,8 @@
 package com.codefixia.drumcloud;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
@@ -24,6 +26,18 @@ public class MenuDialogs{
     
 	public static void setNextFrequency(float nextFrequency) {
 		MenuDialogs.nextFrequency = nextFrequency;
+	}
+	
+	public static void showHelpDialog(final DrumCloud drumCloud){
+		new AlertDialog.Builder(drumCloud)
+		.setTitle(R.string.Tutorial)
+		.setMessage(R.string.showTutorialMessage)
+		.setNegativeButton(android.R.string.no, null)
+		.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				drumCloud.startHelpShowCase();
+			}
+		}).create().show();	
 	}
 	
 	public static void showAboutDialog(final DrumCloud drumCloud){
