@@ -8,6 +8,7 @@
     <string name="ON_RELEASE" tools:ignore="MissingTranslation">AL SOLTAR:</string>
     <string name="HOLD" tools:ignore="MissingTranslation">MANTENER</string>
     <string name="STOP" tools:ignore="MissingTranslation">PARAR</string>
+    <string name="VOLUME" tools:ignore="MissingTranslation">VOLUMEN</string>   
     <string name="feedback" tools:ignore="MissingTranslation">Feedback</string>
     <string name="send" tools:ignore="MissingTranslation">Enviar</string> 
 	<string name="support_drumcloud" tools:ignore="MissingTranslation">Ayude a DrumCloud</string>    
@@ -76,12 +77,12 @@ Rubén González González\n
 <u>ICONO</u>\n
 Diana Hidalgo Marín\n
 \n
+<u>TRADUCCIÓN</u>\n
+Tania Martínez Bermúdez\n
+\n
 <u>CONTACTO</u>\n
 www.codefixia.com\n
 tino@codefixia.com\n
-\n
-<u>AGRADECIMIENTOS</u>\n
-Coursera \"Creative Programming for Digital Media and Mobile Apps\" Staff\n
 \n
 <u>DRUMCLOUD</u>\n
 <font size="8">

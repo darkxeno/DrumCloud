@@ -1,0 +1,67 @@
+/* General Styles */
+html, body {
+	height:100%;
+	margin:0; padding:0;
+	font-family:'Helvetica', Verdana, Arial, sans-serif;
+	text-align:center;
+}
+img { vertical-align:middle;}
+.clear { margin:0 !important; padding:0 !important; clear:both !important; visibility:hidden !important;}
+.stars { float:right; margin:0 !important; -webkit-background-size: cover;-moz-background-size: cover; -o-background-size: cover; background-size: cover;}
+
+#box {margin:auto;}
+#title {
+	height:2em;
+	font-size:1.4em;
+	font-weight:bold;
+	line-height:2em;
+	text-shadow: 0.2em 0.2em 0.2em #0D3141;
+	border-bottom:0.1em solid #404040;
+	background:url('top_bg.jpg') no-repeat;
+	-webkit-background-size:100% 100%;
+	-moz-background-size:100% 100%;
+	-o-background-size:100% 100%;
+	background-size:100% 100%;
+	}
+#description { font-size:1.2em;font-weight:bold;margin:0.6em 0;}
+#ad_list { padding:0; margin:0;}
+#ad_list li { display:block; list-style:none; text-align:left; position:relative; margin:0 0.5em 0.5em 0.5em;}
+#ad_list a.i {display:none;position:absolute;top:0.9em;left:0.9em;z-index:999;width:1em;height:1em;background:url('i.png') no-repeat;background-size:1em 1em;}
+#ad_list li a.ad {
+	display:block;
+	text-decoration:none;
+	cursor:default;
+	padding:0.8em; 
+	border-radius:4px;
+}
+#ad_list li a.ad img.logo { width:6em;float:left;margin-right:0.8em; border-radius:0.5em; }
+#ad_list li a.ad ul {position:relative;}
+#ad_list li a.ad ul li {padding:0;margin:0;}
+#ad_list li .stars img {width:4em;margin-top:0.5em;}
+#ad_list li .text_title {font-size:1.2em;line-height:1.25em;height:2.5em;font-weight:bold;overflow:hidden;}
+#ad_list li .text_subtitle, #ad_list li .text_desc {display:block;position:absolute;overflow:hidden; text-overflow:ellipsis;top:3.6em;left:6.8em;height:2.4em;line-height:1.2em;}
+
+#ads_by {margin:0 0.8em 0.8em 0.8em;font-size:0.8em;text-align:right;color:#666666;}
+
+/* Standard Size or up to 480px Width Size */
+body {font-size:12px;}
+
+/* 480px to 639px */
+@media screen and (min-width:480px ) {
+	body {font-size:18px;}
+}
+
+/* 640px to 799px */
+@media screen and (min-width:640px ) {
+	body {font-size:24px;}
+}
+
+/* 800px to 959px */
+@media screen and (min-width:800px ) {
+	body {font-size:30px;}
+}
+
+/* 960px and above */
+@media screen and (min-width:960px ) {
+	body {font-size:36px;}
+}

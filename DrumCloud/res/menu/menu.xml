@@ -45,7 +45,7 @@
     </item>
     <item
         android:id="@+id/supportDrumCloud"
-        android:icon="@drawable/ic_menu_selectall_holo_light"
+        android:icon="@android:drawable/ic_menu_help"
         android:title="@string/support_drumcloud">
     </item>    
     <item

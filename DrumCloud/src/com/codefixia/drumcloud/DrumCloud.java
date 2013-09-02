@@ -2124,7 +2124,7 @@ public void onShowcaseViewHide(ShowcaseView showcaseView) {
 	    sv6.setOnShowcaseEventListener(this);
 	    sv6.overrideButtonClick(showcaseCustomClick(sv6));
 	}else if(showcaseView==sv6){
-		sv7 = ShowcaseView.insertShowcaseView(width*0.5f,height*0.71f, this,
+		sv7 = ShowcaseView.insertShowcaseView(width*0.5f,height*0.65f, this,
 				R.string.helpDialogTitle7, R.string.helpDialogText7, co);  
 		sv7.setShowcaseIndicatorScale(1.7f);
 		sv7.animateGesture(width*0.05f, height*0.05f, width*0.05f, height*0.15f);
@@ -2268,7 +2268,7 @@ protected void onStop()
 public void onAdClicked(String arg0) {
 	Log.d("ADS","onAdClicked");
 	if(clickToDisableAds){
-		adsEnabled=false;
+		minInterAdsTime=1800000;
 	}
 }
 

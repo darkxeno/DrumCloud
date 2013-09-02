@@ -78,6 +78,7 @@ public class MidiFileIO {
 		    new OnItemSelectedListener() {
 		        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		        	fileToLoad=parent.getSelectedItem().toString();
+		        	Log.d("FILE","SELECTED:"+fileToLoad);
 		        }
 
 		        public void onNothingSelected(AdapterView<?> parent) {}
@@ -87,8 +88,9 @@ public class MidiFileIO {
 	    midiLoadButton.setOnClickListener(new View.OnClickListener() {			
 			@Override
 			public void onClick(View arg0) {
-				if(!(fileToLoad.length()>0)){
+				if(fileToLoad.length()>0){
 					File inputMidiFile=new File(midiFolder+""+fileToLoad);
+					Log.d("FILE","LOADING MIDI:"+inputMidiFile);
 		    		MidiFileIO.load(inputMidiFile,BPM,samplesPerBeat);
 				}
 			}
