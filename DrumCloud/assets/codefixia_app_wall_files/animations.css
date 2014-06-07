@@ -1,0 +1,67 @@
+/* TEXT AD FADE IN/OUT */
+@-webkit-keyframes fade_in {0% {opacity:0;} 10% {opacity:1;} 50% {opacity:1;} 60% {opacity:0;} 100% {opacity:0;}}
+@keyframes fade_in {0% {opacity:0;} 10% {opacity:1;} 50% {opacity:1;} 60% {opacity:0;} 100% {opacity:0;}}
+
+@-webkit-keyframes fade_out {0% {opacity:1;} 10% {opacity:0;} 50% {opacity:0;} 60% {opacity:1;} 100%{opacity:1;}}
+@keyframes fade_out {0% {opacity:1;} 10% {opacity:0;} 50% {opacity:0;} 60% {opacity:1;} 100%{opacity:1;}}
+
+.fade_in {opacity:0; -webkit-animation:fade_in 10s ease 5s infinite; animation:fade_in 10s ease 5s infinite;}
+.fade_out {-webkit-animation:fade_out 10s ease 5s infinite; animation:fade_out 10s ease 5s infinite;}
+
+/* BANNER ROTATION */
+@-webkit-keyframes rotate2 {0% {-webkit-transform:translateY(0);} 46% {-webkit-transform:translateY(0);} 52% {-webkit-transform:translateY(-100%);} 100% {-webkit-transform:translateY(-100%);}}
+@keyframes rotate2 {0% {transform:translateY(0);} 46% {transform:translateY(0);} 52% {transform:translateY(-100%);} 100% {transform:translateY(-100%);}}
+
+#rotate2_0 {top:0;-webkit-animation: rotate2 5s linear 2.3s alternate infinite; animation: rotate2 5s linear 2.3s alternate infinite;}
+#rotate2_1 {top:100%;-webkit-animation: rotate2 5s linear 2.3s alternate infinite; animation: rotate2 5s linear 2.3s alternate infinite;}
+
+@-webkit-keyframes rotate3 {0% {-webkit-transform:translateY(0);} 23% {-webkit-transform:translateY(0);} 26% {-webkit-transform:translateY(-100%);} 73% {-webkit-transform:translateY(-100%);} 76% {-webkit-transform:translateY(-200%);} 100% {-webkit-transform:translateY(-200%);}}
+@keyframes rotate3 {0% {transform:translateY(0);} 23% {transform:translateY(0);} 26% {transform:translateY(-100%);} 73% {transform:translateY(-100%);} 76% {transform:translateY(-200%);} 100% {transform:translateY(-200%);}}
+
+#rotate3_0 {top:0;-webkit-animation: rotate3 10s linear 2.3s alternate infinite; animation: rotate3 10s linear 2.3s alternate infinite;}
+#rotate3_1 {top:100%;-webkit-animation: rotate3 10s linear 2.3s alternate infinite; animation: rotate3 10s linear 2.3s alternate infinite;}
+#rotate3_2 {top:200%;-webkit-animation: rotate3 10s linear 2.3s alternate infinite; animation: rotate3 10s linear 2.3s alternate infinite;}
+
+@-webkit-keyframes rotate4 {0% {-webkit-transform:translateY(0);} 15.33% {-webkit-transform:translateY(0);} 17.33% {-webkit-transform:translateY(-100%);} 48.67% {-webkit-transform:translateY(-100%);} 50.67% {-webkit-transform:translateY(-200%);} 82% {-webkit-transform:translateY(-200%);} 84% {-webkit-transform:translateY(-300%);} 100% {-webkit-transform:translateY(-300%);}}
+@keyframes rotate4 {0% {transform:translateY(0);} 15.33% {transform:translateY(0);} 17.33% {transform:translateY(-100%);} 48.67% {transform:translateY(-100%);} 50.67% {transform:translateY(-200%);} 82% {transform:translateY(-200%);} 84% {transform:translateY(-300%);} 100% {transform:translateY(-300%);}}
+
+#rotate4_0 {top:0;-webkit-animation: rotate4 15s linear 2.3s alternate infinite; animation: rotate4 15s linear 2.3s alternate infinite;}
+#rotate4_1 {top:100%;-webkit-animation: rotate4 15s linear 2.3s alternate infinite; animation: rotate4 15s linear 2.3s alternate infinite;}
+#rotate4_2 {top:200%;-webkit-animation: rotate4 15s linear 2.3s alternate infinite; animation: rotate4 15s linear 2.3s alternate infinite;}
+#rotate4_3 {top:300%;-webkit-animation: rotate4 15s linear 2.3s alternate infinite; animation: rotate4 15s linear 2.3s alternate infinite;}
+
+.no_rotation #rotate2_0, .no_rotation #rotate2_1, .no_rotation #rotate3_0, .no_rotation #rotate3_1, .no_rotation #rotate3_2, .no_rotation #rotate4_0, .no_rotation #rotate4_1, .no_rotation #rotate4_2, .no_rotation #rotate4_3 {-webkit-animation-play-state:paused;animation-play-state:paused;}
+
+/* ENTRY EFFECTS */
+
+/* fade in */
+@-webkit-keyframes entry_1 {0% {opacity:0;} 100% {opacity:1;}}
+@keyframes entry_1 {0% {opacity:0;} 100% {opacity:1;}}
+
+/* bounce in */
+@-webkit-keyframes entry_2 {0% {opacity:0; -webkit-transform:scale(0.3);} 50% {opacity:1; -webkit-transform:scale(1.05);} 70% {opacity:1; -webkit-transform:scale(0.9);} 100% {opacity:1; -webkit-transform:scale(1);}}
+@keyframes entry_2 {0% {opacity:0; transform:scale(0.3);} 50%{opacity:1; transform:scale(1.05);} 70%{opacity:1; transform:scale(0.9);} 100%{opacity:1; transform:scale(1);}}
+
+/* DISPLAY EFFECTS  */
+
+/* pulse */
+@-webkit-keyframes display_1 {0% {-webkit-transform:scale(1);} 90% {-webkit-transform:scale(1);} 93% {-webkit-transform:scale(1.05);} 95% {-webkit-transform:scale(1);} 97% {-webkit-transform:scale(1.05);} 100% {-webkit-transform:scale(1);}}
+@keyframes display_1 {0% {transform:scale(1);} 90% {transform:scale(1);} 93% {transform:scale(1.05);} 95% {transform:scale(1);} 97% {transform:scale(1.05);} 100% {transform:scale(1);}}
+
+/* bounce */
+@-webkit-keyframes display_2 {0%, 92%, 95%, 98%, 100% {-webkit-transform:translateY(0);} 94% {-webkit-transform:translateY(-10px);} 96% {-webkit-transform:translateY(-5px);}}
+@keyframes display_2 {0%, 92%, 95%, 98%, 100% {transform:translateY(0);} 94% {transform:translateY(-10px);} 96% {transform:translateY(-5px);}}
+
+/* wiggle */
+@-webkit-keyframes display_3 {0%, 90% {-webkit-transform:skew(0deg,0deg);} 92% {-webkit-transform:skew(-4deg,-4deg);} 94% {-webkit-transform:skew(3deg,3deg);} 96% {-webkit-transform:skew(-2deg,-2deg);} 98% {-webkit-transform:skew(1deg,1deg);} 100% {-webkit-transform:skew(0deg,0deg);}}
+@keyframes display_3 {0%, 90% {transform:skew(0deg,0deg);} 92% {transform:skew(-4deg,-4deg);} 94% {transform:skew(3deg,3deg);} 96% {transform:skew(-2deg,-2deg);} 98% {transform:skew(1deg,1deg);} 100% {transform:skew(0deg,0deg);}}
+
+/* OVERLAY EFFECTS */
+
+/* bounce */
+@-webkit-keyframes overlay_1 {0% {-webkit-transform:translateY(-20%); opacity:1;} 50% {-webkit-transform:translateY(20%); opacity:1;} 100% {-webkit-transform:translateY(-20%); opacity:1;}}
+@keyframes overlay_1 {0% {transform:translateY(-20%); opacity:1;} 50% {transform:translateY(20%); opacity:1;} 100% {transform:translateY(-20%); opacity:1;}}
+
+/* speed in */
+@-webkit-keyframes overlay_2 {0% {-webkit-transform:translateX(100%) skewX(-30deg); opacity:0;} 6% {-webkit-transform:translateX(-20%) skewX(30deg); opacity:1;} 8% {-webkit-transform:translateX(0%) skewX(-15deg); opacity:1;} 10% {-webkit-transform:translateX(0%) skewX(0deg); opacity:1;} 90% {-webkit-transform:translateX(0%) skewX(0deg); opacity:1;} 100% {-webkit-transform:translateX(-100%) skewX(-30deg); opacity:0;}}
+@keyframes overlay_2 {0% {transform:translateX(100%) skewX(-30deg); opacity:0;} 6% {transform:translateX(-20%) skewX(30deg); opacity:1;} 8% {transform:translateX(0%) skewX(-15deg); opacity:1;} 10% {transform:translateX(0%) skewX(0deg); opacity:1;} 90% {transform:translateX(0%) skewX(0deg); opacity:1;} 100% {transform:translateX(-100%) skewX(-30deg); opacity:0;}}

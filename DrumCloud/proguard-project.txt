@@ -18,6 +18,10 @@
 -dontwarn processing.mode.android.**
 -dontwarn com.google.android.**
 -dontwarn org.json.**
+-keep class com.flurry.** { *; }
+-dontwarn com.flurry.**
+-keep public class com.google.ads.** { public protected *; } 	
+-dontwarn com.google.ads.**
 -keep class com.codefixia.drumcloud.DrumCloud {
 	public void fileSelected(java.io.File);
 	public void playSoundFile(java.io.File);

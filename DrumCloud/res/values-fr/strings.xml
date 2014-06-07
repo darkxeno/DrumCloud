@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="shortLocale" tools:ignore="MissingTranslation">fr</string>
+    <string name="LOAD" tools:ignore="MissingTranslation">CHARGE</string>
+    <string name="load" tools:ignore="MissingTranslation">Charger</string>
+    <string name="DELETE" tools:ignore="MissingTranslation">EFFACER</string>
+    <string name="ALL" tools:ignore="MissingTranslation">TOUT</string>
+    <string name="ON_RELEASE" tools:ignore="MissingTranslation">LÂCHER:</string>
+    <string name="HOLD" tools:ignore="MissingTranslation">SOUTENIR</string>
+    <string name="STOP" tools:ignore="MissingTranslation">ARRÊTER</string>   
+    <string name="feedback" tools:ignore="MissingTranslation">Feedback</string>
+    <string name="send" tools:ignore="MissingTranslation">Envoyer</string> 
+	<string name="support_drumcloud" tools:ignore="MissingTranslation">Aider à DrumCloud</string>    
+	<string name="Tutorial" tools:ignore="MissingTranslation">Tutoriel</string>
+    <string name="showTutorialMessage" tools:ignore="MissingTranslation">¿Voulez vous voir le tutoriel d\'aide de DrumCloud?\n\En câs de problème durant la reproduction appuyer sur le bouton "Fermer".</string>    
+    <string name="thank_you" tools:ignore="MissingTranslation">Merçi</string> 
+    <string name="developer_message" tools:ignore="MissingTranslation">Message du Développer</string>
+    <string name="feedback_message" tools:ignore="MissingTranslation">¿Vous aimez notre app? ¿Vous la détester? ¿Vous voulez suggérer une nouvelle fonction ou informer un erreur? On serait ravis de savoir votre opinion:</string>
+    <string name="feedback_comments" tools:ignore="MissingTranslation">Vos commentaires</string>
+    <string name="feedback_idea" tools:ignore="MissingTranslation">idée</string>
+    <string name="feedback_question" tools:ignore="MissingTranslation">question</string> 
+    <string name="inOutOptions" tools:ignore="MissingTranslation">Entrée/Sortie&#8230;</string> 
+    <string name="midi_setup" tools:ignore="MissingTranslation">Configuration</string>
+    <string name="midi_test" tools:ignore="MissingTranslation">Essayer une note</string>
+    <string name="audioFrequencyToast" tools:ignore="MissingTranslation">Utilizant la fréquance de audio de:</string>
+    <string name="select_audio_frequency" tools:ignore="MissingTranslation">Choisir la qualité/fréquance du audio:</string>
+    <string name="set" tools:ignore="MissingTranslation">Rétablir</string>
+    <string name="change_frequency" tools:ignore="MissingTranslation">Qualité du audio</string>
+    <string name="export_midi" tools:ignore="MissingTranslation">Exporter</string>
+    <string name="import_midi" tools:ignore="MissingTranslation">Importer</string>
+    <string name="sureToExitTitle" tools:ignore="MissingTranslation">Fermer application</string>
+    <string name="sureToExitMessage" tools:ignore="MissingTranslation">¿Vous êtes sûres que vous voulez Fermer l\'application?</string>
+	<string name="midi_info_text" tools:ignore="MissingTranslation">Network MIDI for Android\n\nEnvoyer midi a ce dispositif pour essayer la connexion.</string>
+	<string name="midi_client_download" tools:ignore="MissingTranslation">Télécharger le client Midi pour PC/Mac ici­:\nhttp://codefixia.com/drumcloud/nmj.jar</string>
+    <string name="midi_open" tools:ignore="MissingTranslation">Ouvrir fichier</string>
+    <string name="midi_share" tools:ignore="MissingTranslation">Envoyer par Email</string>
+    <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composition</string>
+    <string name="midi_select_file" tools:ignore="MissingTranslation">Choisir un fichier Midi:</string>
+    <string name="file_save_text" tools:ignore="MissingTranslation">Son fichier s\'est gardé en:</string>	    
+    <string name="toggle_mode" tools:ignore="MissingTranslation">Changer mode</string>
+    <string name="delete_all" tools:ignore="MissingTranslation">Effaser tout</string>
+    <string name="donate" tools:ignore="MissingTranslation">Faire un Don</string>
+    <string name="about" tools:ignore="MissingTranslation">Sur le&#8230;</string>
+    <string name="donations__button_close">Fermer</string>
+    <string name="donations__flattr">Flattr</string>
+    <string name="donations__description">¿Vous trouver utile cette application?\n¡Aider son developpment avec Flattr ou bien envoyer un don au développer!</string><string name="donations__flattr_description">¡Flattr prend 10% comme frais mensuel!</string>
+    <string name="donations__google_android_market">Google Play Store</string>
+    <string name="donations__google_android_market_not_supported_title" tools:ignore="ExtraTranslation">On admite pas de don In-App</string>
+    <string name="donations__google_android_market_not_supported">On admite pas de don In-App. ¿Est-il Google Play Store instalé correctement?</string>
+    <string name="donations__google_android_market_description">¡Le 30% des dons son pour Google!</string>
+    <string name="donations__google_android_market_donate_button">¡Faire un don!</string>
+    <string name="donations__google_android_market_text">¿Combien?</string>
+    <string name="donations__paypal">PayPal</string>
+    <string name="donations__paypal_description">¡Vous pouvez choisir la cantité du don après d\'appuyer sur le bouton!</string>
+    <string name="donations__thanks_dialog_title">¡Merçi!</string>
+    <string name="donations__thanks_dialog">¡Merçi pour votre don!\n¡Je vous remerçi beaucoup!</string>
+    <string name="live_mode">Mode Live</string>
+    <string name="sequencer_mode">Séquanceur</string>
+    <string name="pause">Pause</string>
+    <string name="play">Reproduire</string>
+    <string name="close">Annuler</string>
+    <string name="cancel" tools:ignore="MissingTranslation">Annuler</string>
+    <string name="load_samples" tools:ignore="MissingTranslation">Charger Samples</string>
+    <string name="help" tools:ignore="MissingTranslation">Aide</string>
+    <string name="next">Suivant</string>    
+    <string name="aboutDialogText">
+<u>Concepteur Graphique et Developper</u>\n
+Constantino Fernández Traba\n
+\n        
+<u>CODEFIXIA</u>\n
+Constantino Fernández Traba\n
+Emilio José Jiménez Jiménez\n
+Ignacio José Ortega Ruiz\n
+Roberto Díez Mirantes\n
+Rubén González González\n
+\n
+<u>ICÔNO</u>\n
+Diana Hidalgo Marín\n
+\n
+<u>TRADUCTION</u>\n
+Tania Martínez Bermúdez\n
+\n
+<u>CONTACTE</u>\n
+www.codefixia.com\n
+tino@codefixia.com\n
+\n
+<u>DRUMCLOUD</u>\n
+<font size="8">
+Copyright © @2013 Codefixia\n
+Touts droits réservées\n
+</font>
+</string> 
+<string name="helpDialogTitle1" tools:ignore="MissingTranslation">
+Mode Live Tutoriel 1/7
+</string>
+<string name="helpDialogText1" tools:ignore="MissingTranslation">
+La barre de temps montre les 4 divisions correspondentes à chaque un des beats divisés à sa fois en 8 ticks différents.
+Appuyant les 16 boutons \"TAP\" de couleurs de la parte inferieur de l\'écran vous ajouterés des ticks de diferents couleurs qui représentes le momment exact dans lequelle se reproduit le sample associé.
+</string>
+<string name="helpDialogTitle2" tools:ignore="MissingTranslation">
+Mode Live Tutoriel 2/7
+</string>
+<string name="helpDialogText2" tools:ignore="MissingTranslation">
+Le slider horizontal de BPM permet configurer la durée actuelle de chaque beat. De gauche à droite on peut choisir dès le min. de 80 BPMs au max. de 160 BPMs. 
+ </string>
+<string name="helpDialogTitle3" tools:ignore="MissingTranslation">
+Mode Live Tutoriel 3/7
+</string> 
+<string name="helpDialogText3" tools:ignore="MissingTranslation">
+Le bouton \"CHARGER\" vous permet charger des fichiers stockers dans votre télephone (cart SD o mémoire interne) o en Google Drive.
+En fesant click, tous les boutons \"TAP\" commencent à briller. Une fois seleccioné un, il apparetera un dialogue qui nous permettra charger un sample dans ce bouton \"TAP\".
+Si on choisi \"Local Files\" on verat la liste de fichier du dispositif.
+</string>
+<string name="helpDialogTitle4" tools:ignore="MissingTranslation">
+Mode Live Tutoriel 4/7
+</string>
+<string name="helpDialogText4" tools:ignore="MissingTranslation">
+Si on choisi un fichier .wav/.aiff il s\'assosiara au bouton \"TAP\" qu\'on aura appuyer avant et il apparaîtra un nouveau dialogue pour partager le sample avec la communauté par Google Drive. 
+Choisir la categorie du sample pour partager. Si on choisi dans le menu principal et on appuye sur \"Google Drive\" on peut
+télecharger un groupe ou un sample individuel dès le nuage ou partager avec des autre usagers.
+</string>
+<string name="helpDialogTitle5" tools:ignore="MissingTranslation">
+Mode Live Tutoriel 5/7
+</string>
+<string name="helpDialogText5" tools:ignore="MissingTranslation">
+Le bouton \"EFFASER\"  elimine les samples de la barre de temps. Appuyer et glisser en bas pour choisir le tipe de samples à eliminer. 
+Pour effacer tous les samples on choisi \"TOUS\".
+</string>
+<string name="helpDialogTitle6" tools:ignore="MissingTranslation">
+Mode Live Tutoriel 6/7
+</string>
+<string name="helpDialogText6" tools:ignore="MissingTranslation">
+Usant les sliders on peut  controler quelques paramètres de audio globales qui afectes tous les samples. 
+Vous pouvez voir le nom du paramètre sous chaque slider.</string>
+<string name="helpDialogTitle7" tools:ignore="MissingTranslation">
+Mode Live Tutoriel 7/7
+</string>
+<string name="helpDialogText7" tools:ignore="MissingTranslation">
+Avec les bouton \"PAD\" on peut lancer les samples classés en couleurs.\n
+Si on pause la reproduction on peut user les differents niveau de pression.
+</string>
+<string name="shareAppSubject" tools:ignore="MissingTranslation">
+DrumCloud - Production Musicale dans le Nuage
+</string>
+<string name="shareAppMessage" tools:ignore="MissingTranslation">
+DrumCloud, Outil de production musicale avec stockage ilimité de samples.\n\n Essayé le maintnant: %1$s \n\n Un produit de Codefixia: http://codefixia.com
+</string>
+<string name="shareAppDialogTitle" tools:ignore="MissingTranslation">
+Partager aver tes amis
+</string>  
+<string name="share">Partager</string>
+<string name="moreOptions">Plus d\'options&#8230;</string> 
+</resources>

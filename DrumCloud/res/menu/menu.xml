@@ -3,33 +3,78 @@
     <item android:icon="@android:drawable/ic_media_pause" android:showAsAction="ifRoom"
          android:id="@+id/playPause" android:title="@string/pause"></item>
     <!-- <item android:icon="@drawable/ic_menu_selectall_holo_light"
-         android:id="@+id/toggleMode" android:title="@string/sequencer_mode"></item> -->
-    <item android:icon="@android:drawable/ic_menu_delete"
-         android:id="@+id/deleteAll" android:title="@string/delete_all"></item>
-	<item android:icon="@drawable/midi_icon"
-         android:id="@+id/midiSetup" android:title="@string/midi"></item> 
-    <item android:icon="@android:drawable/ic_menu_save"
-         android:id="@+id/exportToMidi" android:title="@string/export_midi"></item>
-    <item android:icon="@drawable/ic_menu_archive"
-         android:id="@+id/importFromMidi" android:title="@string/import_midi"></item>
-    <item android:icon="@drawable/ic_menu_selectall_holo_light"
-         android:id="@+id/changeFrequency" android:title="@string/change_frequency"></item>               
-    <!-- <item android:icon="@drawable/google_drive_icon"
-         android:id="@+id/loadSamples" android:title="@string/load_samples"></item> -->            
-    <item android:icon="@drawable/emo_im_money_mouth"
-         android:id="@+id/donate" android:title="@string/donate"></item>
-    <item android:icon="@drawable/ic_menu_moreoverflow"
-	android:id="@+id/moreItem" android:title="@string/moreOptions">        
-    <menu >
-    <group android:id="@+id/moreGroup" android:checkableBehavior="single">
-		<item android:id="@+id/shareApp" android:icon="@android:drawable/ic_menu_share"
-        	android:showAsAction="ifRoom" android:title="@string/share"
-        	android:actionProviderClass="android.widget.ShareActionProvider" />     
-    	<item android:icon="@android:drawable/ic_menu_help"
-        	 android:id="@+id/help" android:title="@string/help"></item>    
-    	<item android:icon="@android:drawable/ic_menu_info_details" 
-        	android:id="@+id/about" android:title="@string/about"></item>        
-    </group>
-	</menu>
+         android:id="@+id/toggleMode" android:title="@string/sequencer_mode"></item> --><item
+        android:id="@+id/deleteAll"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/delete_all">
     </item>
+    <item
+        android:id="@+id/inOutItem"
+        android:icon="@drawable/ic_menu_moreoverflow"
+        android:title="@string/inOutOptions">
+        <menu>
+            <item
+                android:id="@+id/midiSetup"
+                android:icon="@drawable/midi_icon"
+                android:title="@string/midi">
+            </item>
+            <item
+                android:id="@+id/exportToMidi"
+                android:icon="@android:drawable/ic_menu_save"
+                android:title="@string/export_midi">
+            </item>
+            <item
+                android:id="@+id/importFromMidi"
+                android:icon="@drawable/ic_menu_archive"
+                android:title="@string/import_midi">
+            </item>
+            <item
+                android:id="@+id/changeFrequency"
+                android:icon="@drawable/ic_menu_selectall_holo_light"
+                android:title="@string/change_frequency">
+            </item>           
+        </menu>
+    </item><!--
+         <item android:icon="@drawable/google_drive_icon"
+         android:id="@+id/loadSamples" android:title="@string/load_samples"></item>
+    -->
+    <item
+        android:id="@+id/donate"
+        android:icon="@drawable/emo_im_money_mouth"
+        android:title="@string/donate">
+    </item>
+    <!-- <item
+        android:id="@+id/supportDrumCloud"
+        android:icon="@android:drawable/ic_menu_help"
+        android:title="@string/support_drumcloud">
+    </item>  -->   
+    <item
+        android:id="@+id/feedback"
+        android:icon="@drawable/emo_im_money_mouth"
+        android:title="@string/feedback">
+    </item>
+    <item
+        android:id="@+id/moreItem"
+        android:icon="@drawable/ic_menu_moreoverflow"
+        android:title="@string/moreOptions">
+        <menu>
+            <!--<item
+                android:id="@+id/shareApp"
+                android:actionProviderClass="android.widget.ShareActionProvider"
+                android:icon="@android:drawable/ic_menu_share"
+                android:showAsAction="ifRoom"
+                android:title="@string/share"/>-->
+            <item
+                android:id="@+id/help"
+                android:icon="@android:drawable/ic_menu_help"
+                android:title="@string/help">
+            </item>
+            <item
+                android:id="@+id/about"
+                android:icon="@android:drawable/ic_menu_info_details"
+                android:title="@string/about">
+            </item>
+        </menu>
+    </item>
+
 </menu>
