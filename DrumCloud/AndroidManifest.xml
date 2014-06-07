@@ -48,7 +48,7 @@
         android:theme="@style/MyTheme" >
         <meta-data
             android:name="market"
-            android:value="amazon" />
+            android:value="play" />
 
         <activity
             android:name="com.codefixia.drumcloud.DrumCloud"
