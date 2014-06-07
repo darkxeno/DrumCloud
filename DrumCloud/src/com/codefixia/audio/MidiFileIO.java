@@ -1,15 +1,11 @@
 package com.codefixia.audio;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -20,36 +16,31 @@ import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.codefixia.drumcloud.DrumCloud;
 import com.codefixia.drumcloud.R;
 import com.codefixia.googledrive.DownloadFile;
 import com.leff.midi.MidiFile;
 import com.leff.midi.MidiTrack;
+import com.leff.midi.event.MidiEvent;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.meta.Tempo;
 import com.leff.midi.event.meta.TimeSignature;
-import com.leff.midi.event.MidiEvent;
-
-import de.humatic.nmj.NMJConfig;
-import de.humatic.nmj.NetworkMidiListener;
 
 public class MidiFileIO {
 	
@@ -57,7 +48,7 @@ public class MidiFileIO {
 	
 	public final static int basePitch=35;
 	
-	public static String fileToLoad="";
+	public static String fileToLoad="";	
 	
 	public static void showMidiPreLoadDialog(final DrumCloud drumCloud,final float BPM,final boolean[][] samplesPerBeat){
 		
@@ -87,6 +78,7 @@ public class MidiFileIO {
 		    new OnItemSelectedListener() {
 		        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		        	fileToLoad=parent.getSelectedItem().toString();
+		        	Log.d("FILE","SELECTED:"+fileToLoad);
 		        }
 
 		        public void onNothingSelected(AdapterView<?> parent) {}
@@ -96,8 +88,9 @@ public class MidiFileIO {
 	    midiLoadButton.setOnClickListener(new View.OnClickListener() {			
 			@Override
 			public void onClick(View arg0) {
-				if(!fileToLoad.isEmpty()){
+				if(fileToLoad.length()>0){
 					File inputMidiFile=new File(midiFolder+""+fileToLoad);
+					Log.d("FILE","LOADING MIDI:"+inputMidiFile);
 		    		MidiFileIO.load(inputMidiFile,BPM,samplesPerBeat);
 				}
 			}

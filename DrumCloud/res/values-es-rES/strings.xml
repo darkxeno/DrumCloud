@@ -1,14 +1,31 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="shortLocale" tools:ignore="MissingTranslation">es</string>
     <string name="LOAD" tools:ignore="MissingTranslation">CARGAR</string>
     <string name="load" tools:ignore="MissingTranslation">Cargar</string>
     <string name="DELETE" tools:ignore="MissingTranslation">BORRAR</string>
     <string name="ALL" tools:ignore="MissingTranslation">TODO</string>
     <string name="ON_RELEASE" tools:ignore="MissingTranslation">AL SOLTAR:</string>
     <string name="HOLD" tools:ignore="MissingTranslation">MANTENER</string>
-    <string name="STOP" tools:ignore="MissingTranslation">PARAR</string>    
+    <string name="STOP" tools:ignore="MissingTranslation">PARAR</string>
+    <string name="VOLUME" tools:ignore="MissingTranslation">VOLUMEN</string>   
+    <string name="feedback" tools:ignore="MissingTranslation">Feedback</string>
+    <string name="send" tools:ignore="MissingTranslation">Enviar</string> 
+	<string name="support_drumcloud" tools:ignore="MissingTranslation">Ayude a DrumCloud</string>    
+	<string name="Tutorial" tools:ignore="MissingTranslation">Tutorial</string>
+    <string name="showTutorialMessage" tools:ignore="MissingTranslation">¿Deseas mostrar el tutorial de ayuda de DrumCloud?\n\nSi experimenta problemas durante su reproducción pulse el botón "Cerrar".</string>    
+    <string name="thank_you" tools:ignore="MissingTranslation">Gracias</string> 
+    <string name="developer_message" tools:ignore="MissingTranslation">Mensaje del Desarrollador</string>
+    <string name="feedback_message" tools:ignore="MissingTranslation">¿Te gusta nuestra aplicación? ¿La odias? ¿Te gustaría sugerir una nueva funcionalidad o informar de un error? Nos encantaría saber tu opinión:</string>
+    <string name="feedback_comments" tools:ignore="MissingTranslation">Tus comentarios</string>
+    <string name="feedback_question" tools:ignore="MissingTranslation">pregunta</string> 
+    <string name="inOutOptions" tools:ignore="MissingTranslation">Entrada/Salida&#8230;</string> 
     <string name="midi_setup" tools:ignore="MissingTranslation">Configuración</string>
     <string name="midi_test" tools:ignore="MissingTranslation">Enviar nota de prueba</string>
+    <string name="audioFrequencyToast" tools:ignore="MissingTranslation">Usando frecuencia de audio de:</string>
+    <string name="select_audio_frequency" tools:ignore="MissingTranslation">Seleccione la calidad/frecuencia del audio:</string>
+    <string name="set" tools:ignore="MissingTranslation">Establecer</string>
+    <string name="change_frequency" tools:ignore="MissingTranslation">Calidad de audio</string>
     <string name="export_midi" tools:ignore="MissingTranslation">Exportar</string>
     <string name="import_midi" tools:ignore="MissingTranslation">Importar</string>
     <string name="sureToExitTitle" tools:ignore="MissingTranslation">Cerrar aplicación</string>
@@ -20,8 +37,8 @@
     <string name="midi_mail_subject" tools:ignore="MissingTranslation">DrumCloud Composición</string>
     <string name="midi_select_file" tools:ignore="MissingTranslation">Seleccione un archivo Midi:</string>
     <string name="file_save_text" tools:ignore="MissingTranslation">Su archivo se ha guardado en:</string>	    
-    <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar Modo</string>
-    <string name="delete_all" tools:ignore="MissingTranslation">Borrar Todo</string>
+    <string name="toggle_mode" tools:ignore="MissingTranslation">Cambiar modo</string>
+    <string name="delete_all" tools:ignore="MissingTranslation">Borrar todo</string>
     <string name="donate" tools:ignore="MissingTranslation">Donar</string>
     <string name="about" tools:ignore="MissingTranslation">Acerca de&#8230;</string>
     <string name="donations__button_close">Cerrar</string>
@@ -60,12 +77,12 @@ Rubén González González\n
 <u>ICONO</u>\n
 Diana Hidalgo Marín\n
 \n
+<u>TRADUCCIÓN</u>\n
+Tania Martínez Bermúdez\n
+\n
 <u>CONTACTO</u>\n
 www.codefixia.com\n
 tino@codefixia.com\n
-\n
-<u>AGRADECIMIENTOS</u>\n
-Coursera \"Creative Programming for Digital Media and Mobile Apps\" Staff\n
 \n
 <u>DRUMCLOUD</u>\n
 <font size="8">
@@ -132,5 +149,5 @@ DrumCloud, tu herramienta móvil de producción musical con almacenamiento ilimi
 Compartir con tus amigos
 </string>  
 <string name="share">Compartir</string>
-<string name="moreOptions">Más Opciones&#8230;</string> 
+<string name="moreOptions">Más opciones&#8230;</string> 
 </resources>

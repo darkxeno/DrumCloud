@@ -1,47 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.codefixia.drumcloud"
-    android:versionCode="5"
-    android:versionName="1.1.1" >
-    
+    android:versionCode="14"
+    android:versionName="1.1.85" >
+
     <uses-sdk
-        android:minSdkVersion="10"
-        android:targetSdkVersion="17"
-        />
-	<supports-screens 
-                  android:smallScreens="true"
-                  android:normalScreens="true"
-                  android:largeScreens="true"
-                  android:xlargeScreens="true"
-                  android:anyDensity="true"/>
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="com.android.vending.BILLING" android:required="false"/>
-	<uses-permission android:name="android.permission.USE_CREDENTIALS" />
-	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
-	
-	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" android:required="false"></uses-permission>
-	<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" android:required="false"></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" android:required="false"></uses-permission>
-	<!-- <uses-permission android:name="android.permission.BLUETOOTH"></uses-permission>  -->
-	
-    <!-- android:debuggable="true"  -->	
-	
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="com.android.vending.BILLING"
+        android:required="false" />
+    <uses-permission
+        android:name="android.permission.CHANGE_NETWORK_STATE"
+        android:required="false" >
+    </uses-permission>
+    <uses-permission
+        android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
+        android:required="false" >
+    </uses-permission>
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        android:required="false" >
+    </uses-permission>
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH"></uses-permission> -->
+
+
+    <!-- android:debuggable="true" -->
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/icon"
-        android:theme="@style/MyTheme" 
-        android:label="DrumCloud" >
-    	<meta-data android:name="market" android:value="amazon" />        
+        android:label="DrumCloud"
+        android:theme="@style/MyTheme" >
+        <meta-data
+            android:name="market"
+            android:value="amazon" />
+
         <activity
             android:name="com.codefixia.drumcloud.DrumCloud"
-            android:uiOptions="splitActionBarWhenNarrow"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:uiOptions="splitActionBarWhenNarrow" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -50,35 +64,67 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
-		<!-- Make nmj's control panel accessible -->
-		<activity android:name="de.humatic.nmj.NMJConfigDialog"></activity>
-     	<!-- activity android:name="com.codefixia.audio.USBListener">  
+        <activity
+            android:name="com.google.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+
+        <meta-data
+            android:name="com.flurry.admob.MY_AD_UNIT_ID"
+            android:value="a1521cebd7b4309" />
+        <meta-data
+            android:name="com.flurry.admob.MYTEST_AD_DEVICE_ID"
+            android:value="039F31EFA5B4B0607D42B9E2DF58D5CE" />
+        <!--
+             <meta-data
+    	    android:name="com.flurry.admob.test"
+    	    android:value="true" />
+        -->
+
+
+        <!-- Make nmj's control panel accessible -->
+        <activity android:name="de.humatic.nmj.NMJConfigDialog" >
+        </activity>
+        <!--
+        activity android:name="com.codefixia.audio.USBListener">  
 		     <intent-filter>                
 		         <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />            
 		        </intent-filter>            
 		        <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"                
 		            android:resource="@xml/devices" />
-		</activity -->		
+		</activity
+        -->
         <service android:name="com.codefixia.googledrive.GoogleDriveService" >
         </service>
-        
-<activity
-    android:name="org.donations.DonationsActivity"
-    android:excludeFromRecents="true"
-    android:label="Donations"
-    android:launchMode="singleTask"
-    android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-<!-- - Google Play Store donations -->
-<service android:name="org.donations.google.BillingService" />
+        <activity
+            android:name="org.donations.DonationsActivity"
+            android:excludeFromRecents="true"
+            android:label="Donations"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name="com.flurry.android.FlurryFullscreenTakeoverActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode"
+            android:hardwareAccelerated="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
+        </activity>
+        <!-- start of Leadbolt AppWall HTML -->
+        <activity
+            android:name="com.codefixia.ads.HtmlAdsActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <!-- end of Leadbolt AppWall HTML -->
+        <!-- - Google Play Store donations -->
+        <service android:name="org.donations.google.BillingService" />
 
-<receiver android:name="org.donations.google.BillingReceiver" >
-    <intent-filter>
-        <action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
-        <action android:name="com.android.vending.billing.RESPONSE_CODE" />
-        <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
-    </intent-filter>
-</receiver>        
+        <receiver android:name="org.donations.google.BillingReceiver" >
+            <intent-filter>
+                <action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
+                <action android:name="com.android.vending.billing.RESPONSE_CODE" />
+                <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

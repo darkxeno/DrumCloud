@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="shortLocale" tools:ignore="MissingTranslation">en</string>
     <string name="LOAD" tools:ignore="MissingTranslation">LOAD</string>
     <string name="load" tools:ignore="MissingTranslation">Load</string>
     <string name="DELETE" tools:ignore="MissingTranslation">DELETE</string>
@@ -12,6 +13,23 @@
     <string name="HOLD" tools:ignore="MissingTranslation">HOLD</string>
     <string name="STOP" tools:ignore="MissingTranslation">STOP</string>
     <string name="midi" tools:ignore="MissingTranslation">Midi</string>
+    <string name="set" tools:ignore="MissingTranslation">Set</string>
+    <string name="feedback" tools:ignore="MissingTranslation">Feedback</string>
+    <string name="send" tools:ignore="MissingTranslation">Send</string>
+    <string name="support_drumcloud" tools:ignore="MissingTranslation">Support DrumCloud</string>
+    <string name="Tutorial" tools:ignore="MissingTranslation">Tutorial</string>
+    <string name="showTutorialMessage" tools:ignore="MissingTranslation">Do you want to start the DrumCloud help tutorial?\n\nIf you experience problems during the playback of the tutorial please use the "Close" button.</string>
+    <string name="thank_you" tools:ignore="MissingTranslation">Thank you</string>
+    <string name="feedback_message" tools:ignore="MissingTranslation">Love it? Hate it? Would you like to suggest a new feature or report a bug? We would love to hear from you:</string>
+    <string name="feedback_comments" tools:ignore="MissingTranslation">Your comments</string>
+    <string name="feedback_question" tools:ignore="MissingTranslation">question</string>
+    <string name="feedback_idea" tools:ignore="MissingTranslation">idea</string>
+    <string name="feedback_bug" tools:ignore="MissingTranslation">bug</string> 
+    <string name="inOutOptions" tools:ignore="MissingTranslation">In/Out&#8230;</string>   
+    <string name="developer_message" tools:ignore="MissingTranslation">Message from the Developer</string>
+    <string name="audioFrequencyToast" tools:ignore="MissingTranslation">Using audio frequency of:</string>
+    <string name="select_audio_frequency" tools:ignore="MissingTranslation">Select audio frequency/quality:</string>
+    <string name="change_frequency" tools:ignore="MissingTranslation">Audio Quality</string>
     <string name="sureToExitTitle" tools:ignore="MissingTranslation">Really exit?</string>
     <string name="sureToExitMessage" tools:ignore="MissingTranslation">Are you sure you want to exit?</string>
     <string name="midi_setup" tools:ignore="MissingTranslation">Setup</string>
@@ -67,12 +85,12 @@ Rubén González González\n
 <u>ICON</u>\n
 Diana Hidalgo Marín\n
 \n
+<u>TRANSLATION</u>\n
+Tania Martínez Bermúdez\n
+\n
 <u>CONTACT</u>\n
 www.codefixia.com\n
 tino@codefixia.com\n
-\n
-<u>Thanks</u>\n
-Coursera \"Creative Programming for Digital Media and Mobile Apps\" Staff\n
 \n
 <u>DRUMCLOUD</u>\n
 <font size="8">
@@ -142,6 +160,9 @@ DrumCloud, your mobile audio production tool with unlimited samples storage.\n\n
 </string>
 <string name="playMarketWebLink" tools:ignore="MissingTranslation">
 https://play.google.com/store/apps/details?id=com.codefixia.drumcloud
+</string>
+<string name="codefixiaWebLink" tools:ignore="MissingTranslation">
+http://www.codefixia.com/app/drumcloud/
 </string>
 <string name="slidemeMarketWebLink" tools:ignore="MissingTranslation">
 http://slideme.org/application/drumcloud

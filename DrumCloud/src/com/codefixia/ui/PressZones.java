@@ -38,7 +38,7 @@ public class PressZones extends Clickable {
 	  }	  
 
 	  public int getLastZoneSelected() {
-		  PApplet.println("lastZoneSelected:"+lastZoneSelected);
+		  //PApplet.println("lastZoneSelected:"+lastZoneSelected);
 		  return lastZoneSelected;
 	  }
 
