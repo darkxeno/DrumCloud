@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.codefixia.drumcloud"
-    android:versionCode="9"
-    android:versionName="1.1.5" >
+    android:versionCode="14"
+    android:versionName="1.1.85" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -48,7 +48,7 @@
         android:theme="@style/MyTheme" >
         <meta-data
             android:name="market"
-            android:value="play" />
+            android:value="amazon" />
 
         <activity
             android:name="com.codefixia.drumcloud.DrumCloud"

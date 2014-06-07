@@ -161,6 +161,9 @@ DrumCloud, your mobile audio production tool with unlimited samples storage.\n\n
 <string name="playMarketWebLink" tools:ignore="MissingTranslation">
 https://play.google.com/store/apps/details?id=com.codefixia.drumcloud
 </string>
+<string name="codefixiaWebLink" tools:ignore="MissingTranslation">
+http://www.codefixia.com/app/drumcloud/
+</string>
 <string name="slidemeMarketWebLink" tools:ignore="MissingTranslation">
 http://slideme.org/application/drumcloud
 </string>

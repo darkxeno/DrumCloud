@@ -43,11 +43,11 @@
         android:icon="@drawable/emo_im_money_mouth"
         android:title="@string/donate">
     </item>
-    <item
+    <!-- <item
         android:id="@+id/supportDrumCloud"
         android:icon="@android:drawable/ic_menu_help"
         android:title="@string/support_drumcloud">
-    </item>    
+    </item>  -->   
     <item
         android:id="@+id/feedback"
         android:icon="@drawable/emo_im_money_mouth"
@@ -58,12 +58,12 @@
         android:icon="@drawable/ic_menu_moreoverflow"
         android:title="@string/moreOptions">
         <menu>
-            <item
+            <!--<item
                 android:id="@+id/shareApp"
                 android:actionProviderClass="android.widget.ShareActionProvider"
                 android:icon="@android:drawable/ic_menu_share"
                 android:showAsAction="ifRoom"
-                android:title="@string/share"/>
+                android:title="@string/share"/>-->
             <item
                 android:id="@+id/help"
                 android:icon="@android:drawable/ic_menu_help"

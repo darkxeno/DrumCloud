@@ -105,11 +105,11 @@ public class DrumCloud extends PApplet implements OnShowcaseEventListener, Flurr
 	boolean adsLoaded=false;
 	static final boolean defaultAdsEnabled=false;
 	static boolean adsEnabled=defaultAdsEnabled;
-	static final long defaultInterTime=300000;
+	static final long defaultInterTime=180000;
 	static long minInterAdsTime=defaultInterTime;
 	static long lastAdShowTime=0;	
 	static boolean clickToDisableAds=false;
-	static AdsMode adsMode=AdsMode.FLURRY;
+	static AdsMode adsMode=AdsMode.EXTERNAL;
 	static String adsExternalUrl=null;
 	private FeedbackDialog feedBack;
 
@@ -2000,6 +2000,8 @@ public void keyPressed() {
 		  shareMessage = String.format(res.getString(R.string.shareAppMessage), res.getString(R.string.amazonMarketWebLink));
 	  }else if(market.equalsIgnoreCase("slideme")){
 		  shareMessage = String.format(res.getString(R.string.shareAppMessage), res.getString(R.string.slidemeMarketWebLink));
+	  }else if(market.equalsIgnoreCase("external")){
+		  shareMessage = String.format(res.getString(R.string.shareAppMessage), res.getString(R.string.codefixiaWebLink));		  
 	  }else{
 		  shareMessage = String.format(res.getString(R.string.shareAppMessage), res.getString(R.string.playMarketWebLink));
 	  }
@@ -2020,10 +2022,10 @@ public void keyPressed() {
    public boolean onOptionsItemSelected(MenuItem item) {
 		Map<String, String> params = new HashMap<String, String>();	   
             switch (item.getItemId()) {
-            case R.id.supportDrumCloud:
+            /*case R.id.supportDrumCloud:
             	params.put("Option", "Support DrumCloud");
             	showExternalAds();
-            break;            
+            break;*/            
             case R.id.feedback:
             	params.put("Option", "Feedback");
                 feedBack.show();
@@ -2036,10 +2038,10 @@ public void keyPressed() {
             	params.put("Option", "Show help");
             	startHelpShowCase();
             break; 
-            case R.id.shareApp:
+            /*case R.id.shareApp:
             	params.put("Option", "Share app");
             	shareApp();
-            break;             
+            break;*/             
             case R.id.playPause:
             	params.put("Option", "Play/pause");
             	toggleAudioPlayThread();
